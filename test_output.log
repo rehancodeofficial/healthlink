@@ -1,0 +1,39 @@
+🧪 Testing Patient Profile Update...
+
+1️⃣  Logging in as patient...
+✅ Login successful
+
+2️⃣  Fetching current profile...
+✅ Current profile fetched
+   Current data: {
+  "id": "e1943811-e518-452c-b7de-b91a4020da7e",
+  "userId": "1f65afa7-1787-4350-b7df-0dce430cc0c9",
+  "bloodGroup": "UNKNOWN",
+  "height": null,
+  "weight": null,
+  "allergies": "",
+  "medications": "",
+  "medicalHistory": "",
+  "address": "",
+  "medicalRecordNumber": null,
+  "insuranceProvider": "",
+  "insuranceMemberId": "",
+  "emergencyContact": "",
+  "createdAt": "2025-12-26T22:43:18.410Z",
+  "updatedAt": "2025-12-26T22:43:18.410Z",
+  "user": {
+    "id": "1f65afa7-1787-4350-b7df-0dce430cc0c9",
+    "firstName": "Muhammad",
+    "lastName": "Hussain",
+    "email": "rehan.dev1514@gmail.com"
+  },
+  "appointments": [],
+  "prescriptions": [],
+  "consultations": []
+} 
+
+3️⃣  Updating profile with new data...
+
+❌ Test failed:
+   Status: 500
+   Error: { error: 'Failed to save profile' }
