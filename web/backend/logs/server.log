@@ -1,0 +1,3 @@
+[dotenv@17.2.3] injecting env (41) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+🚀 Server running on http://localhost:5001
