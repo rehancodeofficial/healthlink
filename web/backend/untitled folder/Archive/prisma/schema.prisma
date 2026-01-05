@@ -1,0 +1,546 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/* =========================================================
+   ENUMS
+   =======================================================*/
+enum UserRole {
+  DOCTOR
+  PATIENT
+  PHARMACY          // ✅ NEW
+}
+
+enum AdminRole {
+  SUPERADMIN
+  ADMIN
+  SUPPORT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum BloodGroup {
+  A_POSITIVE  @map("A+")
+  A_NEGATIVE  @map("A-")
+  B_POSITIVE  @map("B+")
+  B_NEGATIVE  @map("B-")
+  AB_POSITIVE @map("AB+")
+  AB_NEGATIVE @map("AB-")
+  O_POSITIVE  @map("O+")
+  O_NEGATIVE  @map("O-")
+  UNKNOWN     @map("UNKNOWN")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ConsultationStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  PENDING
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+enum Plan {
+  MONTHLY
+  YEARLY
+}
+
+enum SubStatus {
+  UNSUBSCRIBED
+  PENDING
+  ACTIVE
+  EXPIRED
+  DEACTIVATED
+  FAILED
+}
+
+enum PrescriptionDispatchStatus {
+  NONE
+  SENT
+  ACKNOWLEDGED
+  READY
+  DISPENSED
+  REJECTED
+}
+
+/* =========================================================
+   EMAIL OTP VERIFICATION
+   =======================================================*/
+model EmailOTP {
+  id        Int      @id @default(autoincrement())
+  email     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("EmailOTP")
+}
+
+/* =========================================================
+   USERS
+   =======================================================*/
+model User {
+  id          String   @id @default(uuid())
+  firstName   String
+  middleName  String?
+  lastName    String
+  email       String   @unique
+  password    String
+  role        UserRole @default(PATIENT)
+  dateOfBirth DateTime
+  gender      Gender
+
+  // Snapshot of latest subscription state for quick reads
+  subscriptionState SubStatus @default(UNSUBSCRIBED)
+
+  // Relations
+  subscriptions Subscription[]
+  doctor        DoctorProfile?
+  patient       PatientProfile?
+  pharmacy      PharmacyProfile?      // ✅ NEW
+
+  // Chat
+  sentMessages  Message[] @relation("MessagesSent")
+  recvMessages  Message[] @relation("MessagesRecv")
+
+  // Support
+  supportAgent  SupportAgent?
+  raisedTickets SupportTicket[] @relation("raisedBy")
+  sentReplies   SupportReply[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("User")
+}
+
+/* =========================================================
+   ADMINS & SETTINGS
+   =======================================================*/
+model admin {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  password    String
+  role        AdminRole @default(ADMIN)
+  token       String?   @unique
+  isSuspended Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  replies      SupportReply[]
+  sentMessages Message[]      @relation("AdminMessagesSent")
+  recvMessages Message[]      @relation("AdminMessagesRecv")
+}
+
+model SupportAgent {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  assignedTickets SupportTicket[]
+
+  @@map("SupportAgent")
+}
+
+
+/* =========================================================
+   ACTIVITY LOG
+   =======================================================*/
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  actorId   String
+  actorRole String
+  action    String
+  entity    String?
+  createdAt DateTime @default(now())
+
+  @@map("ActivityLog")
+}
+
+/* =========================================================
+   PROFILES
+   =======================================================*/
+model DoctorProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization      String
+  qualifications      String
+  licenseNumber       String   @unique
+  hospitalAffiliation String?
+  yearsOfExperience   Int?
+  consultationFee     Float
+  availability        String?  @db.LongText
+  bio                 String?
+  languages           String?  @db.LongText
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  prescriptions  Prescription[]
+  consultations  VideoConsultation[] @relation("DoctorConsultations")
+  appointments   Appointment[]       @relation("DoctorAppointments")
+  doctorPatients DoctorPatient[]     @relation("DoctorPatient_Doctor")
+  schedules      DoctorSchedule[]    @relation("DoctorSchedules")
+
+  @@map("DoctorProfile")
+}
+
+model PharmacyProfile {
+  id            String @id @default(uuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName   String?
+  licenseNumber String?
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  country       String?
+  postalCode    String?
+
+  latitude      Float?
+  longitude     Float?
+
+  openingHours  String? @db.LongText
+  services      String? @db.LongText
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  prescriptions Prescription[]
+  selectedByPatients SelectedPharmacy[]
+
+  @@map("PharmacyProfile")
+}
+
+model PatientProfile {
+  id             String     @id @default(uuid())
+  userId         String     @unique
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bloodGroup     BloodGroup
+  height         Float?
+  weight         Float?
+  allergies      String?    @db.LongText
+  medications    String?    @db.LongText
+  medicalHistory String?    @db.LongText
+  address        String?
+
+  medicalRecordNumber String? @unique
+  insuranceProvider   String?
+  insuranceMemberId   String?
+
+  emergencyContact String?  @db.LongText
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // ✅ Preferred pharmacies (Many-to-Many)
+  selectedPharmacies SelectedPharmacy[]
+
+
+  prescriptions Prescription[]
+  consultations VideoConsultation[] @relation("PatientConsultations")
+  appointments  Appointment[]       @relation("PatientAppointments")
+  doctorLinks   DoctorPatient[]     @relation("DoctorPatient_Patient")
+
+  @@map("PatientProfile")
+}
+
+/* =========================================================
+   APPOINTMENTS
+   =======================================================*/
+model Appointment {
+  id              String            @id @default(uuid())
+  doctorId        String
+  patientId       String
+  appointmentDate DateTime
+  reason          String?
+  status          AppointmentStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  doctor  DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
+  patient PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([patientId])
+
+  @@map("Appointment")
+}
+
+/* =========================================================
+   DOCTOR SCHEDULES
+   =======================================================*/
+model DoctorSchedule {
+  id        String   @id @default(uuid())
+  doctorId  String
+  
+  // Day of week: 0=Sunday, 1=Monday, ..., 6=Saturday
+  dayOfWeek Int
+  
+  // Time ranges (24-hour format, e.g., "09:00", "17:00")
+  startTime String
+  endTime   String
+  
+  // Optional: for recurring patterns or specific dates
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  
+  // Active/inactive toggle
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  doctor DoctorProfile @relation("DoctorSchedules", fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  @@index([doctorId])
+  @@index([dayOfWeek])
+  @@map("DoctorSchedule")
+}
+
+/* =========================================================
+   SUPPORT
+   =======================================================*/
+model SupportTicket {
+  id        Int            @id @default(autoincrement())
+  ticketNo  String         @unique @default(uuid())
+  userId    String
+  user      User           @relation("raisedBy", fields: [userId], references: [id], onDelete: Cascade)
+  agentId   Int?
+  agent     SupportAgent?  @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  subject   String
+  body      String         @db.Text
+  status    TicketStatus   @default(OPEN)
+  priority  Priority       @default(MEDIUM)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  replies   SupportReply[]
+
+  @@map("SupportTicket")
+}
+
+model SupportReply {
+  id       Int           @id @default(autoincrement())
+  ticketId Int
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  adminId Int?
+  admin   admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("SupportReply")
+}
+
+/* =========================================================
+   PRESCRIPTIONS (with pharmacy dispatch)
+   =======================================================*/
+model Prescription {
+  id            String   @id @default(cuid())
+  doctorId      String
+  patientId     String
+  medication    String
+  dosage        String
+  frequency     String
+  duration      String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // ✅ Pharmacy routing
+  pharmacyId     String?
+  pharmacy       PharmacyProfile? @relation(fields: [pharmacyId], references: [id], onDelete: SetNull)
+  dispatchStatus PrescriptionDispatchStatus @default(NONE)
+  dispatchedAt   DateTime?
+
+  doctor  DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([pharmacyId])
+
+  @@map("Prescription")
+}
+
+
+
+/* =========================================================
+   CHAT (Updated for Admin)
+   =======================================================*/
+model Message {
+  id         String    @id @default(cuid())
+  senderId   String?   // User sender
+  receiverId String?   // User receiver
+  content    String
+  createdAt  DateTime  @default(now())
+  readAt     DateTime?
+
+  // Admin support
+  adminSenderId   Int?
+  adminReceiverId Int?
+
+  sender   User? @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User? @relation("MessagesRecv", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  adminSender   admin? @relation("AdminMessagesSent", fields: [adminSenderId], references: [id], onDelete: Cascade)
+  adminReceiver admin? @relation("AdminMessagesRecv", fields: [adminReceiverId], references: [id], onDelete: Cascade)
+
+  @@map("Message")
+}
+
+/* =========================================================
+   VIDEO CONSULTATIONS
+   =======================================================*/
+model VideoConsultation {
+  id           String             @id @default(uuid())
+  doctorId     String
+  patientId    String
+  title        String?
+  notes        String?
+  scheduledAt  DateTime
+  durationMins Int?
+  status       ConsultationStatus @default(SCHEDULED)
+  roomName     String?
+  meetingUrl   String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  doctor  DoctorProfile  @relation("DoctorConsultations", fields: [doctorId], references: [id], onDelete: Cascade)
+  patient PatientProfile @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([patientId])
+
+  @@map("VideoConsultation")
+}
+
+/* =========================================================
+   SUBSCRIPTIONS
+   =======================================================*/
+model SubscriptionSetting {
+  id                 Int      @id @default(1) // singleton row
+  doctorMonthlyUsd   Float?
+  doctorYearlyUsd    Float?
+  patientMonthlyUsd  Float?
+  patientYearlyUsd   Float?
+  pharmacyMonthlyUsd Float?
+  pharmacyYearlyUsd  Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("SubscriptionSetting")
+}
+
+model Subscription {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan
+  status   SubStatus @default(PENDING)
+
+  provider  String?  // e.g. "PAYSTACK" | "STRIPE"
+  reference String?  @unique
+  amount    Int?     // cents
+  currency  String?  // e.g. "USD"
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([plan])
+
+  @@map("Subscription")
+}
+
+/* =========================================================
+   DOCTOR–PATIENT LINK
+   =======================================================*/
+model DoctorPatient {
+  id        String @id @default(uuid())
+  doctorId  String
+  patientId String
+
+  doctor  DoctorProfile  @relation(name: "DoctorPatient_Doctor", fields: [doctorId], references: [id], onDelete: Cascade)
+  patient PatientProfile @relation(name: "DoctorPatient_Patient", fields: [patientId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([doctorId, patientId])
+  @@index([patientId])
+  @@index([doctorId])
+
+  @@map("DoctorPatient")
+}
+
+model SelectedPharmacy {
+  id           String @id @default(uuid())
+  patientId    String
+  pharmacyId   String
+  preferred    Boolean @default(false)
+
+  patient  PatientProfile  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacy PharmacyProfile @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+
+  @@unique([patientId, pharmacyId])
+  @@map("SelectedPharmacy")
+}
+
+model SystemSetting {
+  id          Int      @id @default(1)
+  systemName  String?
+  themeColor  String?
+  logoUrl     String?
+  defaultFee  Float?
+  monthlyPlan Float?
+  yearlyPlan  Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("SystemSetting")
+}
