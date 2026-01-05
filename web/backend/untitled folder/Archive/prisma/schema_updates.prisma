@@ -1,0 +1,15 @@
+
+model SelectedPharmacy {
+  id           String @id @default(uuid())
+  patientId    String
+  pharmacyId   String
+  preferred    Boolean @default(false)
+
+  patient  PatientProfile  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacy PharmacyProfile @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+
+  @@unique([patientId, pharmacyId])
+  @@map("selectedpharmacy")
+}
