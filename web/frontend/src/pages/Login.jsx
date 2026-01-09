@@ -1,0 +1,238 @@
+// FILE: src/pages/Login.jsx
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../Lib/api';
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft } from 'react-icons/fi';
+import { FaArrowRight } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const { token } = res.data;
+      const user = res.data.user || res.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('name', user.name);
+      localStorage.setItem('userName', user.name);
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('type', user.type);
+      localStorage.setItem('email', user.email || email);
+
+      switch (user.role) {
+        case 'SUPERADMIN':
+          navigate('/superadmin/dashboard');
+          break;
+        case 'ADMIN':
+          navigate('/admin/dashboard');
+          break;
+        case 'SUPPORT':
+          navigate('/support/dashboard');
+          break;
+        case 'DOCTOR':
+          navigate('/doctor/dashboard');
+          break;
+        case 'PATIENT':
+          navigate('/patient/dashboard');
+          break;
+        case 'PHARMACY':
+          navigate('/pharmacy/dashboard');
+          break;
+        default:
+          navigate('/');
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.error || 'Invalid credentials. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}
+    >
+      {/* Dynamic Triple Color Orbs */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] bg-[var(--brand-green)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"></div>
+        <div
+          className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--brand-blue)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div
+          className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[var(--brand-orange)] opacity-[0.05] blur-[120px] rounded-full animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
+      </div>
+
+      <div className="w-full max-w-[1000px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700 rounded-[3rem] border border-[var(--border)]">
+        {/* Left Side: Branding */}
+        <div className="hidden md:flex flex-col justify-between w-2/5 p-12 text-[var(--text-main)] relative overflow-hidden bg-gradient-to-br from-[#1e293b] to-[#0f172a]">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--brand-orange),transparent)]"></div>
+            <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,var(--brand-green),transparent)]"></div>
+          </div>
+
+          <div className="z-10">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
+            >
+              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+              Home
+            </Link>
+
+            <div className="mb-8">
+              <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-6 border border-[var(--border)] shadow-2xl">
+                <img
+                  src="/images/logo/Asset2.png"
+                  alt="Logo"
+                  className="w-10 h-10"
+                />
+                <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
+                  CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+                </span>
+              </div>
+              <h2 className="text-4xl font-black tracking-tighter mb-4 leading-none uppercase text-[var(--brand-green)]">
+                Systems <br />{' '}
+                <span className="text-[var(--brand-green)]">Nominal.</span>
+              </h2>
+              <p className="text-[var(--brand-green)] text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic">
+                Secure portal entrance for the CureVirtual ecosystem.
+              </p>
+            </div>
+          </div>
+
+          <div className="z-10 flex items-center gap-4">
+            <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
+              Secure Encryption Enabled
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side: Form */}
+        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col justify-center">
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 text-[var(--brand-green)] text-[9px] font-black uppercase tracking-[0.2em] mb-4">
+              <FiLock /> Biometric Shield Active
+            </div>
+            <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
+              Auth <span className="text-[var(--brand-orange)]">Gate</span>
+            </h1>
+            <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
+              Enter your credentials to access your clinical dashboard.
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                Universal Email
+              </label>
+              <div className="relative group">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
+                  <FiMail />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner"
+                  placeholder="operator@curevirtual.io"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Access Token
+                </label>
+                <Link
+                  to="/forgot-password"
+                  title="Coming Soon"
+                  className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
+                >
+                  Recovery?
+                </Link>
+              </div>
+              <div className="relative group">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
+                  <FiLock />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 animate-shake">
+                <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn btn-primary w-full !py-4.5 !rounded-2xl text-xs shadow-2xl flex items-center justify-center gap-3 disabled:opacity-70 group"
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  Authorize Access{' '}
+                  <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-12 text-center pt-8 border-t border-[var(--border)]">
+            <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
+              New Operator?{' '}
+              <Link
+                to="/register"
+                className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1"
+              >
+                Initialize Account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
