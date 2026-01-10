@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: curevirtual_db
+    ports:
+      - '3307:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./web/backend
+    ports:
+      - '5001:5001'
+    depends_on:
+      - db
+    env_file:
+      - ./web/backend/.env
+    environment:
+      - DATABASE_URL=mysql://root:rootpassword@db:3306/curevirtual_db
+      - PORT=5001
+    volumes:
+      - ./web/backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./web/frontend
+    ports:
+      - '5173:5173'
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5001/api
+    volumes:
+      - ./web/frontend:/app
+      - /app/node_modules
+
+  python-chatbot:
+    build: ./web/python_backend
+    ports:
+      - '5002:5002'
+    env_file:
+      - ./web/python_backend/.env
+    volumes:
+      - ./web/python_backend:/app
+
+volumes:
+  db_data:
