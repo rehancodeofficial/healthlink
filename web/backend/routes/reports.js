@@ -32,7 +32,7 @@ router.get("/summary", async (req, res) => {
       prisma.videoConsultation.count(),
       prisma.videoConsultation.count({ where: { status: "COMPLETED" } }),
       prisma.videoConsultation.count({ where: { status: "CANCELLED" } }),
-      prisma.videoConsultation.aggregate({ _avg: { durationMinutes: true } }),
+      prisma.videoConsultation.aggregate({ _avg: { durationMins: true } }),
       prisma.prescription.count(),
       prisma.prescription.count({
         where: { createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } },
@@ -50,7 +50,7 @@ router.get("/summary", async (req, res) => {
         total: totalConsultations,
         completed: completedConsultations,
         cancelled: cancelledConsultations,
-        avgDuration: avgConsultation._avg.durationMinutes || 0,
+        avgDuration: avgConsultation._avg.durationMins || 0,
       },
       prescriptions: { total: totalPrescriptions, thisMonth: monthlyPrescriptions },
       support: { total: totalTickets, open: openTickets, resolved: resolvedTickets },
@@ -58,7 +58,7 @@ router.get("/summary", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to load reports" });
+    res.status(500).json({ error: err.message });
   }
 });
 
