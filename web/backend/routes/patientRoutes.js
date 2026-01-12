@@ -63,7 +63,7 @@ router.get("/profile", async (req, res) => {
       patient = await prisma.patientProfile.findUnique({
         where: { userId: String(userId) },
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, email: true, dateOfBirth: true, gender: true } },
+          user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, dateOfBirth: true, gender: true } },
           appointments: true,
           prescriptions: true,
           consultations: true,
@@ -877,6 +877,11 @@ router.put("/profile", async (req, res) => {
       insuranceMemberId,
     } = req.body || {};
 
+    // Sanitize medicalRecordNumber: convert empty string to null to avoid unique constraint violations
+    const finalMedicalRecordNumber = medicalRecordNumber && medicalRecordNumber.trim() !== "" 
+      ? medicalRecordNumber 
+      : null;
+
     console.log("🔍 Extracted userId:", userId);
     
     if (!userId) {
@@ -954,7 +959,7 @@ router.put("/profile", async (req, res) => {
           medicalHistory: medicalHistory,
           address: address,
           emergencyContact: emergencyContact,
-          medicalRecordNumber: medicalRecordNumber,
+          medicalRecordNumber: finalMedicalRecordNumber,
           insuranceProvider: insuranceProvider,
           insuranceMemberId: insuranceMemberId,
         },
@@ -968,7 +973,7 @@ router.put("/profile", async (req, res) => {
           medicalHistory: medicalHistory || "",
           address: address || "",
           emergencyContact: emergencyContact || "",
-          medicalRecordNumber: medicalRecordNumber || null,
+          medicalRecordNumber: finalMedicalRecordNumber,
           insuranceProvider: insuranceProvider || "",
           insuranceMemberId: insuranceMemberId || "",
         },
