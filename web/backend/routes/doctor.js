@@ -107,7 +107,10 @@ router.get("/profile", async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    let profile = await prisma.doctorProfile.findUnique({ where: { userId } });
+    let profile = await prisma.doctorProfile.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
     if (!profile && user.role === "DOCTOR") {
       profile = await ensureDefaultProfile(user);
     }
