@@ -83,13 +83,13 @@ export default function Sidebar({ role: propRole }) {
       to={to}
       className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group relative ${
         isActive(to)
-          ? 'bg-[var(--brand-green)] text-white shadow-lg shadow-green-500/20'
-          : 'text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)]'
+          ? 'bg-white text-[var(--brand-green)] shadow-lg'
+          : 'text-emerald-100 hover:bg-white/10 hover:text-white'
       }`}
     >
       <div
         className={`text-lg transition-transform group-hover:scale-110 ${
-          isActive(to) ? 'text-white' : ''
+          isActive(to) ? 'text-[var(--brand-green)]' : ''
         }`}
       >
         {icon}
@@ -114,8 +114,8 @@ export default function Sidebar({ role: propRole }) {
         onClick={onClick}
         className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${
           isOpen
-            ? 'text-[var(--brand-green)]'
-            : 'text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)]'
+            ? 'text-white bg-white/10'
+            : 'text-emerald-100 hover:bg-white/10 hover:text-white'
         }`}
       >
         <div className="flex items-center gap-3 flex-1">
@@ -140,7 +140,7 @@ export default function Sidebar({ role: propRole }) {
         )}
       </button>
       {isOpen && open && (
-        <div className="ml-6 pl-4 border-l-2 border-[var(--border)] space-y-1 animate-in slide-in-from-top-2 duration-300">
+        <div className="ml-6 pl-4 border-l-2 border-white/20 space-y-1 animate-in slide-in-from-top-2 duration-300">
           {children}
         </div>
       )}
@@ -152,8 +152,8 @@ export default function Sidebar({ role: propRole }) {
       to={to}
       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
         isActive(to)
-          ? 'text-[var(--brand-green)] bg-[var(--brand-green)]/10'
-          : 'text-[var(--text-muted)] hover:text-[var(--brand-green)] hover:bg-[var(--bg-main)]'
+          ? 'bg-white text-[var(--brand-green)] shadow-md'
+          : 'text-emerald-100 hover:text-white hover:bg-white/10'
       }`}
     >
       {icon && <span className="text-sm">{icon}</span>}
@@ -163,27 +163,27 @@ export default function Sidebar({ role: propRole }) {
 
   return (
     <div
-      className={`h-screen sticky top-0 border-r border-[var(--border)] transition-all duration-500 ease-in-out flex flex-col z-[60] ${
+      className={`h-screen sticky top-0 border-r border-white/10 transition-all duration-500 ease-in-out flex flex-col z-[60] ${
         open ? 'w-72' : 'w-24'
-      } ${theme === 'light' ? 'bg-gradient-to-b from-green-50 via-emerald-50 to-green-50' : 'bg-[var(--bg-card)]'}`}
+      } bg-gradient-to-b from-green-700 via-emerald-800 to-green-900 shadow-xl`}
     >
       {/* Brand Logo Section */}
       <div className="p-6 mb-4">
         <div className="flex items-center gap-3">
           <div
-            className="bg-white/5 p-2 rounded-xl shadow-lg cursor-pointer shrink-0"
+            className="bg-white/10 p-2 rounded-xl shadow-lg cursor-pointer shrink-0 border border-white/10 backdrop-blur-sm"
             onClick={() => setOpen(!open)}
           >
-            <img src="/images/logo/Asset2.png" alt="Logo" className="w-8 h-8" />
+            <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
           </div>
           {open && (
             <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-              <p className="text-xl font-black tracking-tighter text-[var(--text-main)]">
-                Cure<span className="text-[var(--brand-blue)]">Virtual</span>
+              <p className="text-xl font-black tracking-tighter text-white">
+                Cure<span className="text-blue-200">Virtual</span>
               </p>
               <div className="flex items-center gap-1.5">
-                <FaCircle className="text-[var(--brand-green)] text-[6px] animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                <FaCircle className="text-white text-[6px] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-200">
                   {role} PANEL
                 </span>
               </div>
@@ -589,17 +589,17 @@ export default function Sidebar({ role: propRole }) {
       </nav>
 
       {/* Footer / User Profile Summary */}
-      <div className="p-4 bg-[var(--bg-main)]/50 border-t border-[var(--border)]">
+      <div className="p-4 bg-white/5 border-t border-white/10 backdrop-blur-md">
         {open && (
-          <div className="flex items-center gap-3 px-2 py-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-sm">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[var(--brand-green)] to-[var(--brand-blue)] flex items-center justify-center text-white font-black text-lg">
+          <div className="flex items-center gap-3 px-2 py-3 rounded-2xl bg-white/10 border border-white/10 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[var(--brand-green)] font-black text-lg">
               {localStorage.getItem('name')?.charAt(0) || 'U'}
             </div>
             <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-black text-[var(--text-main)] truncate">
+              <p className="text-sm font-black text-white truncate">
                 {localStorage.getItem('name') || 'User Account'}
               </p>
-              <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest">
                 {role}
               </p>
             </div>
