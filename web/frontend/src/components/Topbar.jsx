@@ -76,15 +76,15 @@ export default function Topbar({ userName }) {
   };
 
   return (
-    <header className={`sticky top-0 z-50 h-[80px] flex items-center justify-between px-8 backdrop-blur-xl border-b border-[var(--border)] ${
-      theme === 'light' ? 'bg-gradient-to-r from-green-50 via-emerald-50 to-green-50' : 'bg-[var(--bg-glass)]'
+    <header className={`sticky top-0 z-50 h-[80px] flex items-center justify-between px-8 backdrop-blur-xl border-b border-white/20 shadow-sm ${
+      theme === 'light' ? 'bg-gradient-to-r from-green-700 via-emerald-800 to-green-900' : 'bg-[var(--bg-glass)]'
     }`}>
       {/* Search / Breadcrumbs Area */}
       <div className="flex-1 max-w-md hidden md:flex items-center gap-3">
-        <img src="/images/logo/Asset2.png" alt="Logo" className="w-8 h-8" />
-        <h1 className="text-xl font-black tracking-tighter text-[var(--text-main)] animate-in fade-in slide-in-from-left-4 duration-500">
+        <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+        <h1 className="text-xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-left-4 duration-500">
           Welcome back,{' '}
-          <span className="text-[var(--brand-green)]">
+          <span className="text-emerald-300">
             {userName ? userName.split(' ')[0] : 'User'}
           </span>
         </h1>
@@ -93,12 +93,12 @@ export default function Topbar({ userName }) {
       {/* Right section */}
       <div className="flex items-center gap-4">
         {/* Clock */}
-        <div className="hidden lg:flex flex-col items-end pr-6 border-r border-[var(--border)]">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+        <div className="hidden lg:flex flex-col items-end pr-6 border-r border-white/20">
+          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-200">
             Current Time
           </span>
-          <div className="flex items-center gap-2 text-sm font-bold text-[var(--text-main)]">
-            <FaClock className="text-[var(--brand-blue)]" />
+          <div className="flex items-center gap-2 text-sm font-bold text-white">
+            <FaClock className="text-emerald-300" />
             {time.toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -110,7 +110,7 @@ export default function Topbar({ userName }) {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-soft)] hover:text-[var(--brand-orange)] transition-all shadow-sm active:scale-95"
+          className="p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all shadow-sm active:scale-95"
           title="Toggle Theme"
         >
           {theme === 'light' ? <FaMoon /> : <FaSun />}
@@ -118,7 +118,7 @@ export default function Topbar({ userName }) {
 
         {/* Notifications */}
         <div
-          className="relative cursor-pointer p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-soft)] hover:text-[var(--brand-blue)] transition-all active:scale-95"
+          className="relative cursor-pointer p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all active:scale-95"
           onClick={handleNotificationClick}
         >
           <FaBell />
@@ -132,17 +132,17 @@ export default function Topbar({ userName }) {
         {/* User Menu */}
         <div className="relative ml-2">
           <button
-            className="flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--brand-green)] transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-white/10 border border-white/10 hover:border-emerald-300 transition-all active:scale-95 shadow-sm"
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[var(--brand-green)] to-[var(--brand-blue)] flex items-center justify-center text-white font-black text-lg">
+            <div className="h-9 w-9 rounded-xl bg-white text-[var(--brand-green)] flex items-center justify-center font-black text-lg">
               {userName ? userName.charAt(0).toUpperCase() : <FaUserCircle />}
             </div>
             <div className="hidden sm:flex flex-col items-start whitespace-nowrap">
-              <span className="text-sm font-black text-[var(--text-main)] truncate max-w-[120px]">
+              <span className="text-sm font-black text-white truncate max-w-[120px]">
                 {userName ? userName.split(' ')[0] : 'User'}
               </span>
-              <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
+              <span className="text-[10px] font-black text-emerald-200 uppercase tracking-widest">
                 {role || 'ACCESS'}
               </span>
             </div>
