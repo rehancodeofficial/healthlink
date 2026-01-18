@@ -203,7 +203,7 @@ export default function VideoCallModal({ consultation, onClose }) {
         {/* Status + Timer */}
         <div className="text-center text-sm bg-blue-600/80 text-[var(--text-main)] py-2 flex justify-center gap-4">
                         <img
-                    src="/images/logo/Asset2.png"
+                    src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 80, height: "auto" }}
                     onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
