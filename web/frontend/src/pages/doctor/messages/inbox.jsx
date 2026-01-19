@@ -168,7 +168,7 @@ export default function DoctorInbox() {
     <DashboardLayout role="DOCTOR" user={user}>
       <div className="p-6 min-h-screen bg-[var(--bg-main)]/90 text-[var(--text-main)]">
                       <img
-                    src="/images/logo/Asset2.png"
+                    src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
@@ -252,7 +252,7 @@ export default function DoctorInbox() {
               {/* Header + inline delete */}
               <div className="flex items-center justify-between">
                                 <img
-                    src="/images/logo/Asset2.png"
+                    src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
