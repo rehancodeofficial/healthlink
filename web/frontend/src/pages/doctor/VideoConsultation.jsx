@@ -190,7 +190,7 @@ export default function VideoConsultation() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
              <img
-              src="/images/logo/Asset2.png"
+              src="/images/logo/Asset3.png"
               alt="CureVirtual"
               style={{ width: 60, height: "auto" }}
               onError={(e) => {
