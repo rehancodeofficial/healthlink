@@ -178,7 +178,7 @@ const openMessage = async (msg) => {
 
         <div className="p-6">
                           <img
-                    src="/images/logo/Asset2.png"
+                    src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
@@ -259,7 +259,7 @@ const openMessage = async (msg) => {
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-black p-6 relative">
                 {/* Close button */}
                                 <img
-                    src="/images/logo/Asset2.png"
+                    src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
