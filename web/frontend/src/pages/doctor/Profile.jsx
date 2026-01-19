@@ -101,7 +101,7 @@ export default function DoctorProfile() {
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-[var(--text-main)]">My Profile</h1>
             <img
-              src="/images/logo/Asset2.png"
+              src="/images/logo/Asset3.png"
               alt="CureVirtual"
               style={{ width: 120, height: "auto" }}
               onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
