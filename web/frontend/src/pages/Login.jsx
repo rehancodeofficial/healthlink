@@ -100,7 +100,7 @@ export default function Login() {
             <div className="mb-8">
               <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-6 border border-[var(--border)] shadow-2xl">
                 <img
-                  src="/images/logo/Asset2.png"
+                  src="/images/logo/Asset3.png"
                   alt="Logo"
                   className="w-10 h-10"
                 />
@@ -109,11 +109,11 @@ export default function Login() {
                 </span>
               </div>
               <h2 className="text-4xl font-black tracking-tighter mb-4 leading-none uppercase text-[var(--brand-green)]">
-                Systems <br />{' '}
-                <span className="text-[var(--brand-green)]">Nominal.</span>
+                Welcome <br />{' '}
+                <span className="text-[var(--brand-green)]">Back</span>
               </h2>
               <p className="text-[var(--brand-green)] text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic">
-                Secure portal entrance for the CureVirtual ecosystem.
+                Login to your account.
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function Login() {
           <div className="z-10 flex items-center gap-4">
             <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Secure Encryption Enabled
+              Secure Login
             </p>
           </div>
         </div>
@@ -130,20 +130,20 @@ export default function Login() {
         <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col justify-center">
           <div className="mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 text-[var(--brand-green)] text-[9px] font-black uppercase tracking-[0.2em] mb-4">
-              <FiLock /> Biometric Shield Active
+              <FiLock /> Secure
             </div>
             <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
-              Auth <span className="text-[var(--brand-orange)]">Gate</span>
+              Login
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
-              Enter your credentials to access your clinical dashboard.
+              Enter your credentials to access your dashboard.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                Universal Email
+                Email Address
               </label>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
@@ -163,7 +163,7 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Access Token
+                  Password
                 </label>
                 <Link
                   to="/forgot-password"
@@ -213,7 +213,7 @@ export default function Login() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Authorize Access{' '}
+                  Submit{' '}
                   <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -222,12 +222,12 @@ export default function Login() {
 
           <div className="mt-12 text-center pt-8 border-t border-[var(--border)]">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              New Operator?{' '}
+              New User?{' '}
               <Link
                 to="/register"
                 className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1"
               >
-                Initialize Account
+                Register
               </Link>
             </p>
           </div>
