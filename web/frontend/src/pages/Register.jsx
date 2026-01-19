@@ -119,15 +119,15 @@ export default function Register() {
           <div className="z-10">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 mb-12 text-[var(--text-main)]/60 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest group"
+              className="inline-flex items-center gap-2 mb-12 text-emerald-300 hover:text-emerald-200 transition-all font-black text-[10px] uppercase tracking-widest group"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Interface Exit
+              Back to Home
             </Link>
 
             <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-8 border border-[var(--border)] shadow-2xl">
               <img
-                src="/images/logo/Asset2.png"
+                src="/images/logo/Asset3.png"
                 alt="Logo"
                 className="w-10 h-10"
               />
@@ -136,13 +136,12 @@ export default function Register() {
               </span>
             </div>
 
-            <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-[0.9] uppercase">
-              Join <br /> The{' '}
-              <span className="text-[var(--brand-orange)]">Network.</span>
+            <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-[0.9] uppercase text-emerald-300">
+              Create <br />{' '}
+              <span className="text-emerald-300">Account</span>
             </h2>
-            <p className="text-[var(--text-main)]/60 text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic text-justify">
-              Create your secure medical profile and access instant virtual
-              care.
+            <p className="text-emerald-300 text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic text-justify">
+              Sign up to access virtual care.
             </p>
           </div>
 
@@ -153,7 +152,7 @@ export default function Register() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
-                  Encrypted Vault
+                  Secure Data
                 </p>
                 <p className="text-[9px] font-bold text-[var(--text-main)]/40 uppercase tracking-widest">
                   Medical Grade Security
@@ -164,14 +163,14 @@ export default function Register() {
         </div>
 
         {/* Right Side: Deployment Form */}
-        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col justify-center overflow-y-auto max-h-[90vh]">
+        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
           <div className="mb-8">
             <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
-              System{' '}
-              <span className="text-[var(--brand-green)]">Onboarding</span>
+              Create{' '}
+              <span className="text-[var(--brand-green)]">Account</span>
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
-              Initialize your digital credentials for clinical access.
+              Fill in your details to get started.
             </p>
           </div>
 
@@ -179,7 +178,7 @@ export default function Register() {
             <div className="grid sm:grid-cols-3 gap-2">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  First
+                  First Name
                 </label>
                 <input
                   name="firstName"
@@ -192,7 +191,7 @@ export default function Register() {
               </div>
                <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Middle
+                  Middle Name
                 </label>
                 <input
                   name="middleName"
@@ -204,7 +203,7 @@ export default function Register() {
               </div>
                <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Last
+                  Last Name
                 </label>
                 <input
                   name="lastName"
@@ -273,7 +272,7 @@ export default function Register() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Auth Secret
+                  Password
                 </label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
@@ -294,7 +293,7 @@ export default function Register() {
 
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Confirm Secret
+                  Confirm Password
                 </label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
@@ -322,7 +321,7 @@ export default function Register() {
 
             <div className="space-y-2">
               <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                Account Protocol
+                I am a...
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
@@ -405,7 +404,7 @@ export default function Register() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Deploy Profile{' '}
+                  Submit{' '}
                   <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -414,12 +413,12 @@ export default function Register() {
 
           <footer className="mt-8 text-center border-t border-[var(--border)] pt-8">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              Standardized?{' '}
+              Already have an account?{' '}
               <Link
                 to="/login"
                 className="text-[var(--brand-orange)] font-black hover:underline ml-1"
               >
-                Authorize Login
+                Login
               </Link>
             </p>
           </footer>
