@@ -111,111 +111,111 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
               <h3 className="text-xs font-black uppercase tracking-widest text-indigo-500">Personal Specification</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">First Name</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">First Name</label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Last Name</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Last Name</label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Phone Number</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Phone Number</label>
                   <input
                     type="text"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Date of Birth</label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Date of Birth</label>
                   <input
                     type="date"
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                   />
                 </div>
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Gender</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Gender</label>
                     <select
                         name="gender"
                         value={formData.gender}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     >
                         {GENDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                 </div>
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Blood Group</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Blood Group</label>
                     <select
                         name="bloodGroup"
                         value={formData.bloodGroup}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     >
                         {BLOOD_GROUP_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Height (cm)</label>
+                        <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Height (cm)</label>
                         <input
                             type="number"
                             name="height"
                             value={formData.height}
                             onChange={handleChange}
                             placeholder="e.g. 175"
-                            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Weight (kg)</label>
+                        <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Weight (kg)</label>
                         <input
                             type="number"
                             name="weight"
                             value={formData.weight}
                             onChange={handleChange}
                             placeholder="e.g. 70"
-                            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                         />
                     </div>
                 </div>
                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Address</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Address</label>
                     <input
                         type="text"
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
                         placeholder="Full Address"
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                 </div>
                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Emergency Contact</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Emergency Contact</label>
                     <input
                         type="text"
                         name="emergencyContact"
                         value={formData.emergencyContact}
                         onChange={handleChange}
                         placeholder="Name and Phone Number"
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                 </div>
               </div>
@@ -226,34 +226,34 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
               <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">Insurance & ID</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Medical Record Number (MRN)</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Medical Record Number (MRN)</label>
                      <input
                         type="text"
                         name="medicalRecordNumber"
                         value={formData.medicalRecordNumber}
                         onChange={handleChange}
                          placeholder="System ID"
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                   </div>
                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Insurance Provider</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Insurance Provider</label>
                      <input
                         type="text"
                         name="insuranceProvider"
                         value={formData.insuranceProvider}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                   </div>
                    <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Insurance Member ID</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Insurance Member ID</label>
                      <input
                         type="text"
                         name="insuranceMemberId"
                         value={formData.insuranceMemberId}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                   </div>
               </div>
@@ -264,7 +264,7 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
               <h3 className="text-xs font-black uppercase tracking-widest text-orange-500">Clinical Observations</h3>
                <div className="space-y-4">
                    <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Allergies</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Allergies</label>
                     <textarea
                         name="allergies"
                         value={formData.allergies}
@@ -274,7 +274,7 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Active Medications</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Active Medications</label>
                     <textarea
                         name="medications"
                         value={formData.medications}
@@ -284,7 +284,7 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
                     />
                   </div>
                    <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Medical History</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Medical History</label>
                     <textarea
                         name="medicalHistory"
                         value={formData.medicalHistory}
