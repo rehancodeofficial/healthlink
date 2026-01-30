@@ -490,7 +490,7 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
     const reference = `cv_sub_${user.id}_${Date.now()}`;
     const callback_url =
       process.env.PAYSTACK_CALLBACK_URL ||
-      `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription`;
+      `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription`;
 
     // Pending payment record
     const pending = await prisma.subscriptionPayment.create({
@@ -600,10 +600,10 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
       customer_email: user.email,
       success_url:
         process.env.STRIPE_SUCCESS_URL ||
-        `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         process.env.STRIPE_CANCEL_URL ||
-        `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?status=cancel`,
+        `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=cancel`,
       metadata: { userId: user.id },
     });
 
