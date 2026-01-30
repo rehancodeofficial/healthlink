@@ -11,6 +11,7 @@ services:
       - '3307:3306'
     volumes:
       - db_data:/var/lib/mysql
+      - ./curevirtual.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend:
     build: ./web/backend
@@ -32,7 +33,7 @@ services:
     ports:
       - '5173:5173'
     environment:
-      - VITE_API_BASE_URL=http://localhost:5001/api
+      - VITE_API_BASE_URL=https://blanchedalmond-mink-417824.hostingersite.com/api
     volumes:
       - ./web/frontend:/app
       - /app/node_modules
