@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-const PLACEHOLDER_LOGO = "/images/logo/placeholder-logo.png";
+const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
 const fmtUSD = (n) =>
   typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—";
