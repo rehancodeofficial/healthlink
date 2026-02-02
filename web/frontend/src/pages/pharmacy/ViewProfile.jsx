@@ -6,7 +6,7 @@ import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const PLACEHOLDER_LOGO = "/images/logo/placeholder-logo.png";
+const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
 function formatDate(iso) {
   if (!iso) return "—";
