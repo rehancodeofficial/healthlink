@@ -17,178 +17,107 @@ const ALLOWED_USER_ROLES = new Set(['DOCTOR', 'PATIENT', 'PHARMACY']);
 const ALLOWED_ADMIN_ROLES = new Set(['SUPERADMIN', 'ADMIN', 'SUPPORT']);
 
 // -------------------------
-// Register (Handles Users and Admins)
+// Register Success (Supabase Sync)
 // -------------------------
-// Accepts: { name, email, password, role? }
-// If role is missing/invalid → defaults to PATIENT
-router.post('/register', async (req, res) => {
+router.post('/register-success', async (req, res) => {
   try {
-    let { firstName, middleName, lastName, email, phone, password, role, dateOfBirth, gender } = req.body || {};
+    const { 
+      supabaseId,
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      role, 
+      dateOfBirth, 
+      gender 
+    } = req.body || {};
 
-    if (!firstName || !lastName || !email || !password || !dateOfBirth || !gender) {
-      return res
-        .status(400)
-        .json({ error: 'Missing required fields: firstName, lastName, email, password, dateOfBirth, gender' });
+    if (!supabaseId || !email) {
+      return res.status(400).json({ error: 'Missing required fields: supabaseId, email' });
     }
 
-    // normalize
-    email = String(email).trim().toLowerCase();
-
-    // Default to PATIENT if role is missing or invalid
-    if (!role) {
-      role = 'PATIENT';
-    }
-
-    // ✅ Handle Admin registrations
-    if (ALLOWED_ADMIN_ROLES.has(role)) {
-      const existingAdmin = await prisma.admin.findUnique({ where: { email } });
-      if (existingAdmin)
-        return res.status(400).json({ error: 'Admin email already exists' });
-
-      const adminHash = await bcrypt.hash(password, 10);
-      const newAdmin = await prisma.admin.create({
+    const normedEmail = String(email).trim().toLowerCase();
+    
+    // Check if user already exists
+    let existingUser = await prisma.user.findUnique({ where: { email: normedEmail } });
+    
+    // If not, create them
+    if (!existingUser) {
+      existingUser = await prisma.user.create({
         data: {
-          name: `${firstName} ${lastName}`, // Admin model still uses single name
-          email,
-          password: adminHash,
-          role: role, // Uses passed SUPERADMIN, ADMIN, or SUPPORT
-        },
+          id: supabaseId, // Use Supabase ID as our primary key
+          firstName: firstName || 'First',
+          lastName: lastName || 'Last',
+          email: normedEmail,
+          phone: phone || null,
+          password: 'supabase-managed', // Placeholder since password is in Supabase
+          role: role || 'PATIENT',
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+          gender: gender || 'PREFER_NOT_TO_SAY',
+          
+          // Create a default Organization for this user
+          organization: {
+            create: {
+              name: `${firstName || 'User'}'s Organization`,
+              ownerId: supabaseId // We set it here, but it's optional in schema for now
+            }
+          }
+        }
       });
-      return res
-        .status(201)
-        .json({ message: 'Admin account provisioned', user: newAdmin });
-    }
-
-    // ✅ Handle User registrations (Patient/Doctor/Pharmacy)
-    const userRole = ALLOWED_USER_ROLES.has(role) ? role : 'PATIENT';
-
-    // Ensure unique email
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return res.status(400).json({ error: 'Email is already registered' });
-    }
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    // Create user first
-    const user = await prisma.user.create({
-      data: {
-        firstName,
-        middleName,
-        lastName,
-        email,
-        phone: phone || null,
-        password: hashed,
-        role: userRole,
-        dateOfBirth: new Date(dateOfBirth),
-        gender,
-        // subscriptionState defaults in Prisma schema (UNSUBSCRIBED)
-      },
-      select: { id: true, firstName: true, lastName: true, email: true, role: true },
-    });
-
-    // Provision a default profile so UI never breaks after first login
-    try {
-      // Pass specialization to profile logic if it's a doctor
-      await ensureDefaultProfile(user, req.body.specialization);
-    } catch (e) {
-      // Non-fatal: log and proceed (user can still log in, profile can be created later)
-      console.error('⚠️ Failed to provision default profile:', e);
-    }
-
-    // ✅ Generate and send OTP for email verification
-    try {
-      const otp = generateOTP();
-      const expiresAt = getOTPExpiration();
-
-      // Delete any existing unverified OTPs for this email
-      await prisma.emailOTP.deleteMany({
-        where: {
-          email,
-          verified: false,
-        },
-      });
-
-      // Store OTP in database
-      await prisma.emailOTP.create({
-        data: {
-          email,
-          otp,
-          expiresAt,
-          verified: false,
-        },
-      });
-
-      // Send OTP email (non-blocking)
-      sendOTPEmail(email, otp).catch(err => {
-        console.error('⚠️ Failed to send OTP email:', err);
-      });
-
-      console.log(`📧 OTP sent to ${email} for verification`);
-    } catch (otpError) {
-      // Non-fatal: user is registered, OTP can be resent
-      console.error('⚠️ Failed to generate/send OTP:', otpError);
+      
+      // Provision default profile
+      try {
+        await ensureDefaultProfile(existingUser, req.body.specialization);
+      } catch (e) {
+        console.error('⚠️ Failed to provision default profile:', e);
+      }
     }
 
     return res.status(201).json({
-      message: 'User registered. Please check your email for verification code.',
-      user,
-      requiresVerification: true,
+      message: 'User synchronized successfully',
+      user: existingUser,
     });
+
   } catch (err) {
-    if (err?.code === 'P2002') {
-      return res.status(400).json({ error: 'Email is already registered' });
-    }
-    console.error('Register error:', err);
+    console.error('Register Sync error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // -------------------------
-// Login (works for Users and Admins)
+// Login Sync (Supabase Sync)
 // -------------------------
-router.post('/login', async (req, res) => {
+router.post('/login-sync', async (req, res) => {
   try {
-    let { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Missing email or password' });
-    }
-    email = String(email).trim().toLowerCase();
+    const { email, supabaseId } = req.body || {};
 
-    // 1) Try USERS
-    let account = await prisma.user.findUnique({ where: { email } });
+    if (!email) {
+      return res.status(400).json({ error: 'Missing email' });
+    }
+
+    const normedEmail = String(email).trim().toLowerCase();
+
+    // 1) Try Finding User
+    let account = await prisma.user.findUnique({ where: { email: normedEmail } });
     let type = 'USER';
 
     // 2) Fall back to ADMINS
     if (!account) {
-      account = await prisma.admin.findUnique({ where: { email } });
+      account = await prisma.admin.findUnique({ where: { email: normedEmail } });
       type = 'ADMIN';
     }
 
     if (!account) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // 3) Password check (supports older plaintext seeds)
-    let isMatch = false;
-    if (account.password === password) {
-      isMatch = true; // (not recommended for production; keep for seed/dev only)
-    } else {
-      isMatch = await bcrypt.compare(password, account.password);
-    }
-
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // 4) Token
+    // 3) Create Legacy JWT
     const token = jwt.sign(
       { id: account.id, role: account.role, type },
       JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    // 5) Response
     return res.json({
       token,
       user: {
@@ -198,12 +127,107 @@ router.post('/login', async (req, res) => {
           : `${account.firstName} ${account.lastName}`.trim(),
         role: account.role,
         email: account.email,
-        type, // "USER" or "ADMIN"
+        type,
       },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('Login Sync error:', err);
     return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// -------------------------
+// Request OTP (Backend-driven)
+// -------------------------
+router.post('/request-otp-login', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const normedEmail = String(email).trim().toLowerCase();
+
+    // Check if user exists in our DB first (Security)
+    const user = await prisma.user.findUnique({ where: { email: normedEmail } });
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email' });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = getOTPExpiration();
+
+    // Store OTP in DB
+    await prisma.emailOTP.create({
+      data: {
+        email: normedEmail,
+        otp,
+        expiresAt,
+      }
+    });
+
+    // Send via email service
+    await sendOTPEmail(normedEmail, otp);
+
+    return res.json({ message: 'OTP sent to your email' });
+  } catch (err) {
+    console.error('OTP Request Error:', err);
+    return res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+// -------------------------
+// Verify OTP (Backend-driven)
+// -------------------------
+router.post('/verify-otp-login', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
+
+    const normedEmail = String(email).trim().toLowerCase();
+
+    // Find valid OTP
+    const record = await prisma.emailOTP.findFirst({
+      where: {
+        email: normedEmail,
+        otp,
+        verified: false,
+        expiresAt: { gt: new Date() }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired OTP' });
+    }
+
+    // Mark as verified
+    await prisma.emailOTP.update({
+      where: { id: record.id },
+      data: { verified: true }
+    });
+
+    // Get user and generate token
+    const user = await prisma.user.findUnique({ where: { email: normedEmail } });
+    
+    // Create JWT
+    const token = jwt.sign(
+      { id: user.id, role: user.role, type: 'USER' },
+      JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        role: user.role,
+        email: user.email,
+        type: 'USER',
+      },
+    });
+  } catch (err) {
+    console.error('OTP Verification Error:', err);
+    return res.status(500).json({ error: 'Verification failed' });
   }
 });
 
