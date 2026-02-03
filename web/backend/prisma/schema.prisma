@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -131,6 +131,10 @@ model User {
   patient       PatientProfile?
   pharmacy      PharmacyProfile?      // ✅ NEW
 
+  // Organization Link
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
   // Chat
   sentMessages  Message[] @relation("MessagesSent")
   recvMessages  Message[] @relation("MessagesRecv")
@@ -144,6 +148,20 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("User")
+  @@index([organizationId])
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String?   // Make optional initially or link to User ID
+  
+  users     User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Organization")
 }
 
 /* =========================================================
@@ -205,9 +223,9 @@ model DoctorProfile {
   hospitalAffiliation String?
   yearsOfExperience   Int?
   consultationFee     Float
-  availability        String?  @db.LongText
+  availability        String?  @db.Text
   bio                 String?
-  languages           String?  @db.LongText
+  languages           String?  @db.Text
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -237,8 +255,8 @@ model PharmacyProfile {
   latitude      Float?
   longitude     Float?
 
-  openingHours  String? @db.LongText
-  services      String? @db.LongText
+  openingHours  String? @db.Text
+  services      String? @db.Text
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -256,16 +274,16 @@ model PatientProfile {
   bloodGroup     BloodGroup
   height         Float?
   weight         Float?
-  allergies      String?    @db.LongText
-  medications    String?    @db.LongText
-  medicalHistory String?    @db.LongText
+  allergies      String?    @db.Text
+  medications    String?    @db.Text
+  medicalHistory String?    @db.Text
   address        String?
 
   medicalRecordNumber String? @unique
   insuranceProvider   String?
   insuranceMemberId   String?
 
-  emergencyContact String?  @db.LongText
+  emergencyContact String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
