@@ -5,11 +5,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.G
 
 exports.generateAIResponse = async (userMessage) => {
   try {
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Using gemini-flash-latest as the modern standard
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `
       You are a smart medical assistant for "CureVirtual".
@@ -40,6 +42,15 @@ exports.generateAIResponse = async (userMessage) => {
     return JSON.parse(cleanText);
   } catch (error) {
     console.error("Gemini Service Error:", error);
+    
+    if (error.message && error.message.includes("API key expired")) {
+        return {
+            specialty: "General Physician",
+            reply: "The Chatbot API key has expired. Please update the GEMINI_API_KEY in the backend .env file.",
+            isEmergency: false
+        };
+    }
+
     // Return a safe fallback rather than crashing
     return {
       specialty: "General Physician",
