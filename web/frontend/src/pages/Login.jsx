@@ -2,82 +2,95 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../Lib/api';
-import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft } from 'react-icons/fi';
+import { supabase } from '../Lib/supabase';
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from 'react-icons/fi';
 import { FaArrowRight } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loginMode, setLoginMode] = useState('password'); // 'password' or 'otp'
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-      const res = await api.post('/auth/login', { email, password });
-      const { token } = res.data;
-      const user = res.data.user || res.data;
+      if (loginMode === 'password') {
+        // 1. Supabase Auth Login
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('name', user.name);
-      localStorage.setItem('userName', user.name);
-      localStorage.setItem('role', user.role);
-      localStorage.setItem('type', user.type);
-      localStorage.setItem('email', user.email || email);
+        if (authError) throw authError;
 
-      switch (user.role) {
-        case 'SUPERADMIN':
-          navigate('/superadmin/dashboard');
-          break;
-        case 'ADMIN':
-          navigate('/admin/dashboard');
-          break;
-        case 'SUPPORT':
-          navigate('/support/dashboard');
-          break;
-        case 'DOCTOR':
-          navigate('/doctor/dashboard');
-          break;
-        case 'PATIENT':
-          navigate('/patient/dashboard');
-          break;
-        case 'PHARMACY':
-          navigate('/pharmacy/dashboard');
-          break;
-        default:
-          navigate('/');
+        // 2. Get User Details and Sync with Backend
+        const res = await api.post('/auth/login-sync', { 
+          email, 
+          supabaseId: data.user.id 
+        });
+
+        handleAuthSuccess(res.data, email);
+      } else {
+        // OTP Mode
+        if (!otpSent) {
+          // Request OTP
+          await api.post('/auth/request-otp-login', { email });
+          setOtpSent(true);
+        } else {
+          // Verify OTP
+          const res = await api.post('/auth/verify-otp-login', { email, otp });
+          handleAuthSuccess(res.data, email);
+        }
       }
     } catch (err) {
+      console.error(err);
       setError(
-        err.response?.data?.error || 'Invalid credentials. Please try again.'
+        err.message || err.response?.data?.error || 'Invalid credentials. Please try again.'
       );
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleAuthSuccess = (data, userEmail) => {
+    const { token } = data;
+    const user = data.user || data;
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('userId', user.id);
+    localStorage.setItem('name', user.name);
+    localStorage.setItem('userName', user.name);
+    localStorage.setItem('role', user.role);
+    localStorage.setItem('type', user.type || 'USER');
+    localStorage.setItem('email', user.email || userEmail);
+
+    switch (user.role) {
+      case 'SUPERADMIN': navigate('/superadmin/dashboard'); break;
+      case 'ADMIN': navigate('/admin/dashboard'); break;
+      case 'SUPPORT': navigate('/support/dashboard'); break;
+      case 'DOCTOR': navigate('/doctor/dashboard'); break;
+      case 'PATIENT': navigate('/patient/dashboard'); break;
+      case 'PHARMACY': navigate('/pharmacy/dashboard'); break;
+      default: navigate('/');
+    }
+  };
+
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}
-    >
+    <div className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}>
       {/* Dynamic Triple Color Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] bg-[var(--brand-green)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"></div>
-        <div
-          className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--brand-blue)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"
-          style={{ animationDelay: '1s' }}
-        ></div>
-        <div
-          className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[var(--brand-orange)] opacity-[0.05] blur-[120px] rounded-full animate-pulse"
-          style={{ animationDelay: '2s' }}
-        ></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--brand-blue)] opacity-[0.07] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[var(--brand-orange)] opacity-[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
       <div className="w-full max-w-[1000px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700 rounded-[3rem] border border-[var(--border)]">
@@ -89,28 +102,19 @@ export default function Login() {
           </div>
 
           <div className="z-10">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
-            >
-              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Home
+            <Link to="/" className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]">
+              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Home
             </Link>
 
             <div className="mb-8">
               <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-6 border border-[var(--border)] shadow-2xl">
-                <img
-                  src="/images/logo/Asset3.png"
-                  alt="Logo"
-                  className="w-10 h-10"
-                />
+                <img src="/images/logo/Asset3.png" alt="Logo" className="w-10 h-10" />
                 <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
                   CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
                 </span>
               </div>
               <h2 className="text-4xl font-black tracking-tighter mb-4 leading-none uppercase text-[var(--brand-green)]">
-                Welcome <br />{' '}
-                <span className="text-[var(--brand-green)]">Back</span>
+                Welcome <br /> <span className="text-[var(--brand-green)]">Back</span>
               </h2>
               <p className="text-[var(--brand-green)] text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic">
                 Login to your account.
@@ -120,9 +124,7 @@ export default function Login() {
 
           <div className="z-10 flex items-center gap-4">
             <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Secure Login
-            </p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">Secure Login</p>
           </div>
         </div>
 
@@ -136,7 +138,7 @@ export default function Login() {
               Login
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
-              Enter your credentials to access your dashboard.
+              {loginMode === 'password' ? 'Enter your credentials to access your dashboard.' : 'Enter your email to receive a login OTP.'}
             </p>
           </div>
 
@@ -152,55 +154,73 @@ export default function Login() {
                 <input
                   type="email"
                   value={email}
+                  disabled={otpSent}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner"
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
                   placeholder="operator@curevirtual.io"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Password
-                </label>
-                <Link
-                  to="/forgot-password"
-                  title="Coming Soon"
-                  className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
-                >
-                  Recovery?
-                </Link>
-              </div>
-              <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
-                  <FiLock />
+            {loginMode === 'password' ? (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                    Password
+                  </label>
+                  <Link to="/forgot-password" title="Recover Password" className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline">
+                    Recovery?
+                  </Link>
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
+                    <FiLock />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors z-10"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              otpSent && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                    Enter OTP
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
+                      <FiSmartphone />
+                    </div>
+                    <input
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                      placeholder="123456"
+                      required
+                    />
+                  </div>
+                </div>
+              )
+            )}
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 animate-shake">
                 <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider">
-                  {error}
-                </p>
+                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider">{error}</p>
               </div>
             )}
 
@@ -213,22 +233,28 @@ export default function Login() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Submit{' '}
+                  {loginMode === 'otp' && !otpSent ? 'Send OTP' : 'Submit'}
                   <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode(loginMode === 'password' ? 'otp' : 'password');
+                setOtpSent(false);
+                setError('');
+              }}
+              className="w-full text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-widest hover:underline text-center"
+            >
+              {loginMode === 'password' ? 'Login with OTP instead?' : 'Login with Password instead?'}
             </button>
           </form>
 
           <div className="mt-12 text-center pt-8 border-t border-[var(--border)]">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              New User?{' '}
-              <Link
-                to="/register"
-                className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1"
-              >
-                Register
-              </Link>
+              New User? <Link to="/register" className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1">Register</Link>
             </p>
           </div>
         </div>
