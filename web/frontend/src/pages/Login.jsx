@@ -54,7 +54,7 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       setError(
-        err.message || err.response?.data?.error || 'Invalid credentials. Please try again.'
+        err.response?.data?.error || err.message || 'Invalid credentials. Please try again.'
       );
     } finally {
       setIsLoading(false);
