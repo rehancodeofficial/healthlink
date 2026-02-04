@@ -98,6 +98,7 @@ import UserProfile from './pages/shared/UserProfile';
 ================================ */
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Chatbot from './components/Chatbot';
 
@@ -125,6 +126,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Video shared */}
         <Route path="/video/lobby" element={<VideoLobby />} />
