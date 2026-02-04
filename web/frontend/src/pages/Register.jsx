@@ -17,6 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTheme } from '../context/ThemeContext';
 import OTPVerification from '../components/OTPVerification';
+import { supabase } from '../Lib/supabase';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -53,24 +54,40 @@ export default function Register() {
 
     setSubmitting(true);
     try {
-      const response = await api.post('/auth/register', {
+      // 1. Supabase Auth Signup
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        options: {
+          data: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            role: form.role,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error('User creation failed');
+      }
+
+      // 2. Call backend for further processing (profile, organization, etc.)
+      const response = await api.post('/auth/register-success', {
         ...form,
+        supabaseId: authData.user.id,
         email: String(form.email || '')
           .trim()
           .toLowerCase(),
       });
       
-      // Check if email verification is required
-      if (response.data.requiresVerification) {
-        toast.success('Registration successful! Please check your email for verification code.');
-        setRegisteredEmail(form.email.trim().toLowerCase());
-        setShowOTP(true);
-      } else {
-        toast.success('Registration sequence complete.');
-        setTimeout(() => navigate('/login'), 1500);
-      }
+      toast.success('Registration successful! Please verify your email.');
+      // Session persists automatically in Supabase, but we might want them to log in again or verify first.
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      toast.error(err?.response?.data?.error || 'Registration failed');
+      console.error('Registration error:', err);
+      toast.error(err.message || 'Registration failed');
     } finally {
       setSubmitting(false);
     }
