@@ -1,7 +1,6 @@
 const geminiService = require("../services/gemini.service");
-const { PrismaClient } = require("@prisma/client");
+const prisma = require('../prisma/prismaClient');
 const xss = require("xss");
-const prisma = new PrismaClient();
 
 exports.handleChat = async (req, res) => {
   try {
