@@ -16,7 +16,6 @@ export default function PharmacyProfile() {
 
   const [form, setForm] = useState({
     userId,
-    userId,
     firstName: "",
     lastName: "",
     displayName: "",
