@@ -87,7 +87,7 @@ export default function Register() {
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
       console.error('Registration error:', err);
-      toast.error(err.message || 'Registration failed');
+      toast.error(err.response?.data?.error || err.message || 'Registration failed');
     } finally {
       setSubmitting(false);
     }
