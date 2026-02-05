@@ -1,112 +1,113 @@
 // FILE: src/App.jsx
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import LoadingSpinner from './components/LoadingSpinner';
 
 /* ================================
    SUPERADMIN
 ================================ */
-import SuperadminDashboard from './pages/superadmin/SuperadminDashboard';
-import ManageAdmins from './pages/superadmin/ManageAdmins';
-import SystemReports from './pages/superadmin/SystemReports';
-import Settings from './pages/superadmin/Settings';
-import SuperSubscribersStats from './pages/superadmin/subscribers/Stats';
-import SuperSubscribedDoctors from './pages/superadmin/subscribers/Doctor';
-import SuperSubscribedPatients from './pages/superadmin/subscribers/Patients';
-import SuperadminSubscribedPharmacy from './pages/superadmin/subscribers/Pharmacy';
-import SuperadminInbox from './pages/superadmin/SuperadminInbox';
-import SuperadminSendMessage from './pages/superadmin/SuperadminSendMessage';
-import SuperadminActivityLogs from './pages/superadmin/ActivityLogs';
+const SuperadminDashboard = lazy(() => import('./pages/superadmin/SuperadminDashboard'));
+const ManageAdmins = lazy(() => import('./pages/superadmin/ManageAdmins'));
+const SystemReports = lazy(() => import('./pages/superadmin/SystemReports'));
+const Settings = lazy(() => import('./pages/superadmin/Settings'));
+const SuperSubscribersStats = lazy(() => import('./pages/superadmin/subscribers/Stats'));
+const SuperSubscribedDoctors = lazy(() => import('./pages/superadmin/subscribers/Doctor'));
+const SuperSubscribedPatients = lazy(() => import('./pages/superadmin/subscribers/Patients'));
+const SuperadminSubscribedPharmacy = lazy(() => import('./pages/superadmin/subscribers/Pharmacy'));
+const SuperadminInbox = lazy(() => import('./pages/superadmin/SuperadminInbox'));
+const SuperadminSendMessage = lazy(() => import('./pages/superadmin/SuperadminSendMessage'));
+const SuperadminActivityLogs = lazy(() => import('./pages/superadmin/ActivityLogs'));
 
 /* ================================
    ADMIN
 ================================ */
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ManageUsers from './pages/admin/ManageUsers';
-import Reports from './pages/admin/Reports'; // keep your original pathing
-import Inbox from './pages/admin/messages/Inbox';
-import SendMessage from './pages/admin/messages/SendMessage';
-import AdminList from './pages/admin/AdminList';
-import UsersList from './pages/admin/UsersList';
-import SubscriptionSettings from './pages/admin/SubscriptionSettings';
-import AdminSubscribersStats from './pages/admin/subscribers/Stats';
-import AdminSubscribedDoctors from './pages/admin/subscribers/Doctor';
-import AdminSubscribedPatients from './pages/admin/subscribers/Patients';
-import AdminSubscribedPharmacy from './pages/admin/subscribers/Pharmacy';
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'));
+const Reports = lazy(() => import('./pages/admin/Reports'));
+const Inbox = lazy(() => import('./pages/admin/messages/Inbox'));
+const SendMessage = lazy(() => import('./pages/admin/messages/SendMessage'));
+const AdminList = lazy(() => import('./pages/admin/AdminList'));
+const UsersList = lazy(() => import('./pages/admin/UsersList'));
+const SubscriptionSettings = lazy(() => import('./pages/admin/SubscriptionSettings'));
+const AdminSubscribersStats = lazy(() => import('./pages/admin/subscribers/Stats'));
+const AdminSubscribedDoctors = lazy(() => import('./pages/admin/subscribers/Doctor'));
+const AdminSubscribedPatients = lazy(() => import('./pages/admin/subscribers/Patients'));
+const AdminSubscribedPharmacy = lazy(() => import('./pages/admin/subscribers/Pharmacy'));
 
 /* ================================
    DOCTOR
 ================================ */
-import DoctorDashboard from './pages/doctor/DoctorDashboard';
-import DoctorAppointments from './pages/doctor/DoctorAppointments';
-import DoctorPrescriptions from './pages/doctor/Prescriptions';
-import DoctorInbox from './pages/doctor/messages/inbox';
-import DoctorSendMessage from './pages/doctor/messages/SendMessage';
-import DoctorSubscription from './pages/doctor/DoctorSubscription';
-import PatientList from './pages/doctor/PatientList';
-import DoctorViewProfile from './pages/doctor/ViewProfile';
-import DoctorProfile from './pages/doctor/Profile';
-import MyPatientList from './pages/doctor/MyPatientList';
-import DoctorVideoConsultation from './pages/doctor/VideoConsultation';
-import DoctorSchedule from './pages/doctor/DoctorSchedule';
+const DoctorDashboard = lazy(() => import('./pages/doctor/DoctorDashboard'));
+const DoctorAppointments = lazy(() => import('./pages/doctor/DoctorAppointments'));
+const DoctorPrescriptions = lazy(() => import('./pages/doctor/Prescriptions'));
+const DoctorInbox = lazy(() => import('./pages/doctor/messages/inbox'));
+const DoctorSendMessage = lazy(() => import('./pages/doctor/messages/SendMessage'));
+const DoctorSubscription = lazy(() => import('./pages/doctor/DoctorSubscription'));
+const PatientList = lazy(() => import('./pages/doctor/PatientList'));
+const DoctorViewProfile = lazy(() => import('./pages/doctor/ViewProfile'));
+const DoctorProfile = lazy(() => import('./pages/doctor/Profile'));
+const MyPatientList = lazy(() => import('./pages/doctor/MyPatientList'));
+const DoctorVideoConsultation = lazy(() => import('./pages/doctor/VideoConsultation'));
+const DoctorSchedule = lazy(() => import('./pages/doctor/DoctorSchedule'));
 
 /* ================================
    PATIENT
 ================================ */
-import PatientDashboard from './pages/patient/PatientDashboard';
-import BookAppointment from './pages/patient/BookAppointment';
-import MyAppointments from './pages/patient/MyAppointments';
-import PatientPrescriptions from './pages/patient/Prescriptions';
-import PatientVideoConsultation from './pages/patient/VideoConsultation';
-import PatientInbox from './pages/patient/messages/Inbox.jsx';
-import PatientSendMessage from './pages/patient/messages/SendMessage.jsx';
-import MyTickets from './pages/patient/support/MyTickets';
-import TicketDetails from './pages/patient/support/TicketDetail';
-import PatientUpdateProfile from './pages/patient/Profile.jsx';
-import PatientViewProfile from './pages/patient/ViewProfile.jsx';
-import PatientSubscription from './pages/patient/PatientSubscription.jsx';
-import DoctorsList from './pages/patient/DoctorsList';
-import MyDoctors from './pages/patient/MyDoctors';
+const PatientDashboard = lazy(() => import('./pages/patient/PatientDashboard'));
+const BookAppointment = lazy(() => import('./pages/patient/BookAppointment'));
+const MyAppointments = lazy(() => import('./pages/patient/MyAppointments'));
+const PatientPrescriptions = lazy(() => import('./pages/patient/Prescriptions'));
+const PatientVideoConsultation = lazy(() => import('./pages/patient/VideoConsultation'));
+const PatientInbox = lazy(() => import('./pages/patient/messages/Inbox.jsx'));
+const PatientSendMessage = lazy(() => import('./pages/patient/messages/SendMessage.jsx'));
+const MyTickets = lazy(() => import('./pages/patient/support/MyTickets'));
+const TicketDetails = lazy(() => import('./pages/patient/support/TicketDetail'));
+const PatientUpdateProfile = lazy(() => import('./pages/patient/Profile.jsx'));
+const PatientViewProfile = lazy(() => import('./pages/patient/ViewProfile.jsx'));
+const PatientSubscription = lazy(() => import('./pages/patient/PatientSubscription.jsx'));
+const DoctorsList = lazy(() => import('./pages/patient/DoctorsList'));
+const MyDoctors = lazy(() => import('./pages/patient/MyDoctors'));
 
 /**=====================================
  * PHARMACY
  *======================================*/
-
-import PharmacyDashboard from './pages/pharmacy/Dashboard';
-import PharmacyProfile from './pages/pharmacy/Profile';
-import PharmacyPrescriptions from './pages/pharmacy/Prescriptions';
+const PharmacyDashboard = lazy(() => import('./pages/pharmacy/Dashboard'));
+const PharmacyProfile = lazy(() => import('./pages/pharmacy/Profile'));
+const PharmacyPrescriptions = lazy(() => import('./pages/pharmacy/Prescriptions'));
 // Patient: choose pharmacy
-import PatientSelectPharmacy from './pages/patient/SelectPharmacy';
-import PharmacyList from './pages/patient/pharmacy/PharmacyList';
-import MyPharmacy from './pages/patient/pharmacy/MyPharmacy';
-import PharmacySubscription from './pages/pharmacy/PharmacySubscription';
-import PharmacyViewProfile from './pages/pharmacy/ViewProfile';
-import PharmacyInbox from './pages/pharmacy/messages/Inbox';
-import PharmacySendMessage from './pages/pharmacy/messages/SendMessage';
+const PatientSelectPharmacy = lazy(() => import('./pages/patient/SelectPharmacy'));
+const PharmacyList = lazy(() => import('./pages/patient/pharmacy/PharmacyList'));
+const MyPharmacy = lazy(() => import('./pages/patient/pharmacy/MyPharmacy'));
+const PharmacySubscription = lazy(() => import('./pages/pharmacy/PharmacySubscription'));
+const PharmacyViewProfile = lazy(() => import('./pages/pharmacy/ViewProfile'));
+const PharmacyInbox = lazy(() => import('./pages/pharmacy/messages/Inbox'));
+const PharmacySendMessage = lazy(() => import('./pages/pharmacy/messages/SendMessage'));
 
 /* ================================
    SUPPORT
 ================================ */
-import SupportDashboard from './pages/support/SupportDashboard';
-import SupportTickets from './pages/support/SupportTickets';
-import SupportLiveChat from './pages/support/SupportLiveChat';
-import SupportSubscribedDoctors from './pages/support/subscribers/Doctor';
-import SupportSubscribedPatients from './pages/support/subscribers/Patients';
-import SupportSubscribedPharmacy from './pages/support/subscribers/Pharmacy';
-import UserProfile from './pages/shared/UserProfile';
+const SupportDashboard = lazy(() => import('./pages/support/SupportDashboard'));
+const SupportTickets = lazy(() => import('./pages/support/SupportTickets'));
+const SupportLiveChat = lazy(() => import('./pages/support/SupportLiveChat'));
+const SupportSubscribedDoctors = lazy(() => import('./pages/support/subscribers/Doctor'));
+const SupportSubscribedPatients = lazy(() => import('./pages/support/subscribers/Patients'));
+const SupportSubscribedPharmacy = lazy(() => import('./pages/support/subscribers/Pharmacy'));
+const UserProfile = lazy(() => import('./pages/shared/UserProfile'));
 
 /* ================================
    AUTH / HOME
 ================================ */
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import Home from './pages/Home';
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const Home = lazy(() => import('./pages/Home'));
 import Chatbot from './components/Chatbot';
 
 /* ================================
    VIDEO (shared)
 ================================ */
-import VideoLobby from './pages/video/VideoLobby';
-import VideoRoom from './pages/video/VideoRoom';
+const VideoLobby = lazy(() => import('./pages/video/VideoLobby'));
+const VideoRoom = lazy(() => import('./pages/video/VideoRoom'));
 
 /* ================================
    Tiny role guard (localStorage)
@@ -121,7 +122,8 @@ const RequireRole = ({ role, children }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -710,6 +712,7 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       <Chatbot />
     </BrowserRouter>
   );
