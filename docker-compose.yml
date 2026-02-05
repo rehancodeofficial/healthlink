@@ -22,7 +22,6 @@ services:
     env_file:
       - ./web/backend/.env
     environment:
-      - DATABASE_URL=mysql://root:rootpassword@db:3306/curevirtual_db
       - PORT=5001
     volumes:
       - ./web/backend:/app
