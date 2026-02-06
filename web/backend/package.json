@@ -2,11 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"No tests yet\"",
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "build": "prisma generate",
     "prisma:seed": "node prisma/seed.js",
     "seed": "node prisma/seed.js",
     "db:migrate": "prisma migrate dev",
@@ -33,16 +34,15 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.15.1",
     "nodemailer": "^7.0.12",
+    "prisma": "^6.18.0",
     "stripe": "^19.1.0",
     "twilio": "^5.10.2",
     "uuid": "^13.0.0",
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
-    "prisma": "^6.18.0"
+    "nodemon": "^3.1.10"
   },
   "engines": {
     "node": ">=18.0.0"
