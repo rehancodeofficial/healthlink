@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./prisma/prismaClient');
 
 async function main() {
   console.log('Searching for User with email support@curevirtual.com...');
