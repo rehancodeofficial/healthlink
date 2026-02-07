@@ -1,10 +1,9 @@
 // FILE: backend/routes/messages.js
+const prisma = require('../prisma/prismaClient');
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 const { verifyToken, requireRole, verifyOwnerOrAdmin } = require("../middleware/rbac.js");
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // ------------------------------------------------------------------
 // Constants & helpers
