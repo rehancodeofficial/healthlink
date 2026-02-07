@@ -1,12 +1,11 @@
 // FILE: backend/routes/patientRoutes.js
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
+const prisma = require('../prisma/prismaClient');
 const axios = require("axios");
 const Stripe = require("stripe");
 const { verifyToken, requireRole, verifyOwnerOrAdmin } = require("../middleware/rbac.js");
 const { ensureDefaultProfile } = require("../lib/provisionProfile.js");
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 // Apply RBAC to all patient routes
