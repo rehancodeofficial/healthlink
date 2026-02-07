@@ -2,15 +2,14 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prisma/prismaClient');
 const { ensureDefaultProfile } = require('../lib/provisionProfile');
 const { generateOTP, getOTPExpiration } = require('../lib/otpGenerator');
 const { sendOTPEmail } = require('../lib/emailService');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Allowed roles (match Prisma enum)
 const ALLOWED_USER_ROLES = new Set(['DOCTOR', 'PATIENT', 'PHARMACY']);
