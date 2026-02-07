@@ -1,8 +1,7 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
-const prisma = new PrismaClient();
+const prisma = require('../prisma/prismaClient');
 const router = express.Router();
 
 // Apply RBAC to all doctor routes
