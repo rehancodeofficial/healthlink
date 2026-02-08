@@ -9,25 +9,43 @@ dotenv.config();
 const app = express();
 
 // ✅ Global Middlewares
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://localhost:5176',
+  'https://curevirtual.vercel.app',
+  'https://cure-virtual-2.vercel.app',
+  process.env.FRONTEND_URL,
+  process.env.RAILWAY_STATIC_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://localhost:5176',
-      'https://curevirtual.vercel.app',
-      'https://cure-virtual-2.vercel.app',
-      process.env.CORS_ORIGIN || 'http://localhost:5173',
-    ],
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.some(o => origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 // ✅ Health Check
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (_req, res) => {
+  res.json({ 
+    status: 'UP', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // ----------------------------
 // ✅ AUTH / TWILIO
@@ -164,6 +182,10 @@ app.get('/api/doctor/test', (req, res) => {
 
 // ✅ Server start
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log('-------------------------------------------');
+  console.log(`🚀 Server running on port: ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`⏱️  Started at: ${new Date().toISOString()}`);
+  console.log('-------------------------------------------');
+});
