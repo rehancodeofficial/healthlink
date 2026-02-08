@@ -1,9 +1,7 @@
-
 // FILE: backend/routes/subscription.js
 const express = require("express");
 const router = express.Router();
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require('../prisma/prismaClient');
 
 const Stripe = require("stripe");
 const stripeSecret = process.env.STRIPE_SECRET_KEY || "";
