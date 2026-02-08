@@ -287,7 +287,7 @@ router.put("/status/:id", verifyToken, async (req, res) => {
    5) CANCEL (soft status update)
    PATCH /api/videocall/cancel/:id
 ========================================== */
-router.patch("/cancel/:id", async (req, res) => {
+router.patch("/cancel/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const cancelled = await prisma.videoConsultation.update({
