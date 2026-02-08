@@ -1,9 +1,8 @@
 // FILE: backend/routes/pharmacy.js
 const express = require("express");
 const router = express.Router();
-const { PrismaClient } = require("@prisma/client");
+const prisma = require('../prisma/prismaClient');
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
-const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey123";
