@@ -212,13 +212,10 @@ async function putPricesHandler(req, res) {
 
 /* ----------- wire both canonical + compatibility routes ----------- */
 // Canonical admin + role-aware
-router.get("/subscription/prices", verifyToken, getPricesHandler);
-router.put("/subscription/prices", requireRole(["ADMIN", "SUPERADMIN"]), putPricesHandler);
+router.get("/prices", verifyToken, getPricesHandler);
+router.put("/prices", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), putPricesHandler);
 
 // Compatibility (older code may call these)
-router.get("/prices", getPricesHandler);
-router.put("/prices", putPricesHandler);
-router.get("/subscription/settings", getPricesHandler);
 router.get("/settings", getPricesHandler);
 
 /* ----------------------------- STATS & LIST ----------------------------- */
@@ -325,7 +322,7 @@ router.get("/list", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (re
 
 /* ----------------------- USER STATUS & HISTORY ---------------------- */
 // GET /api/subscription/status?userId=UUID
-router.get("/subscription/status", verifyToken, async (req, res) => {
+router.get("/status", verifyToken, async (req, res) => {
   try {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -352,8 +349,8 @@ router.get("/subscription/status", verifyToken, async (req, res) => {
   }
 });
 
-// GET /api/subscription?userId=UUID
-router.get("/subscription", verifyToken, async (req, res) => {
+// GET /api/subscription?userId=UUID (Generic status/history)
+router.get("/", verifyToken, async (req, res) => {
   try {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -372,8 +369,8 @@ router.get("/subscription", verifyToken, async (req, res) => {
 
 });
 
-// Alias for /subscription/history (frontend compatibility)
-router.get("/subscription/history", verifyToken, async (req, res) => {
+// Alias for /subscription/history
+router.get("/history", verifyToken, async (req, res) => {
   try {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -392,8 +389,8 @@ router.get("/subscription/history", verifyToken, async (req, res) => {
 });
 
 /* ------------------------ ADMIN: force status ----------------------- */
-// PATCH /api/subscription/:id/status
-router.patch("/subscription/:id/status", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (req, res) => {
+// PATCH /api/subscription/id/status
+router.patch("/:id/status", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body || {};
@@ -432,7 +429,7 @@ router.patch("/subscription/:id/status", verifyToken, requireRole(["ADMIN", "SUP
 
 /* ------------------------ STRIPE CHECKOUT FLOW ---------------------- */
 // POST /api/subscription/stripe/checkout  { userId, plan: "MONTHLY"|"YEARLY" }
-router.post("/subscription/stripe/checkout", async (req, res) => {
+router.post("/stripe/checkout", verifyToken, async (req, res) => {
   try {
     const { userId, plan } = req.body || {};
     if (!userId || !plan) {
