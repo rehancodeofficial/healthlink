@@ -1,7 +1,7 @@
-//here is the current Backend. update and give me full updated clean version
 // FILE: backend/routes/support.js
 const express = require("express");
 const prisma = require('../prisma/prismaClient');
+const { verifyToken, requireRole } = require("../middleware/rbac");
 const router = express.Router();
 
 /**
@@ -19,16 +19,15 @@ const includeTicket = {
 
 /**
  * POST /api/support/tickets
- * Body: { userId: string (User.id), subject: string, body: string, priority?: 'LOW'|'MEDIUM'|'HIGH'|'URGENT' }
+ * Body: { userId: string, subject: string, body: string, priority?: 'LOW'|'MEDIUM'|'HIGH'|'URGENT' }
  */
-router.post("/tickets", async (req, res) => {
+router.post("/tickets", verifyToken, async (req, res) => {
   try {
     const { userId, subject, body, priority = "MEDIUM" } = req.body || {};
     if (!userId || !subject || !body) {
       return res.status(400).json({ error: "userId, subject and body are required" });
     }
 
-    // Ensure user exists
     const user = await prisma.user.findUnique({ where: { id: String(userId) } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -62,11 +61,10 @@ router.post("/tickets", async (req, res) => {
 
 /**
  * GET /api/support/tickets/my?userId=...
- * Returns current user's tickets (newest first)
  */
-router.get("/tickets/my", async (req, res) => {
+router.get("/tickets/my", verifyToken, async (req, res) => {
   try {
-    const { userId } = req.query;
+    const userId = req.query.userId || req.user.id;
     if (!userId) return res.status(400).json({ error: "userId is required" });
 
     const tickets = await prisma.supportTicket.findMany({
@@ -102,30 +100,33 @@ router.get("/tickets/my", async (req, res) => {
 
 /**
  * GET /api/support/tickets/:id
- * Returns a specific ticket (with replies)
  */
-router.get("/tickets/:id", async (req, res) => {
+router.get("/tickets/:id", verifyToken, async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
     const ticket = await prisma.supportTicket.findUnique({
       where: { id },
-      include: includeTicket,
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        replies: {
+          include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+          orderBy: { createdAt: "asc" },
+        },
+      },
     });
     if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
-    return res.json({
-      success: true,
-      data: {
-        ...ticket,
-        user: pickUserSlim(ticket.user),
-        replies: ticket.replies.map((r) => ({
-          ...r,
-          user: pickUserSlim(r.user),
-        })),
-      },
-    });
+    // Authorization: Owner or Support team
+    const isOwner = ticket.user?.id === req.user.id;
+    const isStaff = ["SUPPORT", "ADMIN", "SUPERADMIN"].includes(req.user.role);
+
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({ error: "Forbidden: Not authorized to view this ticket" });
+    }
+
+    return res.json({ success: true, data: ticket });
   } catch (err) {
     console.error("❌ GET /support/tickets/:id error:", err);
     return res.status(500).json({ error: "Failed to fetch ticket" });
@@ -134,10 +135,8 @@ router.get("/tickets/:id", async (req, res) => {
 
 /**
  * POST /api/support/tickets/:id/replies
- * Body: { userId: string (User.id), message: string }
- * Adds a reply to the ticket (by requester or agent)
  */
-router.post("/tickets/:id/replies", async (req, res) => {
+router.post("/tickets/:id/replies", verifyToken, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { userId, message } = req.body || {};
@@ -147,26 +146,20 @@ router.post("/tickets/:id/replies", async (req, res) => {
     const ticket = await prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
-    // verify user exists
-    const user = await prisma.user.findUnique({ where: { id: String(userId) } });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const reply = await prisma.supportReply.create({
+    const created = await prisma.supportReply.create({
       data: {
         ticketId: id,
         userId: String(userId),
         message: String(message),
       },
-      include: { user: true },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      },
     });
 
-    // bump updatedAt
     await prisma.supportTicket.update({ where: { id }, data: { updatedAt: new Date() } });
 
-    return res.status(201).json({
-      success: true,
-      data: { ...reply, user: pickUserSlim(reply.user) },
-    });
+    return res.status(201).json({ success: true, data: created });
   } catch (err) {
     console.error("❌ POST /support/tickets/:id/replies error:", err);
     return res.status(500).json({ error: "Failed to add reply" });
@@ -175,9 +168,8 @@ router.post("/tickets/:id/replies", async (req, res) => {
 
 /**
  * PUT /api/support/tickets/:id/status
- * Body: { status: 'OPEN'|'IN_PROGRESS'|'WAITING_CUSTOMER'|'RESOLVED'|'CLOSED'|'REOPENED' }
  */
-router.put("/tickets/:id/status", async (req, res) => {
+router.put("/tickets/:id/status", verifyToken, requireRole(["SUPPORT", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { status } = req.body || {};
@@ -205,14 +197,10 @@ router.put("/tickets/:id/status", async (req, res) => {
   }
 });
 
-// ADD this near other routes in backend/routes/support.js
-
 /**
- * GET /api/support/tickets
- * Query (optional): status, priority, q
- * Lists ALL tickets (for Support team)
+ * GET /api/support/tickets (Staff List)
  */
-router.get("/tickets", async (req, res) => {
+router.get("/tickets", verifyToken, requireRole(["SUPPORT", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { status, priority, q } = req.query;
 
@@ -255,77 +243,6 @@ router.get("/tickets", async (req, res) => {
   } catch (err) {
     console.error("❌ GET /support/tickets (all) error:", err);
     res.status(500).json({ error: "Failed to fetch tickets" });
-  }
-});
-
-/**
- * GET /api/support/tickets/:id
- * Returns full ticket with body + replies + basic user info
- */
-router.get("/tickets/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
-
-    const ticket = await prisma.supportTicket.findUnique({
-      where: { id },
-      include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
-        replies: {
-          include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    });
-
-    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
-
-    return res.json({ success: true, data: ticket });
-  } catch (err) {
-    console.error("❌ GET /support/tickets/:id error:", err);
-    return res.status(500).json({ error: "Failed to fetch ticket" });
-  }
-});
-
-/**
- * POST /api/support/tickets/:id/replies
- * Body: { userId: string (Support agent User.id), message: string }
- * Creates a reply and returns the created reply (with user info).
- */
-router.post("/tickets/:id/replies", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    const { userId, message } = req.body || {};
-    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
-    if (!userId || !message)
-      return res.status(400).json({ error: "userId and message are required" });
-
-    const ticket = await prisma.supportTicket.findUnique({ where: { id } });
-    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
-
-    // ensure user exists
-    const user = await prisma.user.findUnique({
-      where: { id: String(userId) },
-      select: { id: true },
-    });
-    if (!user) return res.status(400).json({ error: "Invalid userId" });
-
-    const created = await prisma.supportReply.create({
-      data: {
-        ticketId: id,
-        userId: String(userId),
-        message: String(message),
-      },
-      include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
-      },
-    });
-
-    // bump updatedAt on ticket automatically via @updatedAt; no extra write needed
-    return res.status(201).json({ success: true, data: created });
-  } catch (err) {
-    console.error("❌ POST /support/tickets/:id/replies error:", err);
-    return res.status(500).json({ error: "Failed to add reply" });
   }
 });
 
