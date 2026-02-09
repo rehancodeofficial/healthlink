@@ -215,7 +215,7 @@ router.post("/mark-read", verifyToken, async (req, res) => {
 });
 
 // Mark one as read: PATCH /api/messages/:id/read
-router.patch("/:id/read", async (req, res) => {
+router.patch("/:id/read", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const msg = await prisma.message.update({
