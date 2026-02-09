@@ -1,6 +1,5 @@
 const axios = require('axios');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./prisma/prismaClient');
 
 const BASE_URL = 'http://localhost:5001/api';
 
