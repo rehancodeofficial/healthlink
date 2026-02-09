@@ -5,11 +5,7 @@ const prisma = require('../prisma/prismaClient');
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey123";
-
-/* Apply RBAC to pharmacy routes */
 const authenticatePharmacy = [verifyToken, requireRole(["PHARMACY", "SUPERADMIN", "ADMIN"])];
-
 
 /* --------------------------- helpers --------------------------- */
 const toNullIfBlank = (v) =>
@@ -28,23 +24,6 @@ function inferUserId(req) {
   if (req.body?.userId) return String(req.body.userId);
   return null;
 }
-
-// Optional auth: if Authorization header exists, decode it;
-// if not present, proceed (routes still allow explicit userId)
-function optionalAuth(req, _res, next) {
-  const hdr = req.headers.authorization || req.headers.Authorization;
-  if (!hdr || !hdr.startsWith("Bearer ")) return next();
-  const token = hdr.slice("Bearer ".length);
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = { id: decoded.id, role: decoded.role, type: decoded.type };
-  } catch {
-    // ignore bad tokens so legacy flows keep working
-  }
-  return next();
-}
-
-router.use(optionalAuth);
 
 /* ================================================================
    DASHBOARD STATS
@@ -174,7 +153,7 @@ router.get("/profile", ...authenticatePharmacy, async (req, res) => {
    }
    - Upserts the profile and returns a success message (for toast)
 ================================================================ */
-router.put("/profile", async (req, res) => {
+router.put("/profile", verifyToken, async (req, res) => {
   try {
     const userId = inferUserId(req);
     if (!userId) {
@@ -256,7 +235,7 @@ router.put("/profile", async (req, res) => {
    GET /pharmacy/prescriptions?userId=...
    (dashboard counts / list)
 ================================================================ */
-router.get("/prescriptions", async (req, res) => {
+router.get("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const userId = inferUserId(req);
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -288,7 +267,7 @@ router.get("/prescriptions", async (req, res) => {
    PATCH /pharmacy/prescriptions/:id/status { dispatchStatus }
    dispatchStatus: "ACKNOWLEDGED" | "READY" | "DISPENSED" | "REJECTED"
 ================================================================ */
-router.patch("/prescriptions/:id/status", async (req, res) => {
+router.patch("/prescriptions/:id/status", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { dispatchStatus } = req.body || {};
@@ -328,7 +307,7 @@ router.patch("/prescriptions/:id/status", async (req, res) => {
    DELETE /pharmacy/prescriptions/:id
    - Delete a prescription (e.g. if created in error or rejected)
 ================================================================ */
-router.delete("/prescriptions/:id", async (req, res) => {
+router.delete("/prescriptions/:id", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.prescription.delete({ where: { id: String(id) } });
@@ -343,7 +322,7 @@ router.delete("/prescriptions/:id", async (req, res) => {
    PUT /pharmacy/prescriptions/:id
    - Edit prescription details (medication, dosage, etc.)
 ================================================================ */
-router.put("/prescriptions/:id", async (req, res) => {
+router.put("/prescriptions/:id", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { medication, dosage, frequency, duration, notes } = req.body || {};
@@ -461,7 +440,7 @@ router.get("/patient/selected", async (req, res) => {
 });
 
 // POST /api/pharmacy/patient/select
-router.post("/patient/select", async (req, res) => {
+router.post("/patient/select", verifyToken, async (req, res) => {
   try {
     const { patientId, pharmacyId } = req.body;
     if (!patientId || !pharmacyId) return res.status(400).json({ error: "Missing ids" });
@@ -495,7 +474,7 @@ router.post("/patient/select", async (req, res) => {
 });
 
 // DELETE /api/pharmacy/patient/select/:mapId
-router.delete("/patient/select/:mapId", async (req, res) => {
+router.delete("/patient/select/:mapId", verifyToken, async (req, res) => {
   try {
     const { mapId } = req.params;
     await prisma.selectedPharmacy.delete({ where: { id: mapId } });
@@ -506,7 +485,7 @@ router.delete("/patient/select/:mapId", async (req, res) => {
 });
 
 // PATCH /api/pharmacy/patient/select/:mapId/preferred
-router.patch("/patient/select/:mapId/preferred", async (req, res) => {
+router.patch("/patient/select/:mapId/preferred", verifyToken, async (req, res) => {
   try {
     const { mapId } = req.params;
     const { preferred } = req.body;
@@ -538,7 +517,7 @@ router.patch("/patient/select/:mapId/preferred", async (req, res) => {
    Requester (Pharmacy) acts as the creator/filler.
    Needs doctorId & patientId.
 ================================================================ */
-router.post("/prescriptions", async (req, res) => {
+router.post("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const userId = inferUserId(req);
     if (!userId) return res.status(400).json({ error: "userId is required" });
