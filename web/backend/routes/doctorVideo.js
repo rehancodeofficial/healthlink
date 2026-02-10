@@ -4,6 +4,7 @@ const twilio = require('twilio');
 
 const router = express.Router();
 const prisma = require('../prisma/prismaClient');
+const emailService = require('../services/emailService');
 
 // ====================
 // 🔐 Twilio Credentials
@@ -91,6 +92,11 @@ router.post('/doctor/video-consultations', async (req, res) => {
         patient: { include: { user: true } },
       },
     });
+
+    if (newConsultation.doctor?.user && newConsultation.patient?.user) {
+      emailService.sendVideoConsultationConfirmation(newConsultation, newConsultation.patient.user, newConsultation.doctor.user)
+          .catch(err => console.error("Failed to send video consultation emails:", err));
+    }
 
     res.json(newConsultation);
   } catch (err) {
