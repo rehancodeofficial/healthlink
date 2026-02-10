@@ -133,21 +133,15 @@ app.use('/api/internal', internalRoutes);
 // ✅ SUBSCRIPTION ROUTES
 // ----------------------------
 const subscriptionRoutes = require('./routes/subscription');
+app.use('/api/subscription', subscriptionRoutes);
 
-// Mount at /api for routes that already include "/subscription" prefix or for generic compatibility
-app.use('/api', subscriptionRoutes);
-
-// Mount at /api/subscribers for Admin lists & stats (routes defined as /stats, /list in the router)
-app.use('/api/subscribers', subscriptionRoutes);
+// ADMIN subscription views
+const adminSubscriptionRoutes = require('./routes/adminSubscription');
+app.use('/api/admin/subscription-management', adminSubscriptionRoutes);
 
 // PHARMACY ROUTES
 const pharmacyRoute = require('./routes/pharmacy');
 app.use('/api/pharmacy', pharmacyRoute);
-
-// FILE: SUBSCRIPTION
-const adminSubscriptionRoutes = require('./routes/adminSubscription');
-// ...
-app.use('/api/admin', adminSubscriptionRoutes);
 
 // SUPPORT ROUTES
 const supportRoutes = require('./routes/support');
@@ -159,15 +153,12 @@ app.post(
   express.raw({ type: 'application/json' }),
   subscriptionRoutes.stripeWebhook
 );
-// ----------------------------
-// ✅ GLOBAL MESSAGES (optional)
-// ----------------------------
-const globalMessagesRoutes = require('./routes/messages');
-app.use('/api/messages', globalMessagesRoutes);
 
-// ----------------------------
+// ✅ MESSAGES (Unified)
+const messagesRoutes = require('./routes/messages');
+app.use('/api/messages', messagesRoutes);
+
 // ✅ USER PROFILE / LIST
-// ----------------------------
 const usersRoutes = require('./routes/user');
 app.use('/api/users', usersRoutes);
 
@@ -178,6 +169,23 @@ app.get('/api/test', (req, res) => {
 
 app.get('/api/doctor/test', (req, res) => {
   res.json({ message: 'Doctor routes are working!' });
+});
+
+// ✅ Global Error Handler (Must be last)
+app.use((err, req, res, next) => {
+  console.error("❌ Unhandled Error:", err);
+  
+  // Custom response for CORS or other well-known errors
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ success: false, message: 'CORS policy violation' });
+  }
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === 'production' 
+      ? "Internal server error" 
+      : err.message || "An unexpected error occurred"
+  });
 });
 
 // ✅ Server start
