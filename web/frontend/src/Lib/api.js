@@ -6,7 +6,7 @@ import axios from "axios";
    ============================================================ */
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://lavenderblush-wren-228105.hostingersite.com/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://cure-virtual-2.vercel.app/api",
   headers: {
     "Content-Type": "application/json",
   },
