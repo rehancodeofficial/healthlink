@@ -849,7 +849,7 @@ router.delete("/messages/delete/:id", async (req, res) => {
 // --- PATIENT PROFILE ---
 // PUT /api/patient/profile
 // PUT /api/patient/profile
-router.put("/profile", async (req, res) => {
+router.put("/profile", verifyToken, async (req, res) => {
   try {
     console.log("🔍 PUT /profile - req.user:", req.user);
     console.log("🔍 PUT /profile - req.body.userId:", req.body.userId);
