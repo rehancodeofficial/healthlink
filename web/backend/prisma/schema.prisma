@@ -218,6 +218,7 @@ model DoctorProfile {
   userId              String   @unique
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   specialization      String
+  customProfession    String?  // Used when specialization is "Other"
   qualifications      String
   licenseNumber       String   @unique
   hospitalAffiliation String?
@@ -273,7 +274,9 @@ model PatientProfile {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   bloodGroup     BloodGroup
   height         Float?
+  heightUnit     String?    @default("cm")    // "cm", "feet", or "inches"
   weight         Float?
+  weightUnit     String?    @default("kg")    // "kg" or "lbs"
   allergies      String?    @db.Text
   medications    String?    @db.Text
   medicalHistory String?    @db.Text
@@ -283,9 +286,11 @@ model PatientProfile {
   insuranceProvider   String?
   insuranceMemberId   String?
 
-  emergencyContact String?  @db.Text
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  emergencyContact      String?  @db.Text
+  emergencyContactName  String?
+  emergencyContactEmail String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   // ✅ Preferred pharmacies (Many-to-Many)
   selectedPharmacies SelectedPharmacy[]
