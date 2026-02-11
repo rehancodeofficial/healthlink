@@ -88,6 +88,14 @@ export default function DoctorProfile() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!form.qualifications || !form.licenseNumber) {
+        toast.error("Please fill in Qualifications and License Number.");
+        return;
+    }
+    if (form.specialization === "Other" && !form.customProfession) {
+        toast.error("Please specify your profession.");
+        return;
+    }
     try {
       setSaving(true);
       await api.put("/doctor/profile", {
