@@ -2,6 +2,7 @@ const express = require("express");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
 const prisma = require('../prisma/prismaClient');
+const emailService = require('../services/emailService');
 const router = express.Router();
 
 // Apply RBAC to all doctor routes
@@ -132,6 +133,7 @@ router.put("/profile", async (req, res) => {
       lastName,  // ✅ Extract Name
       phone,     // ✅ Extract Phone
       specialization,
+      customProfession,
       qualifications,
       licenseNumber,
       hospitalAffiliation,
@@ -162,6 +164,7 @@ router.put("/profile", async (req, res) => {
       where: { userId },
       update: {
         specialization: specialization ?? "General Medicine",
+        customProfession: customProfession || undefined,
         qualifications: qualifications ?? "MBBS",
         // only set license if provided in update; otherwise keep existing
         ...(licenseNumber ? { licenseNumber } : {}),
@@ -175,6 +178,7 @@ router.put("/profile", async (req, res) => {
       create: {
         userId,
         specialization: specialization ?? "General Medicine",
+        customProfession: customProfession || null,
         qualifications: qualifications ?? "MBBS",
         licenseNumber: licenseNumber || `LIC-${userId.slice(0, 8).toUpperCase()}`,
         hospitalAffiliation: hospitalAffiliation ?? "",
@@ -185,6 +189,13 @@ router.put("/profile", async (req, res) => {
         languages: Array.isArray(languages) ? JSON.stringify(languages) : (languages ?? JSON.stringify(["English"])),
       },
     });
+
+    // Fetch updated user to get email for notification
+    const userForEmail = await prisma.user.findUnique({ where: { id: userId } });
+    if (userForEmail) {
+        emailService.sendProfileUpdateConfirmation(userForEmail, "Doctor")
+            .catch(err => console.error("Failed to send profile update email:", err));
+    }
 
     return res.json({ data: updated });
   } catch (e) {
@@ -377,6 +388,11 @@ router.post("/appointments", async (req, res) => {
       },
     });
 
+    if (newAppointment.doctor?.user && newAppointment.patient?.user) {
+        emailService.sendAppointmentBookingConfirmation(newAppointment, newAppointment.patient.user, newAppointment.doctor.user)
+            .catch(err => console.error("Failed to send appointment emails:", err));
+    }
+
     res.status(201).json(newAppointment);
   } catch (error) {
     console.error("❌ Error creating appointment:", error);
@@ -404,6 +420,15 @@ router.patch("/appointments/:id", async (req, res) => {
         patient: { include: { user: true } },
       },
     });
+
+    if (status && updatedAppointment.patient?.user && updatedAppointment.doctor?.user) {
+        emailService.sendAppointmentStatusChange(
+            updatedAppointment, 
+            updatedAppointment.patient.user, 
+            updatedAppointment.doctor.user, 
+            status
+        ).catch(err => console.error("Failed to send appointment status email:", err));
+    }
 
     res.json(updatedAppointment);
   } catch (error) {
