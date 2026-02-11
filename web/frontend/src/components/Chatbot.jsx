@@ -38,7 +38,7 @@ export default function Chatbot() {
       // but let's stick to the plan and standard practice. 
       // Actually, let's use the existing 'api' if we can, but 'api' likely has a baseURL set to the Node backend.
       // So detailed fetch is safer.
-      const response = await fetch(import.meta.env.VITE_CHATBOT_URL || 'https://cure-virtual-2.vercel.app/api/chatbot/chat', {
+      const response = await fetch(import.meta.env.VITE_CHATBOT_URL || 'https://curevirtual-2-production-6eaa.up.railway.app/api/chatbot/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
