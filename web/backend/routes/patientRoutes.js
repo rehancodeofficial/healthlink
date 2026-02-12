@@ -3,6 +3,7 @@ const express = require("express");
 const prisma = require('../prisma/prismaClient');
 const axios = require("axios");
 const Stripe = require("stripe");
+const emailService = require('../services/emailService');
 const { verifyToken, requireRole, verifyOwnerOrAdmin } = require("../middleware/rbac.js");
 const { ensureDefaultProfile } = require("../lib/provisionProfile.js");
 
@@ -76,6 +77,101 @@ router.get("/profile", async (req, res) => {
   } catch (err) {
     console.error("GET /api/patient/profile error:", err);
     return res.status(500).json({ success: false, error: "Failed to fetch profile" });
+  }
+});
+
+/**
+ * PUT /api/patient/profile (Update Profile)
+ */
+router.put("/profile", async (req, res) => {
+  try {
+    const {
+      userId,
+      dateOfBirth,
+      gender,
+      bloodGroup,
+      height,
+      heightUnit,
+      weight,
+      weightUnit,
+      allergies,
+      medications,
+      medicalHistory,
+      address,
+      emergencyContact,
+      emergencyContactName,
+      emergencyContactEmail,
+      medicalRecordNumber,
+      insuranceProvider,
+      insuranceMemberId,
+    } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    // Update User Core Info
+    if (dateOfBirth || gender) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
+          ...(gender && { gender }),
+        },
+      });
+    }
+
+    // Upsert Patient Profile
+    const updated = await prisma.patientProfile.upsert({
+      where: { userId },
+      update: {
+        bloodGroup: bloodGroup || "UNKNOWN",
+        height: height ?? null,
+        heightUnit: heightUnit || "cm",
+        weight: weight ?? null,
+        weightUnit: weightUnit || "kg",
+        allergies: allergies || "",
+        medications: medications || "",
+        medicalHistory: medicalHistory || "",
+        address: address || "",
+        emergencyContact: emergencyContact || "",
+        emergencyContactName: emergencyContactName || "",
+        emergencyContactEmail: emergencyContactEmail || "",
+        medicalRecordNumber: medicalRecordNumber || null,
+        insuranceProvider: insuranceProvider || null,
+        insuranceMemberId: insuranceMemberId || null,
+      },
+      create: {
+        userId,
+        bloodGroup: bloodGroup || "UNKNOWN",
+        height: height ?? null,
+        heightUnit: heightUnit || "cm",
+        weight: weight ?? null,
+        weightUnit: weightUnit || "kg",
+        allergies: allergies || "",
+        medications: medications || "",
+        medicalHistory: medicalHistory || "",
+        address: address || "",
+        emergencyContact: emergencyContact || "",
+        emergencyContactName: emergencyContactName || "",
+        emergencyContactEmail: emergencyContactEmail || "",
+        medicalRecordNumber: medicalRecordNumber || null,
+        insuranceProvider: insuranceProvider || null,
+        insuranceMemberId: insuranceMemberId || null,
+      },
+    });
+
+    // Send Notification Email
+    const userForEmail = await prisma.user.findUnique({ where: { id: userId } });
+    if (userForEmail) {
+        emailService.sendProfileUpdateConfirmation(userForEmail, "Patient")
+            .catch(err => console.error("Failed to send profile update email:", err));
+    }
+
+    return res.json({ success: true, message: "Profile updated successfully", data: updated });
+  } catch (err) {
+    console.error("PUT /api/patient/profile error:", err);
+    return res.status(500).json({ success: false, error: "Failed to update profile", details: err.message });
   }
 });
 
@@ -332,6 +428,18 @@ router.post("/appointments", async (req, res) => {
       },
       include: { doctor: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
     });
+
+    // Send confirmation emails
+    const patientUser = await prisma.user.findUnique({ 
+        where: { id: userId },
+        select: { firstName: true, lastName: true, email: true }
+    });
+    
+    if (patientUser && created.doctor?.user) {
+        // Run in background, don't await response to avoid blocking
+        emailService.sendAppointmentBookingConfirmation(created, patientUser, created.doctor.user)
+            .catch(err => console.error("Failed to send appointment emails:", err));
+    }
 
     return res.status(201).json(created);
   } catch (err) {
@@ -865,12 +973,16 @@ router.put("/profile", verifyToken, async (req, res) => {
       gender,
       bloodGroup,
       height,
+      heightUnit,
       weight,
+      weightUnit,
       allergies,
       medications,
       medicalHistory,
       address,
       emergencyContact,
+      emergencyContactName,
+      emergencyContactEmail,
       medicalRecordNumber,
       insuranceProvider,
       insuranceMemberId,
@@ -952,12 +1064,16 @@ router.put("/profile", verifyToken, async (req, res) => {
         update: {
           bloodGroup: mappedBlood,
           height: height !== undefined ? Number(height) : undefined,
+          heightUnit: heightUnit || undefined,
           weight: weight !== undefined ? Number(weight) : undefined,
+          weightUnit: weightUnit || undefined,
           allergies: allergies,
           medications: medications,
           medicalHistory: medicalHistory,
           address: address,
           emergencyContact: emergencyContact,
+          emergencyContactName: emergencyContactName || undefined,
+          emergencyContactEmail: emergencyContactEmail || undefined,
           medicalRecordNumber: finalMedicalRecordNumber,
           insuranceProvider: insuranceProvider,
           insuranceMemberId: insuranceMemberId,
@@ -966,12 +1082,16 @@ router.put("/profile", verifyToken, async (req, res) => {
           userId: String(userId),
           bloodGroup: mappedBlood || "UNKNOWN",
           height: height !== undefined ? Number(height) : null,
+          heightUnit: heightUnit || "cm",
           weight: weight !== undefined ? Number(weight) : null,
+          weightUnit: weightUnit || "kg",
           allergies: allergies || "",
           medications: medications || "",
           medicalHistory: medicalHistory || "",
           address: address || "",
           emergencyContact: emergencyContact || "",
+          emergencyContactName: emergencyContactName || "",
+          emergencyContactEmail: emergencyContactEmail || "",
           medicalRecordNumber: finalMedicalRecordNumber,
           insuranceProvider: insuranceProvider || "",
           insuranceMemberId: insuranceMemberId || "",
@@ -1001,6 +1121,10 @@ router.put("/profile", verifyToken, async (req, res) => {
         gender: updatedUser.gender
       }
     };
+
+    // Send email notification (fire and forget)
+    emailService.sendProfileUpdateConfirmation(updatedUser, "Patient")
+        .catch(err => console.error("Failed to send profile update email:", err));
 
     return res.json({ success: true, data: finalProfile });
   } catch (e) {
