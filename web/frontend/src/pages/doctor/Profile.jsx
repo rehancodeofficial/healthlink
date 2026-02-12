@@ -1,11 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import Sidebar from "../../components/Sidebar";
-import Topbar from "../../components/Topbar";
+import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
 const SPECIALIZATIONS = [
   "General Medicine",
@@ -71,8 +68,7 @@ export default function DoctorProfile() {
       }
     } catch (err) {
       console.error("Failed to load doctor profile:", err);
-      // If profile is auto-provisioned empty, this is fine; otherwise:
-      toast.error("Update your Profile.");
+      toast.error("Complete your profile configuration.");
     } finally {
       setLoading(false);
     }
@@ -117,60 +113,62 @@ export default function DoctorProfile() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#000000]/90 text-[var(--text-main)]">
-      <Sidebar role={role} />
-      <div className="flex-1 min-h-screen">
-        <Topbar userName={userName} />
+    <DashboardLayout role={role} user={{ name: userName }}>
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-[10px] font-black text-[var(--brand-green)] uppercase tracking-[0.3em] mb-1">
+            Professional Account
+          </h2>
+          <h1 className="text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase">
+            Doctor Profile
+          </h1>
+        </div>
 
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-[var(--text-main)]">My Profile</h1>
-            <img
-              src="/images/logo/Asset3.png"
-              alt="CureVirtual"
-              style={{ width: 120, height: "auto" }}
-              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
-            />
-          </div>
-
-          <div className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-4xl">
+        <div className="card !p-8 max-w-5xl">
             {loading ? (
-              <p className="text-[var(--text-soft)]">Loading...</p>
+               <div className="flex flex-col items-center justify-center py-20 gap-4">
+               <div className="h-10 w-10 border-4 border-[var(--brand-green)]/20 border-t-[var(--brand-green)] rounded-full animate-spin"></div>
+               <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] animate-pulse">
+                 Loading Profile...
+               </p>
+             </div>
             ) : (
-              <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">First Name</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">First Name</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.firstName}
                     onChange={handleChange("firstName")}
+                    disabled // Often user info is read-only
                   />
                 </div>
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Last Name</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Last Name</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.lastName}
                     onChange={handleChange("lastName")}
+                    disabled // Often user info is read-only
                   />
                 </div>
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Phone Number</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Phone Number</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.phone}
                     onChange={handleChange("phone")}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Specialization</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Specialization</label>
                   <select
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.specialization}
                     onChange={handleChange("specialization")}
                     required
@@ -180,11 +178,11 @@ export default function DoctorProfile() {
                 </div>
 
                 {form.specialization === "Other" && (
-                  <div>
-                    <label className="block text-sm mb-1 text-[var(--text-soft)]">Specify Profession</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Specify Profession</label>
                     <input
                       type="text"
-                      className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                       value={form.customProfession}
                       onChange={handleChange("customProfession")}
                       placeholder="e.g. Holistic Healer"
@@ -193,11 +191,11 @@ export default function DoctorProfile() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Qualifications</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Qualifications</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.qualifications}
                     onChange={handleChange("qualifications")}
                     placeholder="e.g. MBBS, MD"
@@ -205,87 +203,87 @@ export default function DoctorProfile() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">License Number</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">License Number</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.licenseNumber}
                     onChange={handleChange("licenseNumber")}
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Hospital Affiliation</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Hospital Affiliation</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.hospitalAffiliation}
                     onChange={handleChange("hospitalAffiliation")}
                     placeholder="Optional"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Years of Experience</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Years of Experience</label>
                   <input
                     type="number"
                     min="0"
                     step="1"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.yearsOfExperience}
                     onChange={handleChange("yearsOfExperience")}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Consultation Fee (USD)</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Consultation Fee (USD)</label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.consultationFee}
                     onChange={handleChange("consultationFee")}
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Availability</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Availability</label>
                   <textarea
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)] h-24"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24"
                     value={form.availability}
                     onChange={handleChange("availability")}
                     placeholder='e.g. {"monday":"9-5","tuesday":"10-4"} or free text'
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Bio</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Bio</label>
                   <textarea
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)] h-24"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24"
                     value={form.bio}
                     onChange={handleChange("bio")}
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm mb-1 text-[var(--text-soft)]">Languages</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Languages</label>
                   <input
                     type="text"
-                    className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
                     value={form.languages}
                     onChange={handleChange("languages")}
                     placeholder='e.g. English, French'
                   />
                 </div>
 
-                <div className="md:col-span-2 flex justify-end">
+                <div className="md:col-span-2 flex justify-start pt-4">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded bg-[#027906] hover:bg-[#045d07] px-5 py-2 font-semibold"
+                    className="rounded-2xl bg-[#027906] hover:bg-[#045d07] px-8 py-3 text-white font-bold tracking-wider uppercase text-xs shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? "Saving..." : "Save Profile"}
                   </button>
@@ -294,9 +292,7 @@ export default function DoctorProfile() {
             )}
           </div>
         </div>
-      </div>
-
-      <ToastContainer position="top-right" autoClose={2200} />
-    </div>
+        <ToastContainer position="top-right" autoClose={2200} />
+    </DashboardLayout>
   );
 }
