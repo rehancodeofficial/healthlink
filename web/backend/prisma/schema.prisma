@@ -227,6 +227,12 @@ model DoctorProfile {
   availability        String?  @db.Text
   bio                 String?
   languages           String?  @db.Text
+  
+  // Emergency Contact (New)
+  emergencyContact      String?  @db.Text
+  emergencyContactName  String?
+  emergencyContactEmail String?
+
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
