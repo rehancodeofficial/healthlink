@@ -1,0 +1,8 @@
+[dotenv@17.2.3] injecting env (43) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+-------------------------------------------
+🚀 Server running on port: 5555
+🌍 Environment: development
+⏱️  Started at: 2026-01-12T14:21:35.422Z
+-------------------------------------------
