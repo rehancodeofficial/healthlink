@@ -7,6 +7,21 @@ import "react-toastify/dist/ReactToastify.css";
 
 const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
+const SPECIALIZATIONS = [
+  "General Medicine",
+  "Cardiology",
+  "Dermatology",
+  "Neurology",
+  "Pediatrics",
+  "Psychiatry",
+  "Orthopedics",
+  "Gynecology",
+  "Ophthalmology",
+  "ENT",
+  "Dental",
+  "Other"
+];
+
 export default function DoctorProfile() {
   const role = "DOCTOR";
   const userId = localStorage.getItem("userId") || "";
@@ -20,7 +35,8 @@ export default function DoctorProfile() {
     firstName: "",
     lastName: "",
     phone: "",
-    specialization: "",
+    specialization: "General Medicine",
+    customProfession: "",
     qualifications: "",
     licenseNumber: "",
     hospitalAffiliation: "",
@@ -41,7 +57,8 @@ export default function DoctorProfile() {
           firstName: p.user?.firstName || "",
           lastName: p.user?.lastName || "",
           phone: p.user?.phone || "",
-          specialization: p.specialization || "",
+          specialization: p.specialization || "General Medicine",
+          customProfession: p.customProfession || "",
           qualifications: p.qualifications || "",
           licenseNumber: p.licenseNumber || "",
           hospitalAffiliation: p.hospitalAffiliation || "",
@@ -144,14 +161,29 @@ export default function DoctorProfile() {
 
                 <div>
                   <label className="block text-sm mb-1 text-[var(--text-soft)]">Specialization</label>
-                  <input
-                    type="text"
+                  <select
                     className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
                     value={form.specialization}
                     onChange={handleChange("specialization")}
                     required
-                  />
+                  >
+                    {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
                 </div>
+
+                {form.specialization === "Other" && (
+                  <div>
+                    <label className="block text-sm mb-1 text-[var(--text-soft)]">Specify Profession</label>
+                    <input
+                      type="text"
+                      className="w-full rounded bg-[var(--bg-glass)] border border-[var(--border)] p-2 text-[var(--text-main)]"
+                      value={form.customProfession}
+                      onChange={handleChange("customProfession")}
+                      placeholder="e.g. Holistic Healer"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm mb-1 text-[var(--text-soft)]">Qualifications</label>
