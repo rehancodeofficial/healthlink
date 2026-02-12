@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"No tests yet\"",
     "dev": "nodemon server.js",
-    "start": "node server.js",
+    "start": "npx prisma migrate deploy && node server.js",
     "build": "prisma generate",
     "prisma:seed": "node prisma/seed.js",
     "seed": "node prisma/seed.js",
