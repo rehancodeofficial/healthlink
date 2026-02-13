@@ -149,7 +149,7 @@ export default function Home() {
               <img
                 src="/images/logo/Asset3.png"
                 alt="Telemedicine"
-                className="rounded-[2.5rem] w-full h-[500px] object-cover"
+                className="rounded-[2.5rem] w-full h-[550px] object-fill"
               />
             </div>
             {/* Status Floating Widget */}
@@ -243,7 +243,7 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2">
             <img
-              src="/images/logo/Asset3.png"
+              src="/images/about.jpeg"
               className="rounded-[3rem] shadow-2xl border border-[var(--border)]"
               alt="Modern Hospital"
             />
