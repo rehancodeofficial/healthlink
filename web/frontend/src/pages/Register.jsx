@@ -76,6 +76,7 @@ export default function Register() {
       // 2. Call backend for further processing (profile, organization, etc.)
       const response = await api.post('/auth/register-success', {
         ...form,
+        specialization: form.specialization === 'Other' ? form.customProfession : form.specialization,
         supabaseId: authData.user.id,
         email: String(form.email || '')
           .trim()
@@ -407,8 +408,25 @@ export default function Register() {
                     <option value="ENT">ENT</option>
                     <option value="Urology">Urology</option>
                     <option value="Oncology">Oncology</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
+
+                {form.specialization === 'Other' && (
+                  <div className="relative group mt-3 animate-in fade-in slide-in-from-top-1">
+                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--brand-green)]">
+                      <FaStethoscope />
+                    </div>
+                    <input
+                      name="customProfession"
+                      value={form.customProfession || ''}
+                      onChange={handleChange}
+                      className="w-full bg-[var(--bg-main)] border border-[var(--brand-green)]/30 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                      placeholder="Specify your profession..."
+                      required
+                    />
+                  </div>
+                )}
               </div>
             )}
 
