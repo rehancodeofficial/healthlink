@@ -130,6 +130,7 @@ router.put("/profile", async (req, res) => {
     const {
       userId,
       firstName, // ✅ Extract Name
+      middleName,
       lastName,  // ✅ Extract Name
       phone,     // ✅ Extract Phone
       specialization,
@@ -142,6 +143,9 @@ router.put("/profile", async (req, res) => {
       availability, // JSON string or object
       bio,
       languages,    // JSON string or array
+      emergencyContact,
+      emergencyContactName,
+      emergencyContactEmail
     } = req.body || {};
 
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -149,6 +153,7 @@ router.put("/profile", async (req, res) => {
     // ✅ Update User fields (Name, Phone)
     const userData = {
       ...(firstName ? { firstName } : {}),
+      ...(middleName ? { middleName } : {}),
       ...(lastName ? { lastName } : {}),
       ...(phone ? { phone } : {}),
     };
@@ -174,6 +179,9 @@ router.put("/profile", async (req, res) => {
         availability: typeof availability === "string" ? availability : JSON.stringify(availability || {}),
         bio: bio ?? "",
         languages: Array.isArray(languages) ? JSON.stringify(languages) : (languages ?? JSON.stringify(["English"])),
+        emergencyContact: emergencyContact ?? "",
+        emergencyContactName: emergencyContactName ?? "",
+        emergencyContactEmail: emergencyContactEmail ?? "",
       },
       create: {
         userId,
@@ -187,6 +195,9 @@ router.put("/profile", async (req, res) => {
         availability: typeof availability === "string" ? availability : JSON.stringify(availability || {}),
         bio: bio ?? "",
         languages: Array.isArray(languages) ? JSON.stringify(languages) : (languages ?? JSON.stringify(["English"])),
+        emergencyContact: emergencyContact ?? "",
+        emergencyContactName: emergencyContactName ?? "",
+        emergencyContactEmail: emergencyContactEmail ?? "",
       },
     });
 
