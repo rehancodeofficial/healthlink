@@ -10,8 +10,8 @@ exports.generateAIResponse = async (userMessage) => {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
 
-    // Using gemini-flash-latest as the modern standard
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    // Using gemini-1.5-flash as the modern standard
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
       You are a smart medical assistant for "CureVirtual".
@@ -24,7 +24,8 @@ exports.generateAIResponse = async (userMessage) => {
       3. Provide a helpful, empathetic response to the user.
       4. If it's an emergency, warn them explicitly.
 
-      Return ONLY a JSON object (no markdown) with this format:
+      CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown formatting.
+      Format:
       {
         "specialty": "string",
         "reply": "string",
@@ -36,21 +37,25 @@ exports.generateAIResponse = async (userMessage) => {
     const response = await result.response;
     const text = response.text();
     
-    // Clean up potential markdown code blocks
-    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Clean up potential markdown code blocks and extra chatter
+    let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    return JSON.parse(cleanText);
+    // Find first { and last } to isolate JSON if AI added chatter
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+    }
+    
+    try {
+      return JSON.parse(cleanText);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", cleanText);
+      throw new Error("Invalid AI response format");
+    }
   } catch (error) {
     console.error("Gemini Service Error:", error);
     
-    if (error.message && error.message.includes("API key expired")) {
-        return {
-            specialty: "General Physician",
-            reply: "The Chatbot API key has expired. Please update the GEMINI_API_KEY in the backend .env file.",
-            isEmergency: false
-        };
-    }
-
     // Return a safe fallback rather than crashing
     return {
       specialty: "General Physician",
