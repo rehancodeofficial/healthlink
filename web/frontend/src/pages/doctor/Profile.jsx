@@ -30,6 +30,7 @@ export default function DoctorProfile() {
 
   const [form, setForm] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     phone: "",
     specialization: "General Medicine",
@@ -42,6 +43,9 @@ export default function DoctorProfile() {
     availability: "",
     bio: "",
     languages: "",
+    emergencyContact: "",
+    emergencyContactName: "",
+    emergencyContactEmail: "",
   });
 
   const loadProfile = useCallback(async () => {
@@ -52,6 +56,7 @@ export default function DoctorProfile() {
       if (p) {
         setForm({
           firstName: p.user?.firstName || "",
+          middleName: p.user?.middleName || "",
           lastName: p.user?.lastName || "",
           phone: p.user?.phone || "",
           specialization: p.specialization || "General Medicine",
@@ -64,6 +69,9 @@ export default function DoctorProfile() {
           availability: p.availability || "",
           bio: p.bio || "",
           languages: p.languages || "",
+          emergencyContact: p.emergencyContact || "",
+          emergencyContactName: p.emergencyContactName || "",
+          emergencyContactEmail: p.emergencyContactEmail || "",
         });
       }
     } catch (err) {
@@ -135,26 +143,38 @@ export default function DoctorProfile() {
             ) : (
               <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">First Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
-                    value={form.firstName}
-                    onChange={handleChange("firstName")}
-                    disabled // Often user info is read-only
-                  />
+                {/* Name Row */}
+                <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">First Name</label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.firstName}
+                      onChange={handleChange("firstName")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Middle Name</label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.middleName}
+                      onChange={handleChange("middleName")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Last Name</label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.lastName}
+                      onChange={handleChange("lastName")}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Last Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
-                    value={form.lastName}
-                    onChange={handleChange("lastName")}
-                    disabled // Often user info is read-only
-                  />
-                </div>
+
+                {/* Phone Row */}
                 <div className="md:col-span-2 space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Phone Number</label>
                   <input
@@ -277,6 +297,50 @@ export default function DoctorProfile() {
                     onChange={handleChange("languages")}
                     placeholder='e.g. English, French'
                   />
+                </div>
+
+
+                {/* Emergency Contact */}
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <h3 className="text-sm font-bold text-[var(--brand-green)] uppercase tracking-wider mb-2 mt-4">Emergency Contact</h3>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.emergencyContactName}
+                      onChange={handleChange("emergencyContactName")}
+                      placeholder="Jane Doe"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.emergencyContactEmail}
+                      onChange={handleChange("emergencyContactEmail")}
+                      placeholder="emergency@example.com"
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                      Additional Details (Relation, Phone, etc.)
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                      value={form.emergencyContact}
+                      onChange={handleChange("emergencyContact")}
+                      placeholder="Mother - +1 555-0123"
+                    />
+                  </div>
                 </div>
 
                 <div className="md:col-span-2 flex justify-start pt-4">
