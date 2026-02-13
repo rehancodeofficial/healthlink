@@ -87,6 +87,10 @@ router.put("/profile", async (req, res) => {
   try {
     const {
       userId,
+      firstName,
+      middleName,
+      lastName,
+      phone,
       dateOfBirth,
       gender,
       bloodGroup,
@@ -111,15 +115,17 @@ router.put("/profile", async (req, res) => {
     }
 
     // Update User Core Info
-    if (dateOfBirth || gender) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
-          ...(gender && { gender }),
-        },
-      });
-    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(firstName && { firstName }),
+        ...(middleName && { middleName }),
+        ...(lastName && { lastName }),
+        ...(phone && { phone }),
+        ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
+        ...(gender && { gender }),
+      },
+    });
 
     // Upsert Patient Profile
     const updated = await prisma.patientProfile.upsert({
