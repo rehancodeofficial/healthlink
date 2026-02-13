@@ -62,6 +62,10 @@ export default function PatientProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    phone: '',
     dateOfBirth: '',
     gender: 'OTHER',
     bloodGroup: 'UNKNOWN',
@@ -88,6 +92,10 @@ export default function PatientProfile() {
       const p = res.data?.data;
       if (p) {
         setForm({
+          firstName: p.user?.firstName || '',
+          middleName: p.user?.middleName || '',
+          lastName: p.user?.lastName || '',
+          phone: p.user?.phone || '',
           dateOfBirth: p.dateOfBirth
             ? new Date(p.dateOfBirth).toISOString().slice(0, 10)
             : '',
@@ -171,6 +179,57 @@ export default function PatientProfile() {
               onSubmit={handleSave}
               className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6"
             >
+              {/* Name Row */}
+              <div className="md:col-span-2 grid grid-cols-3 gap-4">
+                 <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Middle Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                    value={form.middleName}
+                    onChange={(e) => setForm({ ...form, middleName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  />
+                </div>
+              </div>
+
+               {/* Phone Row */}
+               <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+               </div>
+
+
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
                   Date of Birth
