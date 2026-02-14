@@ -112,4 +112,16 @@ router.post('/fix-schema', async (req, res) => {
   }
 });
 
+const geminiService = require('../services/gemini.service');
+
+// NEW: Test Gemini connectivity
+router.get('/test-gemini', async (req, res) => {
+  try {
+    const testResult = await geminiService.generateAIResponse("Hello, this is a test.");
+    res.json({ success: true, result: testResult });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
