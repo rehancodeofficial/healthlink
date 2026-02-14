@@ -29,7 +29,7 @@ exports.handleChat = async (req, res) => {
         where: {
           specialization: {
             contains: aiData.specialty, // Flexible matching
-            // mode: 'insensitive', // Uncomment if your DB supports it (e.g., Postgres)
+            mode: 'insensitive', // Enabled for PostgreSQL production
           },
         },
         include: {
@@ -51,6 +51,10 @@ exports.handleChat = async (req, res) => {
 
   } catch (error) {
     console.error("Chatbot Controller Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      message: error.message // Keep for debugging on backend logs
+    });
   }
 };
