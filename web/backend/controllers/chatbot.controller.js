@@ -50,11 +50,15 @@ exports.handleChat = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Chatbot Controller Error:", error);
+    console.error("❌ Chatbot Controller Error:");
+    console.error("- Message:", error.message);
+    if (error.code) console.error("- Prisma Code:", error.code);
+    if (error.stack) console.error("- Stack Trace:", error.stack);
+
     res.status(500).json({ 
       error: "Internal server error",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      message: error.message // Keep for debugging on backend logs
+      details: error.message,
+      code: error.code
     });
   }
 };
