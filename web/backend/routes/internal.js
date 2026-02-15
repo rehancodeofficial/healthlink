@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../prisma/prismaClient');
 const router = express.Router();
+const { main: runSeed } = require('../prisma/seed');
 
 // Internal endpoint for chatbot to fetch doctor data
 router.get('/doctors', async (req, res) => {
@@ -44,6 +45,26 @@ router.get('/doctors', async (req, res) => {
   } catch (error) {
     console.error('Error fetching internal doctor data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// NEW: Endpoint to trigger seeding in production
+router.post('/seed', async (req, res) => {
+  try {
+    const secret = req.headers['x-seed-secret'];
+    const expectedSecret = process.env.SEED_SECRET || 'curevirtual_secret_123';
+
+    if (secret !== expectedSecret) {
+      return res.status(403).json({ error: 'Unauthorized: Invalid seed secret' });
+    }
+
+    console.log('🚀 Remote seed triggered...');
+    await runSeed();
+    
+    res.json({ message: 'Seed completed successfully' });
+  } catch (error) {
+    console.error('❌ Remote seed error:', error);
+    res.status(500).json({ error: 'Seed failed', details: error.message });
   }
 });
 
