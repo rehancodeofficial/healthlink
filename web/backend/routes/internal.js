@@ -137,4 +137,29 @@ router.get('/list-models', async (req, res) => {
   }
 });
 
+const axios = require('axios');
+
+// NEW: Test Gemini via raw REST (to bypass SDK version issues)
+router.get('/test-raw-gemini', async (req, res) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const version = req.query.v || 'v1';
+    const model = req.query.m || 'gemini-1.5-flash';
+    
+    const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${apiKey}`;
+    
+    const response = await axios.post(url, {
+      contents: [{ parts: [{ text: "Hello" }] }]
+    });
+    
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      details: error.response ? error.response.data : 'No response data'
+    });
+  }
+});
+
 module.exports = router;
