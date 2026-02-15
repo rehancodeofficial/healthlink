@@ -19,8 +19,9 @@ exports.generateAIResponse = async (userMessage) => {
 
       Task:
       1. Analyze the symptoms or query.
-      2. Recommend a medical specialist (e.g., Cardiologist, Dermatologist, General Physician). 
-         - Ensure the specialty closely matches standard medical fields.
+      2. Recommend a medical specialist. 
+         - Our available specialties are: General Medicine, General Practice, Ophthalmology, Dentistry.
+         - Choose the closest match.
       3. Provide a helpful, empathetic response to the user.
       4. If it's an emergency, warn them explicitly.
 
@@ -51,16 +52,10 @@ exports.generateAIResponse = async (userMessage) => {
       return JSON.parse(cleanText);
     } catch (parseError) {
       console.error("Failed to parse AI response:", cleanText);
-      throw new Error("Invalid AI response format");
+      throw new Error(`Invalid AI response format: ${cleanText.substring(0, 100)}`);
     }
   } catch (error) {
     console.error("Gemini Service Error:", error);
-    
-    // Return a safe fallback rather than crashing
-    return {
-      specialty: "General Physician",
-      reply: "I am having trouble processing your request right now. Please consult a General Physician.",
-      isEmergency: false
-    };
+    throw error; // Rethrow to be caught by controller with full details
   }
 };
