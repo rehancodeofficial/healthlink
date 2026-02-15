@@ -605,11 +605,16 @@ async function main() {
   console.log('✅ Seed complete (models missing were safely skipped).');
 }
 
-main()
-  .catch((e) => {
-    console.error('❌ Seeding failed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Export for programmatic use (e.g., via internal API)
+module.exports = { main };
+
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error('❌ Seeding failed:', e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
