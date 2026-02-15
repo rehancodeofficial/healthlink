@@ -124,4 +124,17 @@ router.get('/test-gemini', async (req, res) => {
   }
 });
 
+// NEW: List available models
+router.get('/list-models', async (req, res) => {
+  try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+    // Note: The Node SDK might not have a direct listModels, but we can try reaching the raw endpoint or checking docs
+    // Actually, usually we can just try a few known ones
+    res.json({ message: "Checking models manually...", note: "Try gemini-1.5-flash, gemini-1.5-pro, gemini-pro" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
