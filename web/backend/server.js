@@ -44,6 +44,7 @@ app.use(cookieParser());
 app.get('/api/health', (_req, res) => {
   res.json({ 
     status: 'UP', 
+    version: '1.0.2',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
