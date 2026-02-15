@@ -68,4 +68,19 @@ router.post('/seed', async (req, res) => {
   }
 });
 
+// NEW: Endpoint to check actual DB columns (Production only debug)
+router.get('/debug-schema', async (req, res) => {
+  try {
+    const table = req.query.table || 'DoctorProfile';
+    const columns = await prisma.$queryRawUnsafe(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = '${table}'
+    `);
+    res.json({ table, columns });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
