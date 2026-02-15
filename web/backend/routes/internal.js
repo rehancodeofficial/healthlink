@@ -83,4 +83,33 @@ router.get('/debug-schema', async (req, res) => {
   }
 });
 
+// NEW: Endpoint to manually add missing columns if migrate deploy fails
+router.post('/fix-schema', async (req, res) => {
+  try {
+    const secret = req.headers['x-seed-secret'];
+    const expectedSecret = process.env.SEED_SECRET || 'curevirtual_secret_123';
+    if (secret !== expectedSecret) return res.status(403).json({ error: 'Unauthorized' });
+
+    console.log('🛠️ Manual schema fix triggered...');
+    
+    // Add missing cols to DoctorProfile
+    await prisma.$executeRawUnsafe(`ALTER TABLE "DoctorProfile" ADD COLUMN IF NOT EXISTS "emergencyContact" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "DoctorProfile" ADD COLUMN IF NOT EXISTS "emergencyContactName" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "DoctorProfile" ADD COLUMN IF NOT EXISTS "emergencyContactEmail" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "DoctorProfile" ADD COLUMN IF NOT EXISTS "customProfession" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "DoctorProfile" ADD COLUMN IF NOT EXISTS "primaryContact" TEXT`);
+
+    // Add missing cols to PatientProfile if any
+    await prisma.$executeRawUnsafe(`ALTER TABLE "PatientProfile" ADD COLUMN IF NOT EXISTS "emergencyContactName" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "PatientProfile" ADD COLUMN IF NOT EXISTS "emergencyContactEmail" TEXT`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "PatientProfile" ADD COLUMN IF NOT EXISTS "heightUnit" TEXT DEFAULT 'cm'`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE "PatientProfile" ADD COLUMN IF NOT EXISTS "weightUnit" TEXT DEFAULT 'kg'`);
+
+    res.json({ message: 'Schema fix applied successfully' });
+  } catch (error) {
+    console.error('❌ Schema fix error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
