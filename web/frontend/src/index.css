@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================
+   🌿 CureVirtual Ultra-Premium Design System
+   ========================================== */
+
+:root {
+  /* Refined Brand Palette */
+  --brand-orange: #ff7b00;
+  --brand-orange-glow: rgba(255, 123, 0, 0.4);
+
+  --brand-green: #008f11;
+  --brand-green-glow: rgba(0, 143, 17, 0.4);
+
+  --brand-blue: #006aff;
+  --brand-blue-glow: rgba(0, 106, 255, 0.4);
+
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+
+  --transition-premium: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Light Theme - Clean White with Dark Text */
+:root,
+:root.light {
+  --bg-main: #ffffff;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --text-main: #1a1a1a;
+  --text-soft: #333333;
+  --text-muted: #666666;
+  --border: rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Theme - High-End Deep Navy (Replaces Pure Black) */
+:root.dark {
+  --bg-main: #1e293b;
+  --bg-card: #334155;
+  --bg-glass: rgba(51, 65, 85, 0.9);
+  --text-main: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  @apply transition-all duration-300 border-[var(--border)];
+}
+
+body {
+  @apply bg-[var(--bg-main)] text-[var(--text-main)] font-sans antialiased overflow-x-hidden;
+}
+
+/* --- Premium Buttons --- */
+.btn {
+  @apply relative overflow-hidden px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs 
+         transition-all active:scale-95 flex items-center justify-center gap-2 select-none;
+}
+
+.btn::after {
+  content: "";
+  @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity;
+}
+
+.btn:hover::after {
+  @apply opacity-100;
+}
+
+.btn-primary {
+  @apply bg-[var(--brand-green)] text-white shadow-xl shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-1 hover:scale-[1.02];
+}
+
+.btn-secondary {
+  @apply bg-[var(--brand-blue)] text-white shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 hover:scale-[1.02];
+}
+
+.btn-accent {
+  @apply bg-[var(--brand-orange)] text-white shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-1 hover:scale-[1.02];
+}
+
+.btn-glass {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 text-[var(--text-main)] hover:bg-white/10;
+}
+
+/* --- Cards & Glass --- */
+.card {
+  @apply bg-[var(--bg-card)] rounded-[2.5rem] p-8 shadow-[var(--shadow-sm)] border border-[var(--border)];
+}
+
+.glass {
+  @apply bg-[var(--bg-glass)] backdrop-blur-2xl border border-[var(--border)] rounded-[2.5rem] shadow-[var(--shadow-lg)];
+}
+
+/* --- Utility --- */
+.text-gradient {
+  @apply text-transparent bg-clip-text bg-gradient-to-br from-[var(--brand-green)] via-[var(--brand-blue)] to-[var(--brand-orange)];
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.page-container {
+  @apply max-w-7xl mx-auto px-6 w-full;
+}
+
+/* ==========================================
+   📱 MOBILE-FIRST RESPONSIVE OPTIMIZATIONS
+   ========================================== */
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Smaller base font for mobile */
+  html {
+    font-size: 15px;
+  }
+
+  /* Optimize page container for mobile */
+  .page-container {
+    @apply px-4;
+  }
+
+  /* Reduce button padding on mobile while maintaining touch targets */
+  .btn {
+    @apply px-6 py-3 text-[11px] min-h-[44px] min-w-[44px];
+  }
+
+  /* Smaller cards on mobile */
+  .card {
+    @apply p-6 rounded-[2rem];
+  }
+
+  .glass {
+    @apply p-6 rounded-[2rem];
+  }
+
+  /* Disable floating animation on mobile for better performance */
+  .animate-float {
+    animation: none;
+  }
+
+  /* Optimize text gradient for mobile */
+  .text-gradient {
+    background-size: 100%;
+  }
+}
+
+/* Very small devices (< 640px) */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+
+  .page-container {
+    @apply px-3;
+  }
+
+  .btn {
+    @apply px-5 py-2.5 text-[10px];
+  }
+
+  .card {
+    @apply p-5 rounded-[1.5rem];
+  }
+
+  .glass {
+    @apply p-5 rounded-[1.5rem];
+  }
+}
+
+/* Touch-friendly utilities */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+.touch-target-lg {
+  @apply min-h-[48px] min-w-[48px];
+}
+
+/* Mobile-specific utilities */
+.mobile-hidden {
+  @apply hidden md:block;
+}
+
+.mobile-only {
+  @apply block md:hidden;
+}
+
+/* Better spacing for mobile */
+.mobile-spacing {
+  @apply space-y-4 md:space-y-6 lg:space-y-8;
+}
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
