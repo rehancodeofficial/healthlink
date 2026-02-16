@@ -1,7 +1,10 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
+  { apiVersion: 'v1' }
+);
 
 exports.generateAIResponse = async (userMessage) => {
   try {
@@ -10,8 +13,8 @@ exports.generateAIResponse = async (userMessage) => {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
 
-    // Using gemini-pro for maximum compatibility
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Using gemini-1.5-flash as it is supported in v1
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
       You are a smart medical assistant for "CureVirtual".
