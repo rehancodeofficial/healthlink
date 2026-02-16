@@ -162,4 +162,15 @@ router.get('/test-raw-gemini', async (req, res) => {
   }
 });
 
+// NEW: Debug env vars presence
+router.get('/debug-env', (req, res) => {
+  res.json({
+    hasGeminiKey: !!process.env.GEMINI_API_KEY,
+    hasGoogleKey: !!process.env.GOOGLE_API_KEY,
+    geminiKeyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
+    googleKeyLength: process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.length : 0,
+    nodeEnv: process.env.NODE_ENV
+  });
+});
+
 module.exports = router;
