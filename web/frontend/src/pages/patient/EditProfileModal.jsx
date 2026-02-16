@@ -41,6 +41,8 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
         weight: profile.weight || "",
         address: profile.address || "",
         emergencyContact: profile.emergencyContact || "",
+        emergencyContactName: profile.emergencyContactName || "",
+        emergencyContactEmail: profile.emergencyContactEmail || "",
         allergies: profile.allergies || "",
         medications: profile.medications || "",
         medicalHistory: profile.medicalHistory || "",
@@ -208,13 +210,16 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
                     />
                 </div>
                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Emergency Contact</label>
+                    <label className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Emergency Contact Information</label>
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Full Name</label>
                     <input
                         type="text"
-                        name="emergencyContact"
-                        value={formData.emergencyContact}
+                        name="emergencyContactName"
+                        value={formData.emergencyContactName}
                         onChange={handleChange}
-                        placeholder="Name and Phone Number"
+                        placeholder="Jane Doe"
                         className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                 </div>
@@ -256,6 +261,28 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
                         className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
                     />
                   </div>
+                 <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Email Address</label>
+                    <input
+                        type="email"
+                        name="emergencyContactEmail"
+                        value={formData.emergencyContactEmail}
+                        onChange={handleChange}
+                        placeholder="emergency@example.com"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
+                    />
+                 </div>
+                 <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-white uppercase tracking-wide">Phone & Relation</label>
+                    <input
+                        type="text"
+                        name="emergencyContact"
+                        value={formData.emergencyContact}
+                        onChange={handleChange}
+                        placeholder="Mother - +1 555-0123"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2a2a] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 text-sm font-medium transition-all dark:text-white"
+                    />
+                 </div>
               </div>
             </div>
 
