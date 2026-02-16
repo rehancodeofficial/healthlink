@@ -9,11 +9,12 @@ import {
   FaSun,
   FaMoon,
   FaClock,
+  FaBars,
 } from 'react-icons/fa';
 import api from '../Lib/api';
 import { useTheme } from '../context/ThemeContext';
 
-export default function Topbar({ userName }) {
+export default function Topbar({ userName, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [time, setTime] = useState(new Date());
@@ -76,10 +77,19 @@ export default function Topbar({ userName }) {
   };
 
   return (
-    <header className={`sticky top-0 z-50 h-[80px] flex items-center justify-between px-8 backdrop-blur-xl border-b border-white/20 shadow-sm ${
+    <header className={`sticky top-0 z-50 h-[70px] md:h-[80px] flex items-center justify-between px-4 md:px-8 backdrop-blur-xl border-b border-white/20 shadow-sm ${
       theme === 'light' ? 'bg-gradient-to-r from-green-700 via-emerald-800 to-green-900' : 'bg-[var(--bg-glass)]'
     }`}>
-      {/* Search / Breadcrumbs Area */}
+      {/* Hamburger Menu Button - Mobile Only */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+        aria-label="Toggle menu"
+      >
+        <FaBars className="w-5 h-5" />
+      </button>
+
+      {/* Logo and Welcome - Desktop */}
       <div className="flex-1 max-w-md hidden md:flex items-center gap-3">
         <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
         <h1 className="text-xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-left-4 duration-500">
@@ -90,10 +100,15 @@ export default function Topbar({ userName }) {
         </h1>
       </div>
 
+      {/* Mobile Logo - Center aligned on mobile */}
+      <div className="flex-1 flex md:hidden items-center justify-center">
+        <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+      </div>
+
       {/* Right section */}
-      <div className="flex items-center gap-4">
-        {/* Clock */}
-        <div className="hidden lg:flex flex-col items-end pr-6 border-r border-white/20">
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Clock - Hidden on tablets and mobile */}
+        <div className="hidden xl:flex flex-col items-end pr-6 border-r border-white/20">
           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-200">
             Current Time
           </span>
@@ -110,18 +125,22 @@ export default function Topbar({ userName }) {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all shadow-sm active:scale-95"
+          className="p-2.5 md:p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all shadow-sm active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
           title="Toggle Theme"
+          aria-label="Toggle theme"
         >
-          {theme === 'light' ? <FaMoon /> : <FaSun />}
+          {theme === 'light' ? <FaMoon className="w-4 h-4" /> : <FaSun className="w-4 h-4" />}
         </button>
 
         {/* Notifications */}
         <div
-          className="relative cursor-pointer p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all active:scale-95"
+          className="relative cursor-pointer p-2.5 md:p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
           onClick={handleNotificationClick}
+          role="button"
+          aria-label="Notifications"
+          tabIndex={0}
         >
-          <FaBell />
+          <FaBell className="w-4 h-4" />
           {notificationCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-[var(--brand-orange)] text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg shadow-orange-500/20">
               {notificationCount > 9 ? '9+' : notificationCount}
@@ -130,15 +149,16 @@ export default function Topbar({ userName }) {
         </div>
 
         {/* User Menu */}
-        <div className="relative ml-2">
+        <div className="relative ml-1 md:ml-2">
           <button
-            className="flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-white/10 border border-white/10 hover:border-emerald-300 transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-2 md:gap-3 p-1.5 pr-2 md:pr-4 rounded-2xl bg-white/10 border border-white/10 hover:border-emerald-300 transition-all active:scale-95 shadow-sm min-h-[44px]"
             onClick={() => setShowUserMenu(!showUserMenu)}
+            aria-label="User menu"
           >
-            <div className="h-9 w-9 rounded-xl bg-white text-[var(--brand-green)] flex items-center justify-center font-black text-lg">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-xl bg-white text-[var(--brand-green)] flex items-center justify-center font-black text-base md:text-lg">
               {userName ? userName.charAt(0).toUpperCase() : <FaUserCircle />}
             </div>
-            <div className="hidden sm:flex flex-col items-start whitespace-nowrap">
+            <div className="hidden md:flex flex-col items-start whitespace-nowrap">
               <span className="text-sm font-black text-white truncate max-w-[120px]">
                 {userName ? userName.split(' ')[0] : 'User'}
               </span>
