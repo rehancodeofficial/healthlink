@@ -219,7 +219,7 @@ export default function PatientViewProfile() {
                 </section>
 
                 <section className="md:col-span-2 space-y-4">
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-orange)] ml-1">
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-orange)] ml-1 mb-4">
                     Clinical Observations
                   </h2>
                   <div className="grid md:grid-cols-3 gap-6">
