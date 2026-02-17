@@ -1,3 +1,29 @@
 {
-    "DockerRun.DisableDockerrc": true
+  "DockerRun.DisableDockerrc": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["className=\"([^\"]*)\"", "([a-zA-Z0-9\\-:]+)"]
+  ],
+  "cSpell.words": [
+    "curevirtual",
+    "twilio",
+    "supabase",
+    "jspdf",
+    "autotable",
+    "recharts",
+    "toastify"
+  ],
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "javascript.updateImportsOnFileMove.enabled": "always"
 }
