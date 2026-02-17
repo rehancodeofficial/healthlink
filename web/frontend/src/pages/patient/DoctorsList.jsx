@@ -335,16 +335,16 @@ export default function DoctorsList() {
                             <button
                               onClick={() => setViewDoctor(d)}
                               title="View Profile"
-                              className="hover:scale-110 transition"
+                              className="p-2 rounded-lg hover:bg-blue-500/10 transition"
                             >
                               <FaEye className="text-blue-400" />
                             </button>
                             <button
                               onClick={() => handleAssign(d)}
-                              title="Assign Doctor"
-                              className="hover:scale-110 transition"
+                              className="px-3 py-1.5 rounded-lg bg-[#027906] hover:bg-[#045d07] text-white text-xs font-bold transition-all active:scale-95 flex items-center gap-2 shadow-sm"
                             >
-                              <FaUserPlus className="text-green-400" />
+                              <FaUserPlus className="text-sm" />
+                              Assign
                             </button>
                           </div>
                         </td>
