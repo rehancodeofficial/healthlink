@@ -13,12 +13,16 @@ import {
   FaSun,
   FaMoon,
   FaArrowRight,
+  FaBars,
+  FaTimes,
 } from 'react-icons/fa';
+import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Home() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div
@@ -27,7 +31,7 @@ export default function Home() {
       }`}
     >
       {/* Refined Fixed Navbar */}
-      <nav className="fixed w-full z-50 backdrop-blur-2xl border-b border-[var(--border)] px-6 py-3">
+      <nav className="fixed w-full z-50 backdrop-blur-2xl border-b border-[var(--border)] px-4 md:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer group"
@@ -40,92 +44,148 @@ export default function Home() {
                 className="w-7 h-7"
               />
             </div>
-            <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
+            <span className="text-lg md:text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
               CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
             </span>
           </div>
 
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-10">
             <NavLink href="#features">Features</NavLink>
             <NavLink href="#about">About</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-3 rounded-2xl bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-soft)] hover:text-[var(--brand-orange)] transition-all shadow-sm"
+              className="p-2.5 md:p-3 rounded-2xl bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-soft)] hover:text-[var(--brand-orange)] transition-all shadow-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Toggle theme"
             >
               {theme === 'light' ? <FaMoon size={18} /> : <FaSun size={18} />}
             </button>
+            
+            {/* Desktop Auth Buttons */}
             <button
               onClick={() => navigate('/login')}
-              className="hidden sm:block px-5 py-2 font-black text-xs uppercase tracking-widest text-[var(--text-soft)] hover:text-[var(--brand-green)]"
+              className="hidden md:block px-4 md:px-5 py-2 font-black text-xs uppercase tracking-widest text-[var(--text-soft)] hover:text-[var(--brand-green)] transition-colors"
             >
               Sign In
             </button>
             <button
               onClick={() => navigate('/register')}
-              className="btn btn-primary !py-2.5 !px-6 text-[10px]"
+              className="hidden md:block btn btn-primary !py-2.5 !px-6 text-[10px]"
             >
               Join Portal
             </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2.5 rounded-2xl bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-soft)] hover:text-[var(--brand-orange)] transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-[var(--bg-glass)] backdrop-blur-2xl border-b border-[var(--border)] shadow-lg animate-in slide-in-from-top duration-200">
+            <div className="flex flex-col p-4 space-y-2">
+              <a
+                href="#features"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)] transition-all min-h-[44px] flex items-center"
+              >
+                Features
+              </a>
+              <a
+                href="#about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-blue)] transition-all min-h-[44px] flex items-center"
+              >
+                About
+              </a>
+              <a
+                href="#contact"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-orange)] transition-all min-h-[44px] flex items-center"
+              >
+                Contact
+              </a>
+              <div className="border-t border-[var(--border)] my-2"></div>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)] transition-all min-h-[44px] flex items-center"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="btn btn-primary !py-3 !text-sm"
+              >
+                Join Portal <FaArrowRight className="ml-2" />
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Optimized Hero - "Fit in Page View" */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-20 md:pt-24">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[var(--brand-blue)]/5 to-transparent -z-10 blur-[120px]"></div>
         <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-[var(--brand-green)]/5 to-transparent -z-10 blur-[120px]"></div>
 
-        <div className="page-container grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left space-y-6">
+        <div className="page-container grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="text-center lg:text-left space-y-4 md:space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-[var(--border)] text-[var(--brand-orange)] text-[10px] font-black uppercase tracking-[0.2em]">
               <span className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-pulse"></span>
               Redefining Digital Care
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <img
                 src="/images/logo/Asset3.png"
                 alt="CureVirtual Logo"
-                className="w-24 h-auto mx-auto lg:mx-0 drop-shadow-lg"
+                className="w-20 md:w-24 h-auto mx-auto lg:mx-0 drop-shadow-lg"
               />
-              <h1 className="text-6xl lg:text-7xl font-black text-[var(--text-main)] leading-[1.05] tracking-tighter uppercase">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[var(--text-main)] leading-[1.05] tracking-tighter uppercase">
                 CURE <br />
                 <span className="text-gradient">VIRTUAL</span>
               </h1>
-              <p className="text-xl lg:text-2xl font-black text-[var(--brand-orange)] tracking-[0.05em] uppercase italic opacity-90">
+              <p className="text-lg sm:text-xl md:text-2xl font-black text-[var(--brand-orange)] tracking-[0.05em] uppercase italic opacity-90">
                 Healthcare Simplified to You
               </p>
             </div>
 
-            <p className="text-lg text-[var(--text-soft)] max-w-xl leading-relaxed font-medium mx-auto lg:mx-0">
+            <p className="text-base md:text-lg text-[var(--text-soft)] max-w-xl leading-relaxed font-medium mx-auto lg:mx-0">
               Experience medical consultation with zero boundaries. Connect with
               world-class specialists instantly through our high-performance
               virtual clinic.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-6">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start pt-4 md:pt-6">
               <button
                 onClick={() => navigate('/register')}
-                className="btn btn-primary !py-4 !px-10 text-sm shadow-green-500/20"
+                className="btn btn-primary !py-3.5 md:!py-4 !px-8 md:!px-10 text-sm shadow-green-500/20 w-full sm:w-auto"
               >
                 Start Consultation <FaArrowRight />
               </button>
               <button
                 onClick={() => navigate('/login')}
-                className="btn btn-glass !py-4 !px-10 text-sm text-[var(--text-main)]"
+                className="btn btn-glass !py-3.5 md:!py-4 !px-8 md:!px-10 text-sm text-[var(--text-main)] w-full sm:w-auto border-2 border-[var(--brand-green)]"
               >
                 Login to Portal
               </button>
             </div>
 
-            <div className="flex items-center justify-center lg:justify-start gap-8 pt-8 opacity-60">
+            <div className="flex items-center justify-center lg:justify-start gap-6 md:gap-8 pt-6 md:pt-8 opacity-60">
               <div className="text-center">
-                <p className="text-2xl font-black text-[var(--brand-blue)]">
+                <p className="text-xl md:text-2xl font-black text-[var(--brand-blue)]">
                   24/7
                 </p>
                 <p className="text-[10px] font-black uppercase tracking-widest">
@@ -134,7 +194,7 @@ export default function Home() {
               </div>
               <div className="w-px h-8 bg-[var(--border)]"></div>
               <div className="text-center">
-                <p className="text-2xl font-black text-[var(--brand-green)]">
+                <p className="text-xl md:text-2xl font-black text-[var(--brand-green)]">
                   100%
                 </p>
                 <p className="text-[10px] font-black uppercase tracking-widest">
@@ -145,7 +205,7 @@ export default function Home() {
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="glass !p-4 !rounded-[3rem] overflow-hidden border-[var(--border)] shadow-2xl animate-float">
+            <div className="glass !p-4 !rounded-[3rem] overflow-hidden border-[var(--border)] shadow-2xl md:animate-float">
               <img
                 src="/images/logo/Asset3.png"
                 alt="Telemedicine"
@@ -171,17 +231,17 @@ export default function Home() {
       </section>
 
       {/* Features - Compact Grid */}
-      <section id="features" className="py-20 relative">
+      <section id="features" className="py-16 md:py-20 relative">
         <div className="page-container">
-          <div className="text-center mb-16 space-y-4">
+          <div className="text-center mb-12 md:mb-16 space-y-3 md:space-y-4">
             <h2 className="text-[10px] font-black text-[var(--brand-orange)] uppercase tracking-[0.4em]">
               Our Capabilities
             </h2>
-            <h3 className="text-4xl font-black tracking-tighter">
+            <h3 className="text-3xl md:text-4xl font-black tracking-tighter">
               Everything you need for health.
             </h3>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <FeatureCard
               icon={<FaClock className="text-[var(--brand-green)]" />}
               title="24/7 Availability"
@@ -207,44 +267,44 @@ export default function Home() {
       {/* About - Premium Section */}
       <section
         id="about"
-        className="py-24 bg-[var(--bg-glass)] backdrop-blur-sm border-y border-[var(--border)]"
+        className="py-16 md:py-24 bg-[var(--bg-glass)] backdrop-blur-sm border-y border-[var(--border)]"
       >
-        <div className="page-container flex flex-col lg:flex-row items-center gap-16">
-          <div className="lg:w-1/2 space-y-8">
+        <div className="page-container flex flex-col lg:flex-row items-center gap-12 md:gap-16">
+          <div className="lg:w-1/2 space-y-6 md:space-y-8">
             <h2 className="text-gradient font-black text-[10px] uppercase tracking-[0.3em]">
               The Ecosystem
             </h2>
-            <h3 className="text-4xl lg:text-5xl font-black leading-tight tracking-tighter">
+            <h3 className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight tracking-tighter">
               Patient-first <br /> technology.
             </h3>
-            <p className="text-lg text-[var(--text-soft)] leading-relaxed font-medium">
+            <p className="text-base md:text-lg text-[var(--text-soft)] leading-relaxed font-medium">
               We've re-engineered the telemedicine workflow from the ground up.
               CureVirtual isn't just a video tool; it's a complete medical
               ecosystem.
             </p>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-6 glass !rounded-3xl border-[var(--border)]">
-                <p className="text-3xl font-black text-[var(--brand-green)] mb-1">
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              <div className="p-5 md:p-6 glass !rounded-3xl border-[var(--border)]">
+                <p className="text-2xl md:text-3xl font-black text-[var(--brand-green)] mb-1">
                   100k+
                 </p>
                 <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">
                   Users Served
                 </p>
               </div>
-              <div className="p-6 glass !rounded-3xl border-[var(--border)]">
-                <p className="text-3xl font-black text-[var(--brand-blue)] mb-1">
+              <div className="p-5 md:p-6 glass !rounded-3xl border-[var(--border)]">
+                <p className="text-2xl md:text-3xl font-black text-[var(--brand-blue)] mb-1">
                   99.9%
                 </p>
                 <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">
                   Uptime Record
                 </p>
               </div>
-            </div>s
+            </div>
           </div>
           <div className="lg:w-1/2">
             <img
               src="/images/about.jpeg"
-              className="rounded-[3rem] shadow-2xl border border-[var(--border)]"
+              className="rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-[var(--border)]"
               alt="Modern Hospital"
             />
           </div>
@@ -252,8 +312,8 @@ export default function Home() {
       </section>
 
       {/* Simple Footer */}
-      <footer id="contact" className="py-16">
-        <div className="page-container flex flex-col md:flex-row justify-between items-center gap-8 border-t border-[var(--border)] pt-12">
+      <footer id="contact" className="py-12 md:py-16">
+        <div className="page-container flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 border-t border-[var(--border)] pt-10 md:pt-12">
           <div className="flex items-center gap-3">
             <div className="bg-[var(--bg-glass)] p-2 rounded-xl shadow-sm border border-[var(--border)]">
               <img
@@ -266,7 +326,7 @@ export default function Home() {
               CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
             </span>
           </div>
-          <div className="flex gap-10 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
             <a
               href="#features"
               className="hover:text-[var(--brand-green)] transition-colors"
