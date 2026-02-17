@@ -159,10 +159,10 @@ export default function PatientProfile() {
       <div className="space-y-8">
         <div>
           <h2 className="text-[10px] font-black text-[var(--brand-green)] uppercase tracking-[0.3em] mb-1">
-            Account Protocol
+            Patient Account
           </h2>
           <h1 className="text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase">
-            Medical Identity
+            Patient Profile
           </h1>
         </div>
 
@@ -171,7 +171,7 @@ export default function PatientProfile() {
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="h-10 w-10 border-4 border-[var(--brand-green)]/20 border-t-[var(--brand-green)] rounded-full animate-spin"></div>
               <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] animate-pulse">
-                Decrypting Records...
+                Loading Profile...
               </p>
             </div>
           ) : (
@@ -453,13 +453,13 @@ export default function PatientProfile() {
                 />
               </div>
 
-              <div className="md:col-span-2 flex justify-end pt-4">
+              <div className="md:col-span-2 flex justify-start pt-4">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary min-w-[200px]"
+                  className="rounded-2xl bg-[#027906] hover:bg-[#045d07] px-8 py-3 text-white font-bold tracking-wider uppercase text-xs shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Encrypting...' : 'Sync Profile'}
+                  {saving ? 'Encrypting...' : 'Save Profile'}
                 </button>
               </div>
             </form>
