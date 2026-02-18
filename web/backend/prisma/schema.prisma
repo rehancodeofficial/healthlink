@@ -7,13 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* =========================================================
-   ENUMS
-   =======================================================*/
+// =========================================================
+// ENUMS
+// =========================================================
+
 enum UserRole {
   DOCTOR
   PATIENT
-  PHARMACY          // ✅ NEW
+  PHARMACY
 }
 
 enum AdminRole {
@@ -56,6 +57,8 @@ enum Priority {
 
 enum ConsultationStatus {
   SCHEDULED
+  CHECKED_IN
+  WAITING
   ONGOING
   COMPLETED
   CANCELLED
@@ -64,6 +67,9 @@ enum ConsultationStatus {
 enum AppointmentStatus {
   PENDING
   APPROVED
+  CHECKED_IN
+  WAITING
+  IN_SESSION
   COMPLETED
   CANCELLED
 }
@@ -91,9 +97,28 @@ enum PrescriptionDispatchStatus {
   REJECTED
 }
 
-/* =========================================================
-   EMAIL OTP VERIFICATION
-   =======================================================*/
+enum EncounterStatus {
+  DRAFT
+  SIGNED
+  AMENDED
+}
+
+enum LabStatus {
+  ORDERED
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ReferralType {
+  INTERNAL
+  EXTERNAL
+}
+
+// =========================================================
+// MODELS
+// =========================================================
+
 model EmailOTP {
   id        Int      @id @default(autoincrement())
   email     String
@@ -107,9 +132,6 @@ model EmailOTP {
   @@map("EmailOTP")
 }
 
-/* =========================================================
-   USERS
-   =======================================================*/
 model User {
   id          String   @id @default(uuid())
   firstName   String
@@ -122,24 +144,19 @@ model User {
   dateOfBirth DateTime
   gender      Gender
 
-  // Snapshot of latest subscription state for quick reads
   subscriptionState SubStatus @default(UNSUBSCRIBED)
 
-  // Relations
   subscriptions Subscription[]
   doctor        DoctorProfile?
   patient       PatientProfile?
-  pharmacy      PharmacyProfile?      // ✅ NEW
+  pharmacy      PharmacyProfile?
 
-  // Organization Link
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  // Chat
   sentMessages  Message[] @relation("MessagesSent")
   recvMessages  Message[] @relation("MessagesRecv")
 
-  // Support
   supportAgent  SupportAgent?
   raisedTickets SupportTicket[] @relation("raisedBy")
   sentReplies   SupportReply[]
@@ -154,7 +171,7 @@ model User {
 model Organization {
   id        String   @id @default(uuid())
   name      String
-  ownerId   String?   // Make optional initially or link to User ID
+  ownerId   String?
   
   users     User[]
 
@@ -164,9 +181,6 @@ model Organization {
   @@map("Organization")
 }
 
-/* =========================================================
-   ADMINS & SETTINGS
-   =======================================================*/
 model admin {
   id          Int       @id @default(autoincrement())
   name        String
@@ -195,30 +209,26 @@ model SupportAgent {
   @@map("SupportAgent")
 }
 
-
-/* =========================================================
-   ACTIVITY LOG
-   =======================================================*/
 model ActivityLog {
   id        Int      @id @default(autoincrement())
   actorId   String
   actorRole String
   action    String
   entity    String?
+  entityId  String?
+  metadata  String?  @db.Text
+  ipAddress String?
   createdAt DateTime @default(now())
 
   @@map("ActivityLog")
 }
 
-/* =========================================================
-   PROFILES
-   =======================================================*/
 model DoctorProfile {
   id                  String   @id @default(uuid())
   userId              String   @unique
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   specialization      String
-  customProfession    String?  // Used when specialization is "Other"
+  customProfession    String?
   qualifications      String
   licenseNumber       String   @unique
   hospitalAffiliation String?
@@ -228,7 +238,6 @@ model DoctorProfile {
   bio                 String?
   languages           String?  @db.Text
   
-  // Emergency Contact (New)
   emergencyContact      String?  @db.Text
   emergencyContactName  String?
   emergencyContactEmail String?
@@ -241,6 +250,10 @@ model DoctorProfile {
   appointments   Appointment[]       @relation("DoctorAppointments")
   doctorPatients DoctorPatient[]     @relation("DoctorPatient_Doctor")
   schedules      DoctorSchedule[]    @relation("DoctorSchedules")
+  encounters     ClinicalEncounter[]
+  labOrders      LabOrder[]
+  referralsSent  Referral[]          @relation("Referrer")
+  referralsRecv  Referral[]          @relation("Referee")
 
   @@map("DoctorProfile")
 }
@@ -280,9 +293,9 @@ model PatientProfile {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   bloodGroup     BloodGroup
   height         Float?
-  heightUnit     String?    @default("cm")    // "cm", "feet", or "inches"
+  heightUnit     String?    @default("cm")
   weight         Float?
-  weightUnit     String?    @default("kg")    // "kg" or "lbs"
+  weightUnit     String?    @default("kg")
   allergies      String?    @db.Text
   medications    String?    @db.Text
   medicalHistory String?    @db.Text
@@ -295,24 +308,26 @@ model PatientProfile {
   emergencyContact      String?  @db.Text
   emergencyContactName  String?
   emergencyContactEmail String?
+  
+  riskLevel             String?
+  chronicConditions     String?  @db.Text
+
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  // ✅ Preferred pharmacies (Many-to-Many)
   selectedPharmacies SelectedPharmacy[]
-
 
   prescriptions Prescription[]
   consultations VideoConsultation[] @relation("PatientConsultations")
   appointments  Appointment[]       @relation("PatientAppointments")
   doctorLinks   DoctorPatient[]     @relation("DoctorPatient_Patient")
+  encounters    ClinicalEncounter[]
+  labOrders     LabOrder[]
+  referrals     Referral[]
 
   @@map("PatientProfile")
 }
 
-/* =========================================================
-   APPOINTMENTS
-   =======================================================*/
 model Appointment {
   id              String            @id @default(uuid())
   doctorId        String
@@ -320,11 +335,16 @@ model Appointment {
   appointmentDate DateTime
   reason          String?
   status          AppointmentStatus @default(PENDING)
+  
+  chiefComplaint  String?           @db.Text
+  intakeNotes     String?           @db.Text
+  
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
   doctor  DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
   patient PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  encounter ClinicalEncounter?
 
   @@index([doctorId])
   @@index([patientId])
@@ -332,27 +352,15 @@ model Appointment {
   @@map("Appointment")
 }
 
-/* =========================================================
-   DOCTOR SCHEDULES
-   =======================================================*/
 model DoctorSchedule {
   id        String   @id @default(uuid())
   doctorId  String
-  
-  // Day of week: 0=Sunday, 1=Monday, ..., 6=Saturday
   dayOfWeek Int
-  
-  // Time ranges (24-hour format, e.g., "09:00", "17:00")
   startTime String
   endTime   String
-  
-  // Optional: for recurring patterns or specific dates
   effectiveFrom DateTime?
   effectiveTo   DateTime?
-  
-  // Active/inactive toggle
   isActive  Boolean  @default(true)
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -363,9 +371,6 @@ model DoctorSchedule {
   @@map("DoctorSchedule")
 }
 
-/* =========================================================
-   SUPPORT
-   =======================================================*/
 model SupportTicket {
   id        Int            @id @default(autoincrement())
   ticketNo  String         @unique @default(uuid())
@@ -401,9 +406,6 @@ model SupportReply {
   @@map("SupportReply")
 }
 
-/* =========================================================
-   PRESCRIPTIONS (with pharmacy dispatch)
-   =======================================================*/
 model Prescription {
   id            String   @id @default(cuid())
   doctorId      String
@@ -413,10 +415,15 @@ model Prescription {
   frequency     String
   duration      String
   notes         String?
+  
+  isControlled  Boolean  @default(false)
+  deaNumber     String?
+  refills       Int      @default(0)
+  drugAlerts    String?  @db.Text
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // ✅ Pharmacy routing
   pharmacyId     String?
   pharmacy       PharmacyProfile? @relation(fields: [pharmacyId], references: [id], onDelete: SetNull)
   dispatchStatus PrescriptionDispatchStatus @default(NONE)
@@ -424,6 +431,8 @@ model Prescription {
 
   doctor  DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   patient PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterId String?
+  encounter   ClinicalEncounter? @relation(fields: [encounterId], references: [id])
 
   @@index([doctorId])
   @@index([patientId])
@@ -432,20 +441,87 @@ model Prescription {
   @@map("Prescription")
 }
 
+model ClinicalEncounter {
+  id          String   @id @default(uuid())
+  appointmentId String @unique
+  doctorId    String
+  patientId   String
+  
+  subjective  String?  @db.Text
+  objective   String?  @db.Text
+  assessment  String?  @db.Text
+  plan        String?  @db.Text
+  
+  systolic    Int?
+  diastolic   Int?
+  pulse       Int?
+  temperature Float?
+  weight      Float?
+  oxygenSat   Int?
+  
+  status      EncounterStatus @default(DRAFT)
+  signedAt    DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  appointment Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctor      DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  prescriptions Prescription[]
+  labOrders     LabOrder[]
+  referrals     Referral[]
 
-/* =========================================================
-   CHAT (Updated for Admin)
-   =======================================================*/
+  @@map("ClinicalEncounter")
+}
+
+model LabOrder {
+  id          String   @id @default(uuid())
+  doctorId    String
+  patientId   String
+  encounterId String?
+  
+  testName    String
+  status      LabStatus @default(ORDERED)
+  results     String?   @db.Text
+  orderedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  doctor      DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounter   ClinicalEncounter? @relation(fields: [encounterId], references: [id])
+
+  @@map("LabOrder")
+}
+
+model Referral {
+  id          String   @id @default(uuid())
+  doctorId    String
+  patientId   String
+  encounterId String?
+  
+  targetDoctorId String?
+  specialistName String?
+  type        ReferralType
+  reason      String   @db.Text
+  status      String   @default("PENDING")
+
+  doctor      DoctorProfile  @relation("Referrer", fields: [doctorId], references: [id], onDelete: Cascade)
+  referee     DoctorProfile? @relation("Referee", fields: [targetDoctorId], references: [id])
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounter   ClinicalEncounter? @relation(fields: [encounterId], references: [id])
+
+  @@map("Referral")
+}
+
 model Message {
   id         String    @id @default(cuid())
-  senderId   String?   // User sender
-  receiverId String?   // User receiver
+  senderId   String?
+  receiverId String?
   content    String
   createdAt  DateTime  @default(now())
   readAt     DateTime?
 
-  // Admin support
   adminSenderId   Int?
   adminReceiverId Int?
 
@@ -458,9 +534,6 @@ model Message {
   @@map("Message")
 }
 
-/* =========================================================
-   VIDEO CONSULTATIONS
-   =======================================================*/
 model VideoConsultation {
   id           String             @id @default(uuid())
   doctorId     String
@@ -484,11 +557,8 @@ model VideoConsultation {
   @@map("VideoConsultation")
 }
 
-/* =========================================================
-   SUBSCRIPTIONS
-   =======================================================*/
 model SubscriptionSetting {
-  id                 Int      @id @default(1) // singleton row
+  id                 Int      @id @default(1)
   doctorMonthlyUsd   Float?
   doctorYearlyUsd    Float?
   patientMonthlyUsd  Float?
@@ -508,10 +578,10 @@ model Subscription {
   plan     Plan
   status   SubStatus @default(PENDING)
 
-  provider  String?  // e.g. "PAYSTACK" | "STRIPE"
+  provider  String?
   reference String?  @unique
-  amount    Int?     // cents
-  currency  String?  // e.g. "USD"
+  amount    Int?
+  currency  String?
 
   startDate DateTime?
   endDate   DateTime?
@@ -526,9 +596,6 @@ model Subscription {
   @@map("Subscription")
 }
 
-/* =========================================================
-   DOCTOR–PATIENT LINK
-   =======================================================*/
 model DoctorPatient {
   id        String @id @default(uuid())
   doctorId  String
