@@ -35,14 +35,14 @@
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.12",
-    "prisma": "^6.18.0",
     "stripe": "^19.1.0",
     "twilio": "^5.10.2",
     "uuid": "^13.0.0",
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prisma": "^5.22.0"
   },
   "engines": {
     "node": ">=18.0.0"
