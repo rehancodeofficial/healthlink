@@ -2,16 +2,16 @@ version: "3.8"
 
 services:
   db:
-    image: mysql:8.0
+    image: postgres:15
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: curevirtual_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root_password
+      POSTGRES_DB: curevirtual_db
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
-      - ./curevirtual.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
 
   backend:
     build: ./web/backend
