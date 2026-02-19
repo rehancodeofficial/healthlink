@@ -2,6 +2,8 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 /* ================================
    SUPERADMIN
@@ -122,6 +124,7 @@ const RequireRole = ({ role, children }) => {
 export default function App() {
   return (
     <BrowserRouter>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
         {/* Public */}
