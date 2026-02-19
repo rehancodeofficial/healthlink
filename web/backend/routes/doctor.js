@@ -10,6 +10,39 @@ router.use(verifyToken);
 router.use(requireRole(["DOCTOR", "SUPERADMIN", "ADMIN"]));
 
 /**
+ * GET /api/doctor/waiting-patients?doctorId=<User.id>
+ * Returns patients currently waiting or checked in.
+ */
+router.get("/waiting-patients", async (req, res) => {
+  try {
+    const doctorUserId = req.query.doctorId || req.user?.id;
+    if (!doctorUserId) return res.status(400).json({ error: "doctorId is required" });
+
+    const doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { userId: doctorUserId },
+      select: { id: true },
+    });
+    if (!doctorProfile) return res.json([]);
+
+    const waiting = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctorProfile.id,
+        status: { in: ["CHECKED_IN", "WAITING"] },
+      },
+      include: {
+        patient: { include: { user: true } },
+      },
+      orderBy: { appointmentDate: "asc" },
+    });
+
+    return res.json(waiting);
+  } catch (err) {
+    console.error("waiting-patients error:", err);
+    return res.status(500).json({ error: "Failed to fetch waiting patients" });
+  }
+});
+
+/**
  * GET /api/doctor/stats?doctorId=<User.id>
  * Returns dashboard stats for a doctor.
  */
@@ -80,6 +113,23 @@ router.get("/stats", async (req, res) => {
 
     const activePatients = distinctPatients.length;
 
+    // Enhanced stats for Clinical Desk
+    const [urgentLabs, unsignedNotes, lateAppointments] = await Promise.all([
+      prisma.labOrder.count({
+        where: { doctorId: dpId, status: "ORDERED" },
+      }),
+      prisma.clinicalEncounter.count({
+        where: { doctorId: dpId, status: "DRAFT" },
+      }),
+      prisma.appointment.count({
+        where: {
+          doctorId: dpId,
+          status: { in: ["WAITING", "CHECKED_IN"] },
+          appointmentDate: { lt: new Date() },
+        },
+      }),
+    ]);
+
     return res.json({
       totalAppointments,
       completedAppointments,
@@ -87,6 +137,11 @@ router.get("/stats", async (req, res) => {
       totalPrescriptions,
       totalMessages,
       activePatients,
+      urgentFlags: {
+        urgentLabs,
+        unsignedNotes,
+        lateAppointments,
+      }
     });
   } catch (err) {
     console.error("❌ /api/doctor/stats error:", err);
