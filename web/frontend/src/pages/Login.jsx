@@ -1,41 +1,31 @@
 // FILE: src/pages/Login.jsx
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../Lib/api';
-import { supabase } from '../Lib/supabase';
-import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from 'react-icons/fi';
-import { FaArrowRight } from 'react-icons/fa';
-import { useTheme } from '../context/ThemeContext';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../Lib/api";
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
+import { FaArrowRight } from "react-icons/fa";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [loginMode, setLoginMode] = useState('password'); // 'password' or 'otp'
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [loginMode, setLoginMode] = useState("password"); // 'password' or 'otp'
   const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
-      if (loginMode === 'password') {
-        // 1. Supabase Auth Login
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
-
-        if (authError) throw authError;
-
-        // 2. Get User Details and Sync with Backend
-        const res = await api.post('/auth/login-sync', { 
-          email, 
-          supabaseId: data.user.id 
+      if (loginMode === "password") {
+        // 1. Local Backend Auth
+        const res = await api.post("/auth/login", {
+          email,
+          password,
         });
 
         handleAuthSuccess(res.data, email);
@@ -43,18 +33,18 @@ export default function Login() {
         // OTP Mode
         if (!otpSent) {
           // Request OTP
-          await api.post('/auth/request-otp-login', { email });
+          await api.post("/auth/request-otp-login", { email });
           setOtpSent(true);
         } else {
           // Verify OTP
-          const res = await api.post('/auth/verify-otp-login', { email, otp });
+          const res = await api.post("/auth/verify-otp-login", { email, otp });
           handleAuthSuccess(res.data, email);
         }
       }
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.error || err.message || 'Invalid credentials. Please try again.'
+        err.response?.data?.error || err.message || "Invalid credentials. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -65,32 +55,53 @@ export default function Login() {
     const { token } = data;
     const user = data.user || data;
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('userId', user.id);
-    localStorage.setItem('name', user.name);
-    localStorage.setItem('userName', user.name);
-    localStorage.setItem('role', user.role);
-    localStorage.setItem('type', user.type || 'USER');
-    localStorage.setItem('email', user.email || userEmail);
+    localStorage.setItem("token", token);
+    localStorage.setItem("userId", user.id);
+    localStorage.setItem("name", user.name);
+    localStorage.setItem("userName", user.name);
+    localStorage.setItem("role", user.role);
+    localStorage.setItem("type", user.type || "USER");
+    localStorage.setItem("email", user.email || userEmail);
 
     switch (user.role) {
-      case 'SUPERADMIN': navigate('/superadmin/dashboard'); break;
-      case 'ADMIN': navigate('/admin/dashboard'); break;
-      case 'SUPPORT': navigate('/support/dashboard'); break;
-      case 'DOCTOR': navigate('/doctor/dashboard'); break;
-      case 'PATIENT': navigate('/patient/dashboard'); break;
-      case 'PHARMACY': navigate('/pharmacy/dashboard'); break;
-      default: navigate('/');
+      case "SUPERADMIN":
+        navigate("/superadmin/dashboard");
+        break;
+      case "ADMIN":
+        navigate("/admin/dashboard");
+        break;
+      case "SUPPORT":
+        navigate("/support/dashboard");
+        break;
+      case "DOCTOR":
+        navigate("/doctor/dashboard");
+        break;
+      case "PATIENT":
+        navigate("/patient/dashboard");
+        break;
+      case "PHARMACY":
+        navigate("/pharmacy/dashboard");
+        break;
+      default:
+        navigate("/");
     }
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}>
+    <div
+      className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}
+    >
       {/* Dynamic Triple Color Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] bg-[var(--brand-green)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--brand-blue)] opacity-[0.07] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[var(--brand-orange)] opacity-[0.05] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div
+          className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--brand-blue)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+        <div
+          className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[var(--brand-orange)] opacity-[0.05] blur-[120px] rounded-full animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
       </div>
 
       <div className="w-full max-w-[1000px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700 rounded-[3rem] border border-[var(--border)]">
@@ -102,7 +113,10 @@ export default function Login() {
           </div>
 
           <div className="z-10">
-            <Link to="/" className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
+            >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Home
             </Link>
 
@@ -124,7 +138,9 @@ export default function Login() {
 
           <div className="z-10 flex items-center gap-4">
             <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">Secure Login</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
+              Secure Login
+            </p>
           </div>
         </div>
 
@@ -138,7 +154,9 @@ export default function Login() {
               Login
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
-              {loginMode === 'password' ? 'Enter your credentials to access your dashboard.' : 'Enter your email to receive a login OTP.'}
+              {loginMode === "password"
+                ? "Enter your credentials to access your dashboard."
+                : "Enter your email to receive a login OTP."}
             </p>
           </div>
 
@@ -163,13 +181,17 @@ export default function Login() {
               </div>
             </div>
 
-            {loginMode === 'password' ? (
+            {loginMode === "password" ? (
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                     Password
                   </label>
-                  <Link to="/forgot-password" title="Recover Password" className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline">
+                  <Link
+                    to="/forgot-password"
+                    title="Recover Password"
+                    className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
+                  >
                     Recovery?
                   </Link>
                 </div>
@@ -178,7 +200,7 @@ export default function Login() {
                     <FiLock />
                   </div>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
@@ -220,7 +242,9 @@ export default function Login() {
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 animate-shake">
                 <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider">{error}</p>
+                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -233,7 +257,7 @@ export default function Login() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  {loginMode === 'otp' && !otpSent ? 'Send OTP' : 'Submit'}
+                  {loginMode === "otp" && !otpSent ? "Send OTP" : "Submit"}
                   <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -242,19 +266,27 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setLoginMode(loginMode === 'password' ? 'otp' : 'password');
+                setLoginMode(loginMode === "password" ? "otp" : "password");
                 setOtpSent(false);
-                setError('');
+                setError("");
               }}
               className="w-full text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-widest hover:underline text-center"
             >
-              {loginMode === 'password' ? 'Login with OTP instead?' : 'Login with Password instead?'}
+              {loginMode === "password"
+                ? "Login with OTP instead?"
+                : "Login with Password instead?"}
             </button>
           </form>
 
           <div className="mt-12 text-center pt-8 border-t border-[var(--border)]">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              New User? <Link to="/register" className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1">Register</Link>
+              New User?{" "}
+              <Link
+                to="/register"
+                className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1"
+              >
+                Register
+              </Link>
             </p>
           </div>
         </div>
