@@ -5,10 +5,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact"],
   "files.associations": {
     "*.css": "tailwindcss"
   },
@@ -25,5 +22,6 @@
     "toastify"
   ],
   "javascript.preferences.importModuleSpecifier": "relative",
-  "javascript.updateImportsOnFileMove.enabled": "always"
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "prisma.pinToPrisma6": true
 }
