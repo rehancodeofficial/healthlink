@@ -26,6 +26,7 @@ services:
     volumes:
       - ./web/backend:/app
       - /app/node_modules
+      - /app/prisma
 
   frontend:
     build: ./web/frontend
