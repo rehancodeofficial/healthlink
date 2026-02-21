@@ -72,6 +72,8 @@ enum AppointmentStatus {
   IN_SESSION
   COMPLETED
   CANCELLED
+  SCHEDULED
+  NO_SHOW
 }
 
 enum Plan {
@@ -115,9 +117,55 @@ enum ReferralType {
   EXTERNAL
 }
 
+enum SlotStatus {
+  AVAILABLE
+  BOOKED
+  LOCKED
+  CANCELLED
+}
+
 // =========================================================
 // MODELS
 // =========================================================
+
+model DoctorAvailability {
+  id           String   @id @default(uuid())
+  doctorId     String
+  date         DateTime @db.Date 
+  startTime    DateTime 
+  endTime      DateTime 
+  slotDuration Int      @default(15) 
+  
+  slots        AppointmentSlot[]
+
+  doctor       DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([doctorId, date])
+  @@map("DoctorAvailability")
+}
+
+model AppointmentSlot {
+  id             String   @id @default(uuid())
+  doctorId       String
+  availabilityId String
+  
+  startTime      DateTime
+  endTime        DateTime
+  status         SlotStatus @default(AVAILABLE)
+  
+  appointmentId  String?  @unique
+  bookedBy       String?  
+  
+  availability   DoctorAvailability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
+  doctor         DoctorProfile      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointment    Appointment?       @relation(fields: [appointmentId], references: [id]) 
+  
+  @@index([doctorId, startTime])
+  @@index([status])
+  @@map("AppointmentSlot")
+}
 
 model EmailOTP {
   id        Int      @id @default(autoincrement())
@@ -250,6 +298,10 @@ model DoctorProfile {
   appointments   Appointment[]       @relation("DoctorAppointments")
   doctorPatients DoctorPatient[]     @relation("DoctorPatient_Doctor")
   schedules      DoctorSchedule[]    @relation("DoctorSchedules")
+  
+  availabilities DoctorAvailability[]
+  slots          AppointmentSlot[]
+
   encounters     ClinicalEncounter[]
   labOrders      LabOrder[]
   referralsSent  Referral[]          @relation("Referrer")
@@ -345,6 +397,8 @@ model Appointment {
   doctor  DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
   patient PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
   encounter ClinicalEncounter?
+
+  slot    AppointmentSlot?
 
   @@index([doctorId])
   @@index([patientId])
@@ -545,6 +599,10 @@ model VideoConsultation {
   status       ConsultationStatus @default(SCHEDULED)
   roomName     String?
   meetingUrl   String?
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+  recordingUrl    String?
+  failureReason   String?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
