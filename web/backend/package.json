@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"No tests yet\"",
     "dev": "nodemon server.js",
-    "start": "npx prisma migrate deploy && node server.js",
+    "start": "node server.js",
     "build": "prisma generate",
     "prisma:seed": "node prisma/seed.js",
     "seed": "node prisma/seed.js",
@@ -34,6 +34,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.12",
     "stripe": "^19.1.0",
     "twilio": "^5.10.2",
