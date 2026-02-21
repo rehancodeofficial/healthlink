@@ -1,27 +1,29 @@
 // FILE: backend/routes/videocall.js
 const express = require("express");
 const router = express.Router();
-const prisma = require('../prisma/prismaClient');
+const prisma = require("../prisma/prismaClient");
 const twilio = require("twilio");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
 // ---- Twilio credentials (.env) ----
-const {
-  TWILIO_ACCOUNT_SID,
-  TWILIO_API_KEY_SID,
-  TWILIO_API_KEY_SECRET,
-} = process.env;
+const { TWILIO_ACCOUNT_SID, TWILIO_API_KEY_SID, TWILIO_API_KEY_SECRET } =
+  process.env;
 
 if (!TWILIO_ACCOUNT_SID || !TWILIO_API_KEY_SID || !TWILIO_API_KEY_SECRET) {
   console.warn(
-    "⚠️ Missing Twilio credentials in .env (TWILIO_ACCOUNT_SID / TWILIO_API_KEY_SID / TWILIO_API_KEY_SECRET)"
+    "⚠️ Missing Twilio credentials in .env (TWILIO_ACCOUNT_SID / TWILIO_API_KEY_SID / TWILIO_API_KEY_SECRET)",
   );
 }
 
 /* ============================
    Helpers: Profile Resolution
 ============================ */
-async function resolveDoctorProfileId({ doctorId, doctorUserId, callerUserId, role }) {
+async function resolveDoctorProfileId({
+  doctorId,
+  doctorUserId,
+  callerUserId,
+  role,
+}) {
   // Prefer explicit DoctorProfile.id
   if (doctorId) {
     const d = await prisma.doctorProfile.findUnique({
@@ -58,7 +60,12 @@ async function resolveDoctorProfileId({ doctorId, doctorUserId, callerUserId, ro
   return null;
 }
 
-async function resolvePatientProfileId({ patientId, patientUserId, callerUserId, role }) {
+async function resolvePatientProfileId({
+  patientId,
+  patientUserId,
+  callerUserId,
+  role,
+}) {
   // Prefer explicit PatientProfile.id
   if (patientId) {
     const p = await prisma.patientProfile.findUnique({
@@ -241,7 +248,7 @@ router.post("/token", verifyToken, async (req, res) => {
       TWILIO_ACCOUNT_SID,
       TWILIO_API_KEY_SID,
       TWILIO_API_KEY_SECRET,
-      { identity }
+      { identity },
     );
 
     token.addGrant(new VideoGrant({ room: roomName }));
@@ -260,16 +267,35 @@ router.post("/token", verifyToken, async (req, res) => {
 router.put("/status/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body || {};
+    const { status, failureReason, recordingUrl } = req.body || {};
 
-    const valid = ["SCHEDULED", "ONGOING", "COMPLETED", "CANCELLED"];
+    const valid = ["SCHEDULED", "ONGOING", "COMPLETED", "CANCELLED", "FAILED"];
     if (!valid.includes(String(status))) {
       return res.status(400).json({ error: "Invalid status value" });
     }
 
+    const updateData = { status: String(status) };
+
+    if (status === "ONGOING") {
+      updateData.actualStartTime = new Date();
+    } else if (
+      status === "COMPLETED" ||
+      status === "CANCELLED" ||
+      status === "FAILED"
+    ) {
+      updateData.actualEndTime = new Date();
+    }
+
+    if (failureReason) {
+      updateData.failureReason = failureReason;
+    }
+    if (recordingUrl) {
+      updateData.recordingUrl = recordingUrl;
+    }
+
     const updated = await prisma.videoConsultation.update({
       where: { id: String(id) },
-      data: { status: String(status) },
+      data: updateData,
       include: {
         doctor: { include: { user: true } },
         patient: { include: { user: true } },
@@ -315,14 +341,18 @@ router.patch("/reschedule/:id", verifyToken, async (req, res) => {
     const { id } = req.params;
     const { scheduledAt, durationMins } = req.body || {};
     if (!scheduledAt && durationMins == null) {
-      return res.status(400).json({ error: "Provide scheduledAt and/or durationMins" });
+      return res
+        .status(400)
+        .json({ error: "Provide scheduledAt and/or durationMins" });
     }
 
     const data = {};
     if (scheduledAt) {
       const when = new Date(scheduledAt);
       if (Number.isNaN(when.getTime())) {
-        return res.status(400).json({ error: "scheduledAt is not a valid date" });
+        return res
+          .status(400)
+          .json({ error: "scheduledAt is not a valid date" });
       }
       data.scheduledAt = when;
     }
