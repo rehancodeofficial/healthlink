@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../Lib/api";
+import { supabase } from "../Lib/supabase";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,10 +24,18 @@ export default function Login() {
     setError("");
     try {
       if (loginMode === "password") {
-        // 1. Local Backend Auth
-        const res = await api.post("/auth/login", {
+        // 1. Supabase Auth Login
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (authError) throw authError;
+
+        // 2. Get User Details and Sync with Backend
+        const res = await api.post("/auth/login-sync", {
           email,
-          password,
+          supabaseId: data.user.id,
         });
 
         handleAuthSuccess(res.data, email);
