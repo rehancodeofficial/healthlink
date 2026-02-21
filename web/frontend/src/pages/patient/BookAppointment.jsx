@@ -5,19 +5,19 @@ import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { toast } from "react-toastify";
 
+import BookingSlots from "../../components/BookingSlots";
+
 const BookAppointment = () => {
   const [doctors, setDoctors] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [formData, setFormData] = useState({
     doctorId: "",
     appointmentDate: "",
-    selectedSlot: "",
+    selectedSlotId: "",
     reason: "",
   });
   const [loading, setLoading] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
-  const [loadingSlots, setLoadingSlots] = useState(false);
   const patientId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName");
 
@@ -27,10 +27,8 @@ const BookAppointment = () => {
         setLoadingDoctors(true);
         const res = await api.get("/api/doctor/list");
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-        console.log("✅ Loaded doctors:", data);
         setDoctors(data);
-      } catch (err) {
-        console.error("❌ Error loading doctors:", err);
+      } catch {
         toast.error("Failed to load doctors");
       } finally {
         setLoadingDoctors(false);
@@ -40,39 +38,6 @@ const BookAppointment = () => {
     fetchDoctors();
   }, []);
 
-  // Fetch available slots when doctor and date are selected
-  useEffect(() => {
-    const fetchAvailableSlots = async () => {
-      try {
-        setLoadingSlots(true);
-        const date = formData.appointmentDate.split("T")[0]; // Get YYYY-MM-DD
-        const res = await api.get(
-          `/api/schedule/available-slots/${formData.doctorId}?date=${date}`
-        );
-
-        if (res.data.success) {
-          setAvailableSlots(res.data.data || []);
-          if (res.data.data.length === 0) {
-            toast.info(res.data.message || "No available slots for this date");
-          }
-        }
-      } catch (err) {
-        console.error("❌ Error loading slots:", err);
-        toast.error("Failed to load available time slots");
-        setAvailableSlots([]);
-      } finally {
-        setLoadingSlots(false);
-      }
-    };
-
-    if (formData.doctorId && formData.appointmentDate) {
-      fetchAvailableSlots();
-    } else {
-      setAvailableSlots([]);
-      setFormData((prev) => ({ ...prev, selectedSlot: "" }));
-    }
-  }, [formData.doctorId, formData.appointmentDate]);
-
   const handleDoctorChange = (doctorId) => {
     const doctor = doctors.find((d) => d.id === doctorId);
     setSelectedDoctor(doctor);
@@ -80,31 +45,32 @@ const BookAppointment = () => {
       ...formData,
       doctorId,
       appointmentDate: "",
-      selectedSlot: "",
+      selectedSlotId: "",
     });
-    setAvailableSlots([]);
+  };
+
+  const handleSlotSelect = (slot) => {
+    setFormData((prev) => ({ ...prev, selectedSlotId: slot.id }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.selectedSlot) {
+    if (!formData.selectedSlotId) {
       toast.error("Please select an available time slot");
       return;
     }
 
     setLoading(true);
     try {
-      await api.post("/api/patient/appointments", {
-        doctorId: formData.doctorId,
-        appointmentDate: formData.selectedSlot, // Use the full datetime from selected slot
-        reason: formData.reason,
+      await api.post("/doctor-schedule/book-slot", {
+        slotId: formData.selectedSlotId,
         patientId,
+        reason: formData.reason,
       });
       toast.success("Appointment booked successfully!");
-      setFormData({ doctorId: "", appointmentDate: "", selectedSlot: "", reason: "" });
+      setFormData({ doctorId: "", appointmentDate: "", selectedSlotId: "", reason: "" });
       setSelectedDoctor(null);
-      setAvailableSlots([]);
     } catch (err) {
       console.error("Booking error:", err);
       toast.error(err.response?.data?.error || "Failed to book appointment");
@@ -164,12 +130,12 @@ const BookAppointment = () => {
                   </label>
                   <input
                     type="date"
-                    value={formData.appointmentDate.split("T")[0] || ""}
+                    value={formData.appointmentDate}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         appointmentDate: e.target.value,
-                        selectedSlot: "",
+                        selectedSlotId: "",
                       })
                     }
                     min={new Date().toISOString().split("T")[0]}
@@ -179,43 +145,22 @@ const BookAppointment = () => {
                 </div>
               )}
 
-              {/* Available Time Slots */}
+              {/* Available Time Slots via Component */}
               {formData.appointmentDate && (
                 <div>
                   <label className="block font-medium mb-2 text-[var(--text-main)]">
-                    Available Time Slots
+                    Select Time Slot
                   </label>
-                  {loadingSlots ? (
-                    <p className="text-[var(--text-muted)]">Loading available slots...</p>
-                  ) : availableSlots.length === 0 ? (
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                      <p className="text-yellow-400">
-                        No available slots for this date. Please select another date or doctor.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 bg-[var(--bg-card)] rounded-lg">
-                      {availableSlots.map((slot) => (
-                        <button
-                          key={slot.datetime}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, selectedSlot: slot.datetime })}
-                          className={`p-3 rounded-lg border transition ${
-                            formData.selectedSlot === slot.datetime
-                              ? "bg-blue-600 border-blue-500 text-white"
-                              : "bg-white/5 border-gray-600 hover:bg-white/10 text-gray-300"
-                          }`}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <BookingSlots
+                    doctorId={formData.doctorId}
+                    date={new Date(formData.appointmentDate)}
+                    onSlotSelect={handleSlotSelect}
+                  />
                 </div>
               )}
 
               {/* Reason */}
-              {formData.selectedSlot && (
+              {formData.selectedSlotId && (
                 <div>
                   <label className="block font-medium mb-2 text-[var(--text-main)]">
                     Reason for Visit
@@ -233,9 +178,9 @@ const BookAppointment = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || !formData.selectedSlot}
+                disabled={loading || !formData.selectedSlotId}
                 className={`w-full py-3 rounded-lg font-semibold transition ${
-                  loading || !formData.selectedSlot
+                  loading || !formData.selectedSlotId
                     ? "bg-gray-600 cursor-not-allowed"
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
