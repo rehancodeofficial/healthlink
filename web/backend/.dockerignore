@@ -3,3 +3,13 @@ npm-debug.log
 .env
 .git
 .gitignore
+Dockerfile
+.dockerignore
+dist
+build
+*.log
+*.sql
+.DS_Store
+node_modules/.prisma
+prisma/migrations
+!prisma/schema.prisma
