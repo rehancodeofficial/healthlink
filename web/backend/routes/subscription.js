@@ -1,7 +1,7 @@
 // FILE: backend/routes/subscription.js
 const express = require("express");
 const router = express.Router();
-const prisma = require('../prisma/prismaClient');
+const prisma = require("../prisma/prismaClient");
 
 const Stripe = require("stripe");
 const stripeSecret = process.env.STRIPE_SECRET_KEY || "";
@@ -16,7 +16,8 @@ const computeStatus = (row) => {
   if (!row) return "NONE";
   const now = new Date();
   if (row.status === "PENDING") return "PENDING";
-  if (row.status === "ACTIVE" && row.endDate && now <= row.endDate) return "ACTIVE";
+  if (row.status === "ACTIVE" && row.endDate && now <= row.endDate)
+    return "ACTIVE";
   if (row.endDate && now > row.endDate) return "EXPIRED";
   return row.status || "NONE";
 };
@@ -46,14 +47,18 @@ async function ensureSettings() {
 
   // If settings exist, check if we need to migrate legacy pharmacy prices (20 -> 30) or if they are null
   if (s) {
-    if (s.pharmacyMonthlyUsd === 20 || s.pharmacyYearlyUsd === 210 || s.pharmacyMonthlyUsd === null) {
+    if (
+      s.pharmacyMonthlyUsd === 20 ||
+      s.pharmacyYearlyUsd === 210 ||
+      s.pharmacyMonthlyUsd === null
+    ) {
       console.log("Migrating legacy/null Pharmacy prices to 30/300...");
       s = await prisma.subscriptionSetting.update({
         where: { id: 1 },
         data: {
           pharmacyMonthlyUsd: 30,
           pharmacyYearlyUsd: 300,
-        }
+        },
       });
     }
     return s;
@@ -148,7 +153,9 @@ async function getPricesHandler(req, res) {
     });
   } catch (err) {
     console.error("❌ GET prices error:", err);
-    return res.status(500).json({ error: "Failed to load subscription prices" });
+    return res
+      .status(500)
+      .json({ error: "Failed to load subscription prices" });
   }
 }
 
@@ -183,7 +190,9 @@ async function putPricesHandler(req, res) {
     for (const [k, v] of fields) {
       const n = Number(v);
       if (!v || Number.isNaN(n) || n <= 0) {
-        return res.status(400).json({ error: `${k} must be a positive number` });
+        return res
+          .status(400)
+          .json({ error: `${k} must be a positive number` });
       }
     }
 
@@ -200,125 +209,169 @@ async function putPricesHandler(req, res) {
     };
 
     const updated = s
-      ? await prisma.subscriptionSetting.update({ where: { id: s.id }, data: payload })
+      ? await prisma.subscriptionSetting.update({
+          where: { id: s.id },
+          data: payload,
+        })
       : await prisma.subscriptionSetting.create({ data: payload });
 
     return res.json({ success: true, data: updated });
   } catch (err) {
     console.error("❌ PUT prices error:", err);
-    return res.status(500).json({ error: "Failed to save subscription prices" });
+    return res
+      .status(500)
+      .json({ error: "Failed to save subscription prices" });
   }
 }
 
 /* ----------- wire both canonical + compatibility routes ----------- */
 // Canonical admin + role-aware
 router.get("/prices", verifyToken, getPricesHandler);
-router.put("/prices", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), putPricesHandler);
+router.put(
+  "/prices",
+  verifyToken,
+  requireRole(["ADMIN", "SUPERADMIN"]),
+  putPricesHandler,
+);
 
 // Compatibility (older code may call these)
 router.get("/settings", getPricesHandler);
 
 /* ----------------------------- STATS & LIST ----------------------------- */
 /* GET /api/subscribers/stats */
-router.get("/stats", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (_req, res) => {
-  try {
-    const active = await prisma.subscription.findMany({
-      where: { status: "ACTIVE" },
-      distinct: ["userId"],
-      select: { userId: true, plan: true, user: { select: { role: true } } },
-    });
+router.get(
+  "/stats",
+  verifyToken,
+  requireRole(["ADMIN", "SUPERADMIN"]),
+  async (_req, res) => {
+    try {
+      const active = await prisma.subscription.findMany({
+        where: { status: "ACTIVE" },
+        distinct: ["userId"],
+        select: { userId: true, plan: true, user: { select: { role: true } } },
+      });
 
-    const totalActive = active.length;
-    const monthlyActive = active.filter((s) => s.plan === "MONTHLY").length;
-    const yearlyActive = active.filter((s) => s.plan === "YEARLY").length;
+      const totalActive = active.length;
+      const monthlyActive = active.filter((s) => s.plan === "MONTHLY").length;
+      const yearlyActive = active.filter((s) => s.plan === "YEARLY").length;
 
-    const doctorsActive = active.filter((s) => s.user?.role === "DOCTOR").length;
-    const patientsActive = active.filter((s) => s.user?.role === "PATIENT").length;
-    const pharmacyActive = active.filter((s) => s.user?.role === "PHARMACY").length;
+      const doctorsActive = active.filter(
+        (s) => s.user?.role === "DOCTOR",
+      ).length;
+      const patientsActive = active.filter(
+        (s) => s.user?.role === "PATIENT",
+      ).length;
+      const pharmacyActive = active.filter(
+        (s) => s.user?.role === "PHARMACY",
+      ).length;
 
-    return res.json({
-      success: true,
-      data: {
-        totalActive,
-        monthlyActive,
-        yearlyActive,
-        doctorsActive,
-        patientsActive,
-        pharmacyActive,
-      },
-    });
-  } catch (err) {
-    console.error("❌ /subscribers/stats error:", err);
-    return res.status(500).json({ error: "Failed to load stats" });
-  }
-});
+      return res.json({
+        success: true,
+        data: {
+          totalActive,
+          monthlyActive,
+          yearlyActive,
+          doctorsActive,
+          patientsActive,
+          pharmacyActive,
+        },
+      });
+    } catch (err) {
+      console.error("❌ /subscribers/stats error:", err);
+      return res.status(500).json({ error: "Failed to load stats" });
+    }
+  },
+);
 
 /* GET /api/subscribers/list */
-router.get("/list", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (req, res) => {
-  try {
-    const { role, plan, status, q, page = 1, pageSize = 20 } = req.query;
+router.get(
+  "/list",
+  verifyToken,
+  requireRole(["ADMIN", "SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const { role, plan, status, q, page = 1, pageSize = 20 } = req.query;
 
-    const whereUser = {};
-    if (role && ["DOCTOR", "PATIENT", "PHARMACY"].includes(String(role))) {
-      whereUser.role = String(role);
-    }
+      const whereUser = {};
+      if (role && ["DOCTOR", "PATIENT", "PHARMACY"].includes(String(role))) {
+        whereUser.role = String(role);
+      }
 
-    const whereSubsSome = {};
-    if (plan && ["MONTHLY", "YEARLY"].includes(String(plan))) {
-      whereSubsSome.plan = String(plan);
-    }
-    if (status && ["ACTIVE", "EXPIRED", "DEACTIVATED", "PENDING", "FAILED"].includes(String(status))) {
-      whereSubsSome.status = String(status);
-    }
+      const whereSubsSome = {};
+      if (plan && ["MONTHLY", "YEARLY"].includes(String(plan))) {
+        whereSubsSome.plan = String(plan);
+      }
+      if (
+        status &&
+        ["ACTIVE", "EXPIRED", "DEACTIVATED", "PENDING", "FAILED"].includes(
+          String(status),
+        )
+      ) {
+        whereSubsSome.status = String(status);
+      }
 
-    const text = q?.toString().trim();
-    if (text) {
-      whereUser.OR = [
-        { name: { contains: text, mode: "insensitive" } },
-        { email: { contains: text, mode: "insensitive" } },
-      ];
-    }
+      const text = q?.toString().trim();
+      if (text) {
+        whereUser.OR = [
+          { name: { contains: text, mode: "insensitive" } },
+          { email: { contains: text, mode: "insensitive" } },
+        ];
+      }
 
-    whereUser.subscriptions = { some: Object.keys(whereSubsSome).length ? whereSubsSome : {} };
+      whereUser.subscriptions = {
+        some: Object.keys(whereSubsSome).length ? whereSubsSome : {},
+      };
 
-    const take = Math.max(1, Math.min(100, Number(pageSize)));
-    const skip = (Math.max(1, Number(page)) - 1) * take;
+      const take = Math.max(1, Math.min(100, Number(pageSize)));
+      const skip = (Math.max(1, Number(page)) - 1) * take;
 
-    const [total, users] = await Promise.all([
-      prisma.user.count({ where: whereUser }),
-      prisma.user.findMany({
-        where: whereUser,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take,
-        select: {
-          id: true,
-          firstName: true, lastName: true,
-          email: true,
-          role: true,
-          subscriptions: {
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            select: { id: true, plan: true, status: true, startDate: true, endDate: true, updatedAt: true },
+      const [total, users] = await Promise.all([
+        prisma.user.count({ where: whereUser }),
+        prisma.user.findMany({
+          where: whereUser,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            subscriptions: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+              select: {
+                id: true,
+                plan: true,
+                status: true,
+                startDate: true,
+                endDate: true,
+                updatedAt: true,
+              },
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
 
-    const items = users.map((u) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      role: u.role,
-      sub: u.subscriptions?.[0] || null,
-    }));
+      const items = users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        sub: u.subscriptions?.[0] || null,
+      }));
 
-    return res.json({ success: true, data: { total, page: Number(page), pageSize: take, items } });
-  } catch (err) {
-    console.error("❌ /subscribers/list error:", err);
-    return res.status(500).json({ error: "Failed to load list" });
-  }
-});
+      return res.json({
+        success: true,
+        data: { total, page: Number(page), pageSize: take, items },
+      });
+    } catch (err) {
+      console.error("❌ /subscribers/list error:", err);
+      return res.status(500).json({ error: "Failed to load list" });
+    }
+  },
+);
 
 /* ----------------------- USER STATUS & HISTORY ---------------------- */
 // GET /api/subscription/status?userId=UUID
@@ -345,7 +398,9 @@ router.get("/status", verifyToken, async (req, res) => {
     });
   } catch (err) {
     console.error("❌ status error:", err);
-    return res.status(500).json({ error: "Failed to load subscription status" });
+    return res
+      .status(500)
+      .json({ error: "Failed to load subscription status" });
   }
 });
 
@@ -366,7 +421,6 @@ router.get("/", verifyToken, async (req, res) => {
     console.error("❌ history error:", err);
     return res.status(500).json({ error: "Failed to load subscriptions" });
   }
-
 });
 
 // Alias for /subscription/history
@@ -390,42 +444,55 @@ router.get("/history", verifyToken, async (req, res) => {
 
 /* ------------------------ ADMIN: force status ----------------------- */
 // PATCH /api/subscription/id/status
-router.patch("/:id/status", verifyToken, requireRole(["ADMIN", "SUPERADMIN"]), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body || {};
+router.patch(
+  "/:id/status",
+  verifyToken,
+  requireRole(["ADMIN", "SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body || {};
 
-    const allowed = ["ACTIVE", "DEACTIVATED", "EXPIRED"];
-    if (!allowed.includes(String(status))) {
-      return res.status(400).json({ error: "Invalid status value" });
+      const allowed = ["ACTIVE", "DEACTIVATED", "EXPIRED"];
+      if (!allowed.includes(String(status))) {
+        return res.status(400).json({ error: "Invalid status value" });
+      }
+
+      const sub = await prisma.subscription.findUnique({
+        where: { id: String(id) },
+      });
+      if (!sub)
+        return res.status(404).json({ error: "Subscription not found" });
+
+      let data = { status: String(status) };
+
+      if (status === "ACTIVE") {
+        const now = new Date();
+        const ms = (sub.plan === "YEARLY" ? 365 : 30) * 24 * 60 * 60 * 1000;
+        data.startDate = now;
+        data.endDate = new Date(now.getTime() + ms);
+      }
+
+      const updated = await prisma.subscription.update({
+        where: { id: sub.id },
+        data,
+      });
+
+      // Optional: reflect snapshot on User for quick UI badges
+      await prisma.user.update({
+        where: { id: sub.userId },
+        data: { subscriptionState: updated.status },
+      });
+
+      return res.json({ success: true, data: updated });
+    } catch (err) {
+      console.error("❌ /subscription/:id/status error:", err);
+      return res
+        .status(500)
+        .json({ error: "Failed to update subscription status" });
     }
-
-    const sub = await prisma.subscription.findUnique({ where: { id: String(id) } });
-    if (!sub) return res.status(404).json({ error: "Subscription not found" });
-
-    let data = { status: String(status) };
-
-    if (status === "ACTIVE") {
-      const now = new Date();
-      const ms = (sub.plan === "YEARLY" ? 365 : 30) * 24 * 60 * 60 * 1000;
-      data.startDate = now;
-      data.endDate = new Date(now.getTime() + ms);
-    }
-
-    const updated = await prisma.subscription.update({ where: { id: sub.id }, data });
-
-    // Optional: reflect snapshot on User for quick UI badges
-    await prisma.user.update({
-      where: { id: sub.userId },
-      data: { subscriptionState: updated.status },
-    });
-
-    return res.json({ success: true, data: updated });
-  } catch (err) {
-    console.error("❌ /subscription/:id/status error:", err);
-    return res.status(500).json({ error: "Failed to update subscription status" });
-  }
-});
+  },
+);
 
 /* ------------------------ STRIPE CHECKOUT FLOW ---------------------- */
 // POST /api/subscription/stripe/checkout  { userId, plan: "MONTHLY"|"YEARLY" }
@@ -436,7 +503,9 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "userId and plan are required" });
     }
     if (!stripe) {
-      return res.status(500).json({ error: "Stripe is not configured on the server" });
+      return res
+        .status(500)
+        .json({ error: "Stripe is not configured on the server" });
     }
 
     const user = await prisma.user.findUnique({
@@ -449,22 +518,24 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
     if (!priceId) {
       return res
         .status(400)
-        .json({ error: `No Stripe Price configured for ${user.role} ${String(plan).toUpperCase()}` });
+        .json({
+          error: `No Stripe Price configured for ${user.role} ${String(plan).toUpperCase()}`,
+        });
     }
 
-    const FRONTEND_URL = process.env.FRONTEND_URL || "https://curevirtual.vercel.app";
-    const successUrl =
-      `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`;
+    const FRONTEND_URL =
+      process.env.FRONTEND_URL || "https://cure-virtual-2.vercel.app";
+    const successUrl = `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl =
       process.env.STRIPE_CANCEL_URL ||
-      `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=cancel`;
+      `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=cancel`;
 
     // ✅ MOCK CHECKOUT for invalid/placeholder keys
     // If the price ID looks fake (contains * or X), bypass Stripe and create subscription directly.
     if (!priceId || priceId.includes("****") || priceId.includes("XXXX")) {
       console.log("⚠️  Mocking checkout for Price ID:", priceId);
       const mockSessionId = "mock_" + Date.now();
-      
+
       const now = new Date();
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + (plan === "YEARLY" ? 365 : 30));
@@ -483,8 +554,8 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
       });
 
       // Redirect user to success URL immediately
-      return res.json({ 
-        url: successUrl.replace("{CHECKOUT_SESSION_ID}", mockSessionId) 
+      return res.json({
+        url: successUrl.replace("{CHECKOUT_SESSION_ID}", mockSessionId),
       });
     }
 
@@ -528,7 +599,11 @@ async function stripeWebhook(req, res) {
   const sig = req.headers["stripe-signature"];
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
   } catch (err) {
     console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -546,11 +621,18 @@ async function stripeWebhook(req, res) {
         try {
           sub = await stripe.subscriptions.retrieve(subscriptionId);
         } catch (e) {
-          console.warn("⚠️ Could not retrieve subscription from Stripe:", e?.message);
+          console.warn(
+            "⚠️ Could not retrieve subscription from Stripe:",
+            e?.message,
+          );
         }
 
-        const start = sub?.current_period_start ? new Date(sub.current_period_start * 1000) : new Date();
-        const end = sub?.current_period_end ? new Date(sub.current_period_end * 1000) : null;
+        const start = sub?.current_period_start
+          ? new Date(sub.current_period_start * 1000)
+          : new Date();
+        const end = sub?.current_period_end
+          ? new Date(sub.current_period_end * 1000)
+          : null;
 
         await prisma.subscription.updateMany({
           where: { userId, reference: session.id },
@@ -592,7 +674,9 @@ async function stripeWebhook(req, res) {
           where: { reference: String(stripeSub.id) },
           data: {
             status: "DEACTIVATED",
-            endDate: stripeSub.ended_at ? new Date(stripeSub.ended_at * 1000) : new Date(),
+            endDate: stripeSub.ended_at
+              ? new Date(stripeSub.ended_at * 1000)
+              : new Date(),
           },
         });
         break;
