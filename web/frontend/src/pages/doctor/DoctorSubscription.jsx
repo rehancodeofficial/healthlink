@@ -8,16 +8,12 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
-const fmtUSD = (n) =>
-  typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—";
+const fmtUSD = (n) => (typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—");
 
 export default function DoctorSubscription() {
   const role = "DOCTOR";
   const userId = localStorage.getItem("userId");
-  const userName =
-    localStorage.getItem("userName") ||
-    localStorage.getItem("name") ||
-    "Doctor";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
 
   const [prices, setPrices] = useState({ monthlyUsd: null, yearlyUsd: null });
   const [status, setStatus] = useState({
@@ -88,10 +84,7 @@ export default function DoctorSubscription() {
       window.location.href = url; // redirect to Stripe
     } catch (err) {
       console.error(err);
-      const msg =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to start checkout";
+      const msg = err?.response?.data?.error || err?.message || "Failed to start checkout";
       toast.error(msg);
     } finally {
       setProcessing(false);
@@ -102,10 +95,10 @@ export default function DoctorSubscription() {
     status.status === "ACTIVE"
       ? "text-green-400"
       : status.status === "EXPIRED"
-      ? "text-yellow-400"
-      : status.status === "DEACTIVATED"
-      ? "text-red-400"
-      : "text-gray-300";
+        ? "text-yellow-400"
+        : status.status === "DEACTIVATED"
+          ? "text-red-400"
+          : "text-gray-300";
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-main)]/90 text-[var(--text-main)]">
@@ -125,57 +118,52 @@ export default function DoctorSubscription() {
           <h1 className="text-3xl font-bold text-[var(--text-main)]">Subscription</h1>
 
           {/* Status card */}
-          <div className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-between flex-col md:flex-row gap-4">
               <div className="w-full">
                 <div className="text-sm text-[var(--text-soft)]">Current Status</div>
-                <div className={`text-2xl font-semibold ${statusColor}`}>
-                  {status.status}
-                </div>
+                <div className={`text-2xl font-semibold ${statusColor}`}>{status.status}</div>
                 {status.startDate && (
                   <div className="text-[var(--text-muted)] text-sm mt-1">
-                    {status.plan} •{" "}
-                    {new Date(status.startDate).toLocaleDateString()} →{" "}
+                    {status.plan} • {new Date(status.startDate).toLocaleDateString()} →{" "}
                     {new Date(status.endDate).toLocaleDateString()}
                   </div>
                 )}
               </div>
-
-              {/* Pick plan & subscribe */}
-              <div className="w-full md:w-auto flex items-center gap-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="plan"
-                      value="MONTHLY"
-                      checked={plan === "MONTHLY"}
-                      onChange={() => setPlan("MONTHLY")}
-                    />
-                    <span>Monthly — {fmtUSD(Number(prices.monthlyUsd || 0))}</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="plan"
-                      value="YEARLY"
-                      checked={plan === "YEARLY"}
-                      onChange={() => setPlan("YEARLY")}
-                    />
-                    <span>Yearly — {fmtUSD(Number(prices.yearlyUsd || 0))}</span>
-                  </label>
-                </div>
-
-                <button
-                  onClick={handleSubscribe}
-                  disabled={processing}
-                  className="rounded bg-[#027906] hover:bg-[#190366] px-5 py-2 font-semibold disabled:opacity-60"
-                >
-                  {processing ? "Processing..." : "Subscribe / Renew"}
-                </button>
-              </div>
             </div>
-          </div>
+              {/* Pick plan & subscribe */}
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="plan"
+                    value="MONTHLY"
+                    checked={plan === "MONTHLY"}
+                    onChange={() => setPlan("MONTHLY")}
+                  />
+                  <span>Monthly — {fmtUSD(Number(prices.monthlyUsd || 0))}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="plan"
+                    value="YEARLY"
+                    checked={plan === "YEARLY"}
+                    onChange={() => setPlan("YEARLY")}
+                  />
+                  <span>Yearly — {fmtUSD(Number(prices.yearlyUsd || 0))}</span>
+                </label>
+              </div>
+
+              <button
+                onClick={handleSubscribe}
+                disabled={processing}
+                className="rounded bg-[#027906] hover:bg-[#190366] px-5 py-2 font-semibold disabled:opacity-60"
+              >
+                {processing ? "Processing..." : "Subscribe / Renew"}
+              </button>
+            
+          
 
           {/* History */}
           <div className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg">
@@ -234,9 +222,7 @@ export default function DoctorSubscription() {
                                 ).toLocaleDateString()}`
                               : "—"}
                           </td>
-                          <td className="p-3">
-                            {new Date(s.createdAt).toLocaleString()}
-                          </td>
+                          <td className="p-3">{new Date(s.createdAt).toLocaleString()}</td>
                         </tr>
                       );
                     })}
