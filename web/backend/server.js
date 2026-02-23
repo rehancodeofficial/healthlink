@@ -15,9 +15,14 @@ const allowedOrigins = [
   "http://localhost:5175",
   "http://localhost:5176",
   "https://cure-virtual-2.vercel.app",
+  "https://curevirtual-2.vercel.app",
+  "https://curevirtual.vercel.app",
+  "https://cure-virtual-2-git-main-briamstechnologies.vercel.app",
   "https://curevirtual-2-production.up.railway.app",
+  "https://curevirtual-2-production-2656.up.railway.app",
   "https://curevirtual-2-production-6eaa.up.railway.app",
   process.env.FRONTEND_URL,
+  process.env.APP_BASE_URL,
   process.env.RAILWAY_STATIC_URL,
 ].filter(Boolean);
 
@@ -39,8 +44,13 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+app.use(express.json({ limit: "10mb" }));
+
+// ✅ Root Route
+app.get("/", (_req, res) => {
+  res.send("Backend is live on Railway");
+});
 
 // ✅ Health Check
 app.get("/api/health", (_req, res) => {
@@ -201,15 +211,13 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ Server start
-// const { initCleanupJob } = require("./services/cleanup.service");
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+const HOST = "0.0.0.0"; // Required for Railway compatibility
+
+app.listen(PORT, HOST, () => {
   console.log("-------------------------------------------");
-  console.log(`🚀 Server running on port: ${PORT}`);
+  console.log(`🚀 Server running on: http://${HOST}:${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`⏱️  Started at: ${new Date().toISOString()}`);
   console.log("-------------------------------------------");
-
-  // Start the background cleanup job
-  // initCleanupJob();
 });
