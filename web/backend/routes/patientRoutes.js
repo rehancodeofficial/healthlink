@@ -1,10 +1,14 @@
 // FILE: backend/routes/patientRoutes.js
 const express = require("express");
-const prisma = require('../prisma/prismaClient');
+const prisma = require("../prisma/prismaClient");
 const axios = require("axios");
 const Stripe = require("stripe");
-const emailService = require('../services/emailService');
-const { verifyToken, requireRole, verifyOwnerOrAdmin } = require("../middleware/rbac.js");
+const emailService = require("../services/emailService");
+const {
+  verifyToken,
+  requireRole,
+  verifyOwnerOrAdmin,
+} = require("../middleware/rbac.js");
 const { ensureDefaultProfile } = require("../lib/provisionProfile.js");
 
 const router = express.Router();
@@ -13,9 +17,9 @@ const router = express.Router();
 router.use(verifyToken);
 router.use(requireRole(["PATIENT", "DOCTOR", "SUPERADMIN", "ADMIN"])); // Docs can access patient data
 
-
 // ---- Stripe init (safe if not configured) ----
-const stripeSecret = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY || null;
+const stripeSecret =
+  process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY || null;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
 // ---- Helpers ----
@@ -41,15 +45,30 @@ async function getPatientProfileIdByUserId(userId) {
 router.get("/profile", async (req, res) => {
   try {
     const userId = req.user?.id || req.query.userId;
-    if (!userId) return res.status(400).json({ error: "User identity missing" });
+    if (!userId)
+      return res.status(400).json({ error: "User identity missing" });
 
-    const user = await prisma.user.findUnique({ where: { id: String(userId) } });
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    const user = await prisma.user.findUnique({
+      where: { id: String(userId) },
+    });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     let patient = await prisma.patientProfile.findUnique({
       where: { userId: String(userId) },
       include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true, dateOfBirth: true, gender: true } },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            dateOfBirth: true,
+            gender: true,
+          },
+        },
         appointments: true,
         prescriptions: true,
         consultations: true,
@@ -63,7 +82,17 @@ router.get("/profile", async (req, res) => {
       patient = await prisma.patientProfile.findUnique({
         where: { userId: String(userId) },
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, dateOfBirth: true, gender: true } },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              phone: true,
+              dateOfBirth: true,
+              gender: true,
+            },
+          },
           appointments: true,
           prescriptions: true,
           consultations: true,
@@ -71,12 +100,17 @@ router.get("/profile", async (req, res) => {
       });
     }
 
-    if (!patient) return res.status(404).json({ success: false, message: "Profile not found" });
+    if (!patient)
+      return res
+        .status(404)
+        .json({ success: false, message: "Profile not found" });
 
     return res.json({ success: true, data: patient });
   } catch (err) {
     console.error("GET /api/patient/profile error:", err);
-    return res.status(500).json({ success: false, error: "Failed to fetch profile" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch profile" });
   }
 });
 
@@ -168,16 +202,31 @@ router.put("/profile", async (req, res) => {
     });
 
     // Send Notification Email
-    const userForEmail = await prisma.user.findUnique({ where: { id: userId } });
+    const userForEmail = await prisma.user.findUnique({
+      where: { id: userId },
+    });
     if (userForEmail) {
-        emailService.sendProfileUpdateConfirmation(userForEmail, "Patient")
-            .catch(err => console.error("Failed to send profile update email:", err));
+      emailService
+        .sendProfileUpdateConfirmation(userForEmail, "Patient")
+        .catch((err) =>
+          console.error("Failed to send profile update email:", err),
+        );
     }
 
-    return res.json({ success: true, message: "Profile updated successfully", data: updated });
+    return res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updated,
+    });
   } catch (err) {
     console.error("PUT /api/patient/profile error:", err);
-    return res.status(500).json({ success: false, error: "Failed to update profile", details: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        error: "Failed to update profile",
+        details: err.message,
+      });
   }
 });
 
@@ -192,7 +241,9 @@ router.get("/stats", async (req, res) => {
   try {
     const patientUserId = req.user?.id || req.query.patientId;
     if (!patientUserId) {
-      return res.status(400).json({ success: false, error: "Missing patient identity" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing patient identity" });
     }
 
     const patientProfile = await prisma.patientProfile.findUnique({
@@ -216,19 +267,40 @@ router.get("/stats", async (req, res) => {
 
     const pid = patientProfile.id;
 
-    const [totalAppointments, completedAppointments, pendingAppointments] = await Promise.all([
-      prisma.appointment.count({ where: { patientId: pid } }),
-      prisma.appointment.count({ where: { patientId: pid, status: "COMPLETED" } }),
-      prisma.appointment.count({ where: { patientId: pid, status: "PENDING" } }),
-    ]);
+    const [totalAppointments, completedAppointments, pendingAppointments] =
+      await Promise.all([
+        prisma.appointment.count({ where: { patientId: pid } }),
+        prisma.appointment.count({
+          where: { patientId: pid, status: "COMPLETED" },
+        }),
+        prisma.appointment.count({
+          where: { patientId: pid, status: "PENDING" },
+        }),
+      ]);
 
-    const totalPrescriptions = await prisma.prescription.count({ where: { patientId: pid } });
-    const totalConsultations = await prisma.videoConsultation.count({ where: { patientId: pid } });
+    const totalPrescriptions = await prisma.prescription.count({
+      where: { patientId: pid },
+    });
+    const totalConsultations = await prisma.videoConsultation.count({
+      where: { patientId: pid },
+    });
 
     const [apptDocs, consultDocs, rxDocs] = await Promise.all([
-      prisma.appointment.findMany({ where: { patientId: pid }, distinct: ["doctorId"], select: { doctorId: true } }),
-      prisma.videoConsultation.findMany({ where: { patientId: pid }, distinct: ["doctorId"], select: { doctorId: true } }),
-      prisma.prescription.findMany({ where: { patientId: pid }, distinct: ["doctorId"], select: { doctorId: true } }),
+      prisma.appointment.findMany({
+        where: { patientId: pid },
+        distinct: ["doctorId"],
+        select: { doctorId: true },
+      }),
+      prisma.videoConsultation.findMany({
+        where: { patientId: pid },
+        distinct: ["doctorId"],
+        select: { doctorId: true },
+      }),
+      prisma.prescription.findMany({
+        where: { patientId: pid },
+        distinct: ["doctorId"],
+        select: { doctorId: true },
+      }),
     ]);
 
     const doctorSet = new Set([
@@ -250,7 +322,9 @@ router.get("/stats", async (req, res) => {
     });
   } catch (err) {
     console.error("❌ /api/patient/stats error:", err);
-    return res.status(500).json({ success: false, error: "Failed to fetch patient stats" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch patient stats" });
   }
 });
 
@@ -270,8 +344,16 @@ router.get("/all", async (req, res) => {
       prisma.patientProfile.count(),
       prisma.patientProfile.findMany({
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, email: true } },
-          _count: { select: { appointments: true, prescriptions: true, consultations: true } },
+          user: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
+          _count: {
+            select: {
+              appointments: true,
+              prescriptions: true,
+              consultations: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -300,7 +382,13 @@ router.get("/all", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching patients (paginated):", error);
-    res.status(500).json({ success: false, message: "Failed to fetch patients", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch patients",
+        error: error.message,
+      });
   }
 });
 
@@ -313,14 +401,21 @@ router.get("/all", async (req, res) => {
 router.get("/appointments", async (req, res) => {
   try {
     const userId = req.user?.id || req.query.patientId;
-    if (!userId) return res.status(400).json({ error: "Missing patient identity" });
+    if (!userId)
+      return res.status(400).json({ error: "Missing patient identity" });
 
     const pid = await getPatientProfileIdByUserId(userId);
     if (!pid) return res.json([]);
 
     const items = await prisma.appointment.findMany({
       where: { patientId: pid },
-      include: { doctor: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+      include: {
+        doctor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, email: true } },
+          },
+        },
+      },
       orderBy: { appointmentDate: "desc" },
     });
 
@@ -340,14 +435,21 @@ router.post("/appointments", async (req, res) => {
     const { doctorId, appointmentDate, reason, patientId } = req.body;
     const userId = req.user?.id || patientId;
 
-    if (!userId) return res.status(400).json({ error: "Missing patient identity" });
-    if (!doctorId || !appointmentDate) return res.status(400).json({ error: "Missing required fields" });
+    if (!userId)
+      return res.status(400).json({ error: "Missing patient identity" });
+    if (!doctorId || !appointmentDate)
+      return res.status(400).json({ error: "Missing required fields" });
 
     const pid = await getPatientProfileIdByUserId(userId);
-    if (!pid) return res.status(404).json({ error: "Patient profile not found" });
+    if (!pid)
+      return res.status(404).json({ error: "Patient profile not found" });
 
-    const doctor = await prisma.doctorProfile.findUnique({ where: { id: String(doctorId) }, select: { id: true } });
-    if (!doctor) return res.status(404).json({ error: "Doctor profile not found" });
+    const doctor = await prisma.doctorProfile.findUnique({
+      where: { id: String(doctorId) },
+      select: { id: true },
+    });
+    if (!doctor)
+      return res.status(404).json({ error: "Doctor profile not found" });
 
     // ✅ VALIDATE AGAINST DOCTOR'S SCHEDULE
     const apptDate = new Date(appointmentDate);
@@ -369,18 +471,16 @@ router.post("/appointments", async (req, res) => {
             ],
           },
           {
-            AND: [
-              { effectiveFrom: { lte: apptDate } },
-              { effectiveTo: null },
-            ],
+            AND: [{ effectiveFrom: { lte: apptDate } }, { effectiveTo: null }],
           },
         ],
       },
     });
 
     if (schedules.length === 0) {
-      return res.status(400).json({ 
-        error: "Doctor is not available on this day. Please check the doctor's schedule." 
+      return res.status(400).json({
+        error:
+          "Doctor is not available on this day. Please check the doctor's schedule.",
       });
     }
 
@@ -396,7 +496,7 @@ router.post("/appointments", async (req, res) => {
     for (const schedule of schedules) {
       const startMinutes = toMinutes(schedule.startTime);
       const endMinutes = toMinutes(schedule.endTime);
-      
+
       if (apptMinutes >= startMinutes && apptMinutes < endMinutes) {
         isWithinSchedule = true;
         break;
@@ -404,8 +504,8 @@ router.post("/appointments", async (req, res) => {
     }
 
     if (!isWithinSchedule) {
-      return res.status(400).json({ 
-        error: `Doctor is not available at ${apptTime}. Please select a time within the doctor's schedule.` 
+      return res.status(400).json({
+        error: `Doctor is not available at ${apptTime}. Please select a time within the doctor's schedule.`,
       });
     }
 
@@ -419,8 +519,8 @@ router.post("/appointments", async (req, res) => {
     });
 
     if (existingAppt) {
-      return res.status(409).json({ 
-        error: "This time slot is already booked. Please select another time." 
+      return res.status(409).json({
+        error: "This time slot is already booked. Please select another time.",
       });
     }
 
@@ -432,19 +532,32 @@ router.post("/appointments", async (req, res) => {
         reason: reason || null,
         status: "PENDING",
       },
-      include: { doctor: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+      include: {
+        doctor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, email: true } },
+          },
+        },
+      },
     });
 
     // Send confirmation emails
-    const patientUser = await prisma.user.findUnique({ 
-        where: { id: userId },
-        select: { firstName: true, lastName: true, email: true }
+    const patientUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true, email: true },
     });
-    
+
     if (patientUser && created.doctor?.user) {
-        // Run in background, don't await response to avoid blocking
-        emailService.sendAppointmentBookingConfirmation(created, patientUser, created.doctor.user)
-            .catch(err => console.error("Failed to send appointment emails:", err));
+      // Run in background, don't await response to avoid blocking
+      emailService
+        .sendAppointmentBookingConfirmation(
+          created,
+          patientUser,
+          created.doctor.user,
+        )
+        .catch((err) =>
+          console.error("Failed to send appointment emails:", err),
+        );
     }
 
     return res.status(201).json(created);
@@ -454,14 +567,14 @@ router.post("/appointments", async (req, res) => {
   }
 });
 
-
 /**
  * PATCH /api/patient/appointments/:id/cancel
  */
 router.patch("/appointments/:id/cancel", async (req, res) => {
   try {
     const apptId = String(req.params.id);
-    const userId = req.user?.id || req.query.patientId || req.body.patientId || null;
+    const userId =
+      req.user?.id || req.query.patientId || req.body.patientId || null;
 
     console.log("🔍 Cancel request - apptId:", apptId, "userId:", userId);
 
@@ -469,15 +582,23 @@ router.patch("/appointments/:id/cancel", async (req, res) => {
       where: { id: apptId },
       select: { id: true, status: true, patientId: true },
     });
-    
+
     console.log("🔍 Found appointment:", appt);
-    
+
     if (!appt) return res.status(404).json({ error: "Appointment not found" });
 
     if (userId) {
       const pid = await getPatientProfileIdByUserId(userId);
-      console.log("🔍 Patient profile ID:", pid, "Appointment patientId:", appt.patientId);
-      if (!pid || appt.patientId !== pid) return res.status(403).json({ error: "Not allowed to cancel this appointment" });
+      console.log(
+        "🔍 Patient profile ID:",
+        pid,
+        "Appointment patientId:",
+        appt.patientId,
+      );
+      if (!pid || appt.patientId !== pid)
+        return res
+          .status(403)
+          .json({ error: "Not allowed to cancel this appointment" });
     }
 
     if (["CANCELLED", "COMPLETED"].includes(appt.status)) {
@@ -494,7 +615,9 @@ router.patch("/appointments/:id/cancel", async (req, res) => {
   } catch (err) {
     console.error("❌ PATCH /patient/appointments/:id/cancel error:", err);
     console.error("❌ Error stack:", err.stack);
-    return res.status(500).json({ error: "Failed to cancel appointment", details: err.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to cancel appointment", details: err.message });
   }
 });
 
@@ -507,14 +630,28 @@ router.patch("/appointments/:id/cancel", async (req, res) => {
 router.get("/prescriptions", async (req, res) => {
   try {
     const userId = req.user?.id || req.query.patientId;
-    if (!userId) return res.status(400).json({ error: "patientId is required" });
+    if (!userId)
+      return res.status(400).json({ error: "patientId is required" });
 
     const pid = await getPatientProfileIdByUserId(userId);
     if (!pid) return res.json([]);
 
     const prescriptions = await prisma.prescription.findMany({
       where: { patientId: pid },
-      include: { doctor: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } } },
+      include: {
+        doctor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -535,14 +672,28 @@ router.get("/prescriptions", async (req, res) => {
 router.get("/video-calls", async (req, res) => {
   try {
     const userId = req.user?.id || req.query.patientId;
-    if (!userId) return res.status(400).json({ error: "patientId is required" });
+    if (!userId)
+      return res.status(400).json({ error: "patientId is required" });
 
     const pid = await getPatientProfileIdByUserId(userId);
     if (!pid) return res.json([]);
 
     const calls = await prisma.videoConsultation.findMany({
       where: { patientId: pid },
-      include: { doctor: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } } },
+      include: {
+        doctor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { scheduledAt: "desc" },
     });
 
@@ -566,7 +717,13 @@ router.get("/subscription", async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: String(uid) },
-      select: { id: true, firstName: true, lastName: true, email: true, subscription: true },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        subscription: true,
+      },
     });
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -589,7 +746,10 @@ router.get("/subscription", async (req, res) => {
 router.post("/subscription/checkout/paystack", async (req, res) => {
   try {
     const { patientId, amount, currency = "NGN", plan } = req.body;
-    if (!patientId || !amount) return res.status(400).json({ error: "patientId and amount are required" });
+    if (!patientId || !amount)
+      return res
+        .status(400)
+        .json({ error: "patientId and amount are required" });
 
     const user = await prisma.user.findUnique({
       where: { id: String(patientId) },
@@ -598,12 +758,15 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-    if (!PAYSTACK_SECRET_KEY) return res.status(500).json({ error: "PAYSTACK_SECRET_KEY not configured" });
+    if (!PAYSTACK_SECRET_KEY)
+      return res
+        .status(500)
+        .json({ error: "PAYSTACK_SECRET_KEY not configured" });
 
     const reference = `cv_sub_${user.id}_${Date.now()}`;
     const callback_url =
       process.env.PAYSTACK_CALLBACK_URL ||
-      `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription`;
+      `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription`;
 
     // Pending payment record
     const pending = await prisma.subscriptionPayment.create({
@@ -625,20 +788,36 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
         amount: pending.amount,
         reference,
         callback_url,
-        metadata: { userId: user.id, plan: plan || "SUBSCRIPTION", origin: "curevirtual" },
+        metadata: {
+          userId: user.id,
+          plan: plan || "SUBSCRIPTION",
+          origin: "curevirtual",
+        },
       },
-      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`, "Content-Type": "application/json" } }
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      },
     );
 
     const data = initResp?.data?.data;
     if (!data?.authorization_url) {
-      return res.status(500).json({ error: "Failed to initialize Paystack payment" });
+      return res
+        .status(500)
+        .json({ error: "Failed to initialize Paystack payment" });
     }
 
     return res.json({ authorization_url: data.authorization_url, reference });
   } catch (err) {
-    console.error("❌ POST /subscription/checkout/paystack error:", err?.response?.data || err);
-    return res.status(500).json({ error: "Failed to initialize Paystack payment" });
+    console.error(
+      "❌ POST /subscription/checkout/paystack error:",
+      err?.response?.data || err,
+    );
+    return res
+      .status(500)
+      .json({ error: "Failed to initialize Paystack payment" });
   }
 });
 
@@ -648,14 +827,21 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
 router.get("/subscription/verify/paystack", async (req, res) => {
   try {
     const { reference } = req.query;
-    if (!reference) return res.status(400).json({ error: "reference is required" });
+    if (!reference)
+      return res.status(400).json({ error: "reference is required" });
 
     const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-    if (!PAYSTACK_SECRET_KEY) return res.status(500).json({ error: "PAYSTACK_SECRET_KEY not configured" });
+    if (!PAYSTACK_SECRET_KEY)
+      return res
+        .status(500)
+        .json({ error: "PAYSTACK_SECRET_KEY not configured" });
 
-    const verifyResp = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
-    });
+    const verifyResp = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+      },
+    );
 
     const v = verifyResp?.data?.data;
     if (!v) return res.status(500).json({ error: "Unable to verify payment" });
@@ -664,7 +850,8 @@ router.get("/subscription/verify/paystack", async (req, res) => {
       where: { reference: String(reference) },
       select: { id: true, userId: true },
     });
-    if (!payment) return res.status(404).json({ error: "Payment record not found" });
+    if (!payment)
+      return res.status(404).json({ error: "Payment record not found" });
 
     const status = v.status === "success" ? "SUCCESS" : "FAILED";
 
@@ -682,7 +869,10 @@ router.get("/subscription/verify/paystack", async (req, res) => {
 
     return res.json({ status });
   } catch (err) {
-    console.error("❌ GET /subscription/verify/paystack error:", err?.response?.data || err);
+    console.error(
+      "❌ GET /subscription/verify/paystack error:",
+      err?.response?.data || err,
+    );
     return res.status(500).json({ error: "Verification failed" });
   }
 });
@@ -693,10 +883,12 @@ router.get("/subscription/verify/paystack", async (req, res) => {
  */
 router.post("/subscription/checkout/stripe", async (req, res) => {
   try {
-    if (!stripe) return res.status(500).json({ error: "Stripe not configured" });
+    if (!stripe)
+      return res.status(500).json({ error: "Stripe not configured" });
 
     const { patientId } = req.body;
-    if (!patientId) return res.status(400).json({ error: "patientId is required" });
+    if (!patientId)
+      return res.status(400).json({ error: "patientId is required" });
 
     const user = await prisma.user.findUnique({
       where: { id: String(patientId) },
@@ -705,7 +897,8 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const priceId = process.env.STRIPE_PRICE_ID;
-    if (!priceId) return res.status(500).json({ error: "STRIPE_PRICE_ID not configured" });
+    if (!priceId)
+      return res.status(500).json({ error: "STRIPE_PRICE_ID not configured" });
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -713,10 +906,10 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
       customer_email: user.email,
       success_url:
         process.env.STRIPE_SUCCESS_URL ||
-        `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         process.env.STRIPE_CANCEL_URL ||
-        `${process.env.APP_BASE_URL || "https://curevirtual.vercel.app"}/subscription?status=cancel`,
+        `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=cancel`,
       metadata: { userId: user.id },
     });
 
@@ -745,10 +938,12 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
  */
 router.get("/subscription/verify/stripe", async (req, res) => {
   try {
-    if (!stripe) return res.status(500).json({ error: "Stripe not configured" });
+    if (!stripe)
+      return res.status(500).json({ error: "Stripe not configured" });
 
     const { session_id } = req.query;
-    if (!session_id) return res.status(400).json({ error: "session_id is required" });
+    if (!session_id)
+      return res.status(400).json({ error: "session_id is required" });
 
     const session = await stripe.checkout.sessions.retrieve(String(session_id));
     if (!session) return res.status(404).json({ error: "Session not found" });
@@ -757,9 +952,11 @@ router.get("/subscription/verify/stripe", async (req, res) => {
       where: { reference: session.id },
       select: { id: true, userId: true },
     });
-    if (!payment) return res.status(404).json({ error: "Payment record not found" });
+    if (!payment)
+      return res.status(404).json({ error: "Payment record not found" });
 
-    const ok = session.status === "complete" && session.payment_status === "paid";
+    const ok =
+      session.status === "complete" && session.payment_status === "paid";
     const status = ok ? "SUCCESS" : "FAILED";
 
     await prisma.subscriptionPayment.update({
@@ -788,7 +985,8 @@ router.get("/subscription/verify/stripe", async (req, res) => {
 router.post("/subscription/cancel", async (req, res) => {
   try {
     const { patientId } = req.body;
-    if (!patientId) return res.status(400).json({ error: "patientId is required" });
+    if (!patientId)
+      return res.status(400).json({ error: "patientId is required" });
 
     await prisma.user.update({
       where: { id: String(patientId) },
@@ -816,7 +1014,9 @@ router.get("/profile/:id", async (req, res) => {
     const patient = await prisma.patientProfile.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
         appointments: true,
         prescriptions: true,
         consultations: true,
@@ -824,13 +1024,25 @@ router.get("/profile/:id", async (req, res) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ success: false, message: "Patient not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
     }
 
-    res.json({ success: true, message: "Patient fetched successfully", data: patient });
+    res.json({
+      success: true,
+      message: "Patient fetched successfully",
+      data: patient,
+    });
   } catch (error) {
     console.error("Error fetching patient:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch patient", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch patient",
+        error: error.message,
+      });
   }
 });
 
@@ -845,14 +1057,19 @@ router.get("/profile/:id", async (req, res) => {
 router.get("/messages/inbox", async (req, res) => {
   try {
     const { patientId } = req.query;
-    if (!patientId) return res.status(400).json({ error: "patientId is required" });
+    if (!patientId)
+      return res.status(400).json({ error: "patientId is required" });
 
     const msgs = await prisma.message.findMany({
       where: { receiverId: String(patientId) },
       orderBy: { createdAt: "desc" },
       include: {
-        sender: { select: { id: true, firstName: true, lastName: true, email: true } },
-        receiver: { select: { id: true, firstName: true, lastName: true, email: true } },
+        sender: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        receiver: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
       },
     });
 
@@ -877,13 +1094,21 @@ router.post("/messages/send", async (req, res) => {
   try {
     const { senderId, receiverId, content } = req.body || {};
     if (!senderId || !receiverId || !content) {
-      return res.status(400).json({ error: "senderId, receiverId and content are required" });
+      return res
+        .status(400)
+        .json({ error: "senderId, receiverId and content are required" });
     }
 
     // Basic check: ensure both users exist (optional but helpful)
     const [sender, receiver] = await Promise.all([
-      prisma.user.findUnique({ where: { id: String(senderId) }, select: { id: true } }),
-      prisma.user.findUnique({ where: { id: String(receiverId) }, select: { id: true } }),
+      prisma.user.findUnique({
+        where: { id: String(senderId) },
+        select: { id: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: String(receiverId) },
+        select: { id: true },
+      }),
     ]);
     if (!sender || !receiver) {
       return res.status(400).json({ error: "Invalid sender or receiver" });
@@ -918,7 +1143,8 @@ router.patch("/messages/read/:id", async (req, res) => {
       select: { id: true, receiverId: true },
     });
     if (!found) return res.status(404).json({ error: "Message not found" });
-    if (found.receiverId !== userId) return res.status(403).json({ error: "Not allowed" });
+    if (found.receiverId !== userId)
+      return res.status(403).json({ error: "Not allowed" });
 
     const updated = await prisma.message.update({
       where: { id },
@@ -930,7 +1156,6 @@ router.patch("/messages/read/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to mark read" });
   }
 });
-
 
 // DELETE /api/patient/messages/delete/:id?userId=<User.id>
 router.delete("/messages/delete/:id", async (req, res) => {
@@ -967,14 +1192,14 @@ router.put("/profile", verifyToken, async (req, res) => {
   try {
     console.log("🔍 PUT /profile - req.user:", req.user);
     console.log("🔍 PUT /profile - req.body.userId:", req.body.userId);
-    
+
     const userId = req.user?.id || req.body.userId;
     console.log("🔍 PUT /profile BODY:", JSON.stringify(req.body, null, 2));
 
     const {
       firstName, // ✅ Extract Name
-      lastName,  // ✅ Extract Name
-      phone,     // ✅ Extract Phone
+      lastName, // ✅ Extract Name
+      phone, // ✅ Extract Phone
       dateOfBirth,
       gender,
       bloodGroup,
@@ -995,14 +1220,20 @@ router.put("/profile", verifyToken, async (req, res) => {
     } = req.body || {};
 
     // Sanitize medicalRecordNumber: convert empty string to null to avoid unique constraint violations
-    const finalMedicalRecordNumber = medicalRecordNumber && medicalRecordNumber.trim() !== "" 
-      ? medicalRecordNumber 
-      : null;
+    const finalMedicalRecordNumber =
+      medicalRecordNumber && medicalRecordNumber.trim() !== ""
+        ? medicalRecordNumber
+        : null;
 
     console.log("🔍 Extracted userId:", userId);
-    
+
     if (!userId) {
-      console.error("❌ userId is missing - req.user:", req.user, "req.body.userId:", req.body.userId);
+      console.error(
+        "❌ userId is missing - req.user:",
+        req.user,
+        "req.body.userId:",
+        req.body.userId,
+      );
       return res.status(400).json({ error: "userId is required" });
     }
 
@@ -1016,36 +1247,41 @@ router.put("/profile", verifyToken, async (req, res) => {
       "AB-": "AB_NEGATIVE",
       "O+": "O_POSITIVE",
       "O-": "O_NEGATIVE",
-      "UNKNOWN": "UNKNOWN",
-      "A_POS": "A_POSITIVE",
-      "A_NEG": "A_NEGATIVE",
-      "B_POS": "B_POSITIVE",
-      "B_NEG": "B_NEGATIVE",
-      "AB_POS": "AB_POSITIVE",
-      "AB_NEG": "AB_NEGATIVE",
-      "O_POS": "O_POSITIVE",
-      "O_NEG": "O_NEGATIVE",
+      UNKNOWN: "UNKNOWN",
+      A_POS: "A_POSITIVE",
+      A_NEG: "A_NEGATIVE",
+      B_POS: "B_POSITIVE",
+      B_NEG: "B_NEGATIVE",
+      AB_POS: "AB_POSITIVE",
+      AB_NEG: "AB_NEGATIVE",
+      O_POS: "O_POSITIVE",
+      O_NEG: "O_NEGATIVE",
     };
     const mappedBlood = bloodMap[bloodGroup] || bloodGroup;
 
     // Map Gender from frontend (Male, Female) to Prisma Enum (MALE, FEMALE)
     const genderMap = {
-      "Male": "MALE",
-      "Female": "FEMALE",
-      "Other": "OTHER",
-      "MALE": "MALE",
-      "FEMALE": "FEMALE",
-      "OTHER": "OTHER"
+      Male: "MALE",
+      Female: "FEMALE",
+      Other: "OTHER",
+      MALE: "MALE",
+      FEMALE: "FEMALE",
+      OTHER: "OTHER",
     };
     const mappedGender = genderMap[gender] || gender;
 
-    console.log("🔍 Mapped values - Blood:", mappedBlood, "Gender:", mappedGender);
+    console.log(
+      "🔍 Mapped values - Blood:",
+      mappedBlood,
+      "Gender:",
+      mappedGender,
+    );
 
     // Prepare User update data
     const userData = {
       ...(firstName ? { firstName } : {}), // ✅ Update Name
-      ...(lastName ? { lastName } : {}),   // ✅ Update Name
-      ...(phone ? { phone } : {}),         // ✅ Update Phone
+      ...(lastName ? { lastName } : {}), // ✅ Update Name
+      ...(phone ? { phone } : {}), // ✅ Update Phone
       ...(dateOfBirth ? { dateOfBirth: new Date(dateOfBirth) } : {}),
       ...(mappedGender ? { gender: mappedGender } : {}),
     };
@@ -1059,7 +1295,7 @@ router.put("/profile", verifyToken, async (req, res) => {
         prisma.user.update({
           where: { id: String(userId) },
           data: userData,
-        })
+        }),
       );
     }
 
@@ -1102,15 +1338,19 @@ router.put("/profile", verifyToken, async (req, res) => {
           insuranceProvider: insuranceProvider || "",
           insuranceMemberId: insuranceMemberId || "",
         },
-      })
+      }),
     );
 
     // Execute transaction
     const results = await prisma.$transaction(operations);
-    
+
     // Extract results (order depends on whether user update was included)
-    const updatedUser = Object.keys(userData).length > 0 ? results[0] : await prisma.user.findUnique({ where: { id: String(userId) } });
-    const updatedProfile = Object.keys(userData).length > 0 ? results[1] : results[0];
+    const updatedUser =
+      Object.keys(userData).length > 0
+        ? results[0]
+        : await prisma.user.findUnique({ where: { id: String(userId) } });
+    const updatedProfile =
+      Object.keys(userData).length > 0 ? results[1] : results[0];
 
     console.log("✅ Profile updated successfully for userId:", userId);
 
@@ -1124,23 +1364,27 @@ router.put("/profile", verifyToken, async (req, res) => {
         email: updatedUser.email,
         phone: updatedUser.phone, // ✅ Return Phone
         dateOfBirth: updatedUser.dateOfBirth,
-        gender: updatedUser.gender
-      }
+        gender: updatedUser.gender,
+      },
     };
 
     // Send email notification (fire and forget)
-    emailService.sendProfileUpdateConfirmation(updatedUser, "Patient")
-        .catch(err => console.error("Failed to send profile update email:", err));
+    emailService
+      .sendProfileUpdateConfirmation(updatedUser, "Patient")
+      .catch((err) =>
+        console.error("Failed to send profile update email:", err),
+      );
 
     return res.json({ success: true, data: finalProfile });
   } catch (e) {
     console.error("❌ patient profile PUT error:", e);
     console.error("❌ Error stack:", e.stack);
     // Prisma validation errors usually have a message property
-    return res.status(500).json({ error: e.message || "Failed to save profile" });
+    return res
+      .status(500)
+      .json({ error: e.message || "Failed to save profile" });
   }
 });
-
 
 // PATCH /api/patient/select-pharmacy
 // body: { patientUserId, pharmacyId }
@@ -1148,18 +1392,25 @@ router.patch("/select-pharmacy", async (req, res) => {
   try {
     const { patientUserId, pharmacyId } = req.body || {};
     if (!patientUserId || !pharmacyId)
-      return res.status(400).json({ error: "patientUserId and pharmacyId required" });
+      return res
+        .status(400)
+        .json({ error: "patientUserId and pharmacyId required" });
 
-    const pat = await prisma.patientProfile.findUnique({ where: { userId: String(patientUserId) } });
-    if (!pat) return res.status(404).json({ error: "Patient profile not found" });
+    const pat = await prisma.patientProfile.findUnique({
+      where: { userId: String(patientUserId) },
+    });
+    if (!pat)
+      return res.status(404).json({ error: "Patient profile not found" });
 
-    const pharm = await prisma.pharmacyProfile.findUnique({ where: { id: String(pharmacyId) } });
+    const pharm = await prisma.pharmacyProfile.findUnique({
+      where: { id: String(pharmacyId) },
+    });
     if (!pharm) return res.status(404).json({ error: "Pharmacy not found" });
 
     const updated = await prisma.patientProfile.update({
       where: { id: pat.id },
       data: { selectedPharmacyId: pharm.id },
-      include: { selectedPharmacy: true }
+      include: { selectedPharmacy: true },
     });
 
     return res.json({ success: true, data: updated });
@@ -1169,9 +1420,7 @@ router.patch("/select-pharmacy", async (req, res) => {
   }
 });
 
-
 module.exports = router;
-
 
 /* ==================================================
    PHARMACY ORDERING & MANAGEMENT
@@ -1186,14 +1435,14 @@ router.get("/pharmacies", async (req, res) => {
     const pharmacies = await prisma.pharmacyProfile.findMany({
       include: {
         user: {
-          select: { id: true, firstName: true, lastName: true, email: true }
-        }
-      }
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
     });
 
     res.json({
       success: true,
-      data: pharmacies.map(p => ({
+      data: pharmacies.map((p) => ({
         id: p.id,
         name: p.displayName || p.user.name,
         licenseNumber: p.licenseNumber,
@@ -1206,8 +1455,8 @@ router.get("/pharmacies", async (req, res) => {
         latitude: p.latitude,
         longitude: p.longitude,
         openingHours: p.openingHours,
-        services: p.services
-      }))
+        services: p.services,
+      })),
     });
   } catch (err) {
     console.error("Failed to fetch pharmacies:", err);
@@ -1225,11 +1474,13 @@ router.patch("/profile/pharmacy", async (req, res) => {
     const { pharmacyId } = req.body;
 
     if (!patientUserId || !pharmacyId) {
-      return res.status(400).json({ error: "Missing patientUserId or pharmacyId" });
+      return res
+        .status(400)
+        .json({ error: "Missing patientUserId or pharmacyId" });
     }
 
     const patientProfile = await prisma.patientProfile.findUnique({
-      where: { userId: patientUserId }
+      where: { userId: patientUserId },
     });
 
     if (!patientProfile) {
@@ -1237,7 +1488,7 @@ router.patch("/profile/pharmacy", async (req, res) => {
     }
 
     const pharmacy = await prisma.pharmacyProfile.findUnique({
-      where: { id: pharmacyId }
+      where: { id: pharmacyId },
     });
 
     if (!pharmacy) {
@@ -1247,7 +1498,7 @@ router.patch("/profile/pharmacy", async (req, res) => {
     const updated = await prisma.patientProfile.update({
       where: { id: patientProfile.id },
       data: { selectedPharmacyId: pharmacyId },
-      include: { selectedPharmacy: true }
+      include: { selectedPharmacy: true },
     });
 
     res.json({ success: true, data: updated });
@@ -1267,7 +1518,7 @@ router.get("/profile/pharmacy", async (req, res) => {
 
     const patientProfile = await prisma.patientProfile.findUnique({
       where: { userId: patientUserId },
-      include: { selectedPharmacy: true }
+      include: { selectedPharmacy: true },
     });
 
     if (!patientProfile) {
@@ -1295,12 +1546,14 @@ router.post("/pharmacy/order", async (req, res) => {
     const { prescriptionId } = req.body;
 
     if (!patientUserId || !prescriptionId) {
-      return res.status(400).json({ error: "Missing patientUserId or prescriptionId" });
+      return res
+        .status(400)
+        .json({ error: "Missing patientUserId or prescriptionId" });
     }
 
     // Get patient's selected pharmacy
     const patientProfile = await prisma.patientProfile.findUnique({
-      where: { userId: patientUserId }
+      where: { userId: patientUserId },
     });
 
     if (!patientProfile?.selectedPharmacyId) {
@@ -1312,9 +1565,9 @@ router.post("/pharmacy/order", async (req, res) => {
       where: { id: prescriptionId },
       data: {
         pharmacyId: patientProfile.selectedPharmacyId,
-        dispatchStatus: "SENT"
+        dispatchStatus: "SENT",
       },
-      include: { pharmacy: true, doctor: true, patient: true }
+      include: { pharmacy: true, doctor: true, patient: true },
     });
 
     res.json({ success: true, data: updated });
@@ -1325,5 +1578,3 @@ router.post("/pharmacy/order", async (req, res) => {
 });
 
 module.exports = router;
-
-
