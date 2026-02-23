@@ -9,7 +9,7 @@ import OTPVerification from "../components/OTPVerification";
 import "./RegisterPage.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-2656.up.railway.app/api";
+  import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-ee33.up.railway.app/api";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
