@@ -14,7 +14,6 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5175",
   "http://localhost:5176",
-  "https://curevirtual.vercel.app",
   "https://cure-virtual-2.vercel.app",
   "https://curevirtual-2-production.up.railway.app",
   "https://curevirtual-2-production-6eaa.up.railway.app",
