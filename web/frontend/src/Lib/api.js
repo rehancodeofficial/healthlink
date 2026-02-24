@@ -6,7 +6,10 @@ import axios from "axios";
    ============================================================ */
 
 const api = axios.create({
-  baseURL: import.meta.env.DEV ? "http://localhost:5001/api" : (import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-6eaa.up.railway.app/api"),
+  baseURL: import.meta.env.DEV
+    ? "http://localhost:5001/api"
+    : import.meta.env.VITE_API_BASE_URL ||
+      "https://curevirtual-2-production-2656.up.railway.app/api",
   headers: {
     "Content-Type": "application/json",
   },
