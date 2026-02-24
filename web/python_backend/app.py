@@ -24,7 +24,7 @@ def get_doctors_data():
     doctors_info = ""
     try:
         # Get doctor data from the internal Node.js API
-        response = requests.get('http://localhost:5001/api/internal/doctors', timeout=5)
+        response = requests.get('https://curevirtual-2-production-2656.up.railway.app/api/internal/doctors', timeout=5)
         if response.status_code == 200:
             doctors = response.json()
             print(f"Fetched {len(doctors)} doctors from database")
