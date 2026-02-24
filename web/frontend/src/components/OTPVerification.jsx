@@ -1,13 +1,15 @@
 // FILE: frontend/src/components/OTPVerification.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import './OTPVerification.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "./OTPVerification.css";
 
-const API_BASE_URL = import.meta.env.DEV ? "http://localhost:5001/api" : (import.meta.env.VITE_API_BASE_URL || 'https://curevirtual-2-production-6eaa.up.railway.app/api');
+const API_BASE_URL = import.meta.env.DEV
+  ? "https://curevirtual-2-production-2656.up.railway.app/api"
+  : import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-2656.up.railway.app/api";
 
 const OTPVerification = ({ email, onVerified, onBack }) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
@@ -21,7 +23,7 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     }
 
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           setCanResend(true);
           return 0;
@@ -36,7 +38,7 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleOtpChange = (index, value) => {
@@ -55,27 +57,27 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
 
   const handleKeyDown = (index, e) => {
     // Handle backspace
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').trim();
-    
+    const pastedData = e.clipboardData.getData("text").trim();
+
     if (/^\d{6}$/.test(pastedData)) {
-      const newOtp = pastedData.split('');
+      const newOtp = pastedData.split("");
       setOtp(newOtp);
-      document.getElementById('otp-5')?.focus();
+      document.getElementById("otp-5")?.focus();
     }
   };
 
   const handleVerify = async () => {
-    const otpValue = otp.join('');
-    
+    const otpValue = otp.join("");
+
     if (otpValue.length !== 6) {
-      toast.error('Please enter all 6 digits');
+      toast.error("Please enter all 6 digits");
       return;
     }
 
@@ -87,18 +89,18 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
         otp: otpValue,
       });
 
-      toast.success(response.data.message || 'Email verified successfully!');
-      
+      toast.success(response.data.message || "Email verified successfully!");
+
       if (onVerified) {
         onVerified();
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.error || 'Verification failed';
+      const errorMsg = error.response?.data?.error || "Verification failed";
       toast.error(errorMsg);
-      
+
       // Clear OTP on error
-      setOtp(['', '', '', '', '', '']);
-      document.getElementById('otp-0')?.focus();
+      setOtp(["", "", "", "", "", ""]);
+      document.getElementById("otp-0")?.focus();
     } finally {
       setLoading(false);
     }
@@ -112,13 +114,13 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
         email,
       });
 
-      toast.success(response.data.message || 'OTP sent successfully!');
+      toast.success(response.data.message || "OTP sent successfully!");
       setTimeLeft(300); // Reset timer
       setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
-      document.getElementById('otp-0')?.focus();
+      setOtp(["", "", "", "", "", ""]);
+      document.getElementById("otp-0")?.focus();
     } catch (error) {
-      const errorMsg = error.response?.data?.error || 'Failed to resend OTP';
+      const errorMsg = error.response?.data?.error || "Failed to resend OTP";
       toast.error(errorMsg);
     } finally {
       setResending(false);
@@ -129,14 +131,25 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     <div className="otp-verification-container">
       <div className="otp-verification-card">
         <div className="otp-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+            />
           </svg>
         </div>
 
         <h2>Verify Your Email</h2>
         <p className="otp-description">
-          We've sent a 6-digit verification code to<br />
+          We've sent a 6-digit verification code to
+          <br />
           <strong>{email}</strong>
         </p>
 
@@ -163,27 +176,19 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
           </p>
         )}
 
-        {canResend && (
-          <p className="otp-expired">
-            Code has expired. Please request a new one.
-          </p>
-        )}
+        {canResend && <p className="otp-expired">Code has expired. Please request a new one.</p>}
 
         <button
           onClick={handleVerify}
-          disabled={loading || otp.join('').length !== 6}
+          disabled={loading || otp.join("").length !== 6}
           className="btn-verify"
         >
-          {loading ? 'Verifying...' : 'Verify Email'}
+          {loading ? "Verifying..." : "Verify Email"}
         </button>
 
         <div className="otp-actions">
-          <button
-            onClick={handleResend}
-            disabled={resending || !canResend}
-            className="btn-resend"
-          >
-            {resending ? 'Sending...' : 'Resend Code'}
+          <button onClick={handleResend} disabled={resending || !canResend} className="btn-resend">
+            {resending ? "Sending..." : "Resend Code"}
           </button>
 
           {onBack && (
