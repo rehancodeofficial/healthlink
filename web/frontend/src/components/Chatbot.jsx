@@ -39,9 +39,9 @@ export default function Chatbot() {
       // Actually, let's use the existing 'api' if we can, but 'api' likely has a baseURL set to the Node backend.
       // So detailed fetch is safer.
       const chatbotUrl = import.meta.env.DEV
-        ? "http://localhost:5001/api/chatbot/chat"
+        ? "https://curevirtual-2-production-2656.up.railway.app/api/chatbot/chat"
         : import.meta.env.VITE_CHATBOT_URL ||
-          "https://curevirtual-2-production-6eaa.up.railway.app/api/chatbot/chat";
+          "https://curevirtual-2-production-2656.up.railway.app/api/chatbot/chat";
       const response = await fetch(chatbotUrl, {
         method: "POST",
         headers: {
