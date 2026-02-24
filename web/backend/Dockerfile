@@ -17,9 +17,9 @@ COPY . .
 RUN npx prisma generate
 
 ENV NODE_ENV=production
-# Update port to 5001 as requested
-EXPOSE 5001
+# Default port if not provided by Railway
 ENV PORT=5001
+EXPOSE 5001
 
 # Start the application
 CMD ["npm", "start"]
