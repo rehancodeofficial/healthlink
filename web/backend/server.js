@@ -20,6 +20,7 @@ const allowedOrigins = [
   "https://cure-virtual-2-git-main-briamstechnologies.vercel.app",
   "https://curevirtual-2-production.up.railway.app",
   "https://curevirtual-2-production-2656.up.railway.app",
+  "https://curevirtual-2-production-ee33.up.railway.app",
   "https://curevirtual-2-production-6eaa.up.railway.app",
   process.env.FRONTEND_URL,
   process.env.APP_BASE_URL,
