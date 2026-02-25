@@ -203,7 +203,7 @@ docker-compose up -d
 2. **Register a new user:**
 
 ```bash
-curl -X POST https://curevirtual-2-production-2656.up.railway.app/api/auth/register \
+curl -X POST https://curevirtual-2-production-ee33.up.railway.app/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Test User",
@@ -218,7 +218,7 @@ curl -X POST https://curevirtual-2-production-2656.up.railway.app/api/auth/regis
 4. **Verify the OTP:**
 
 ```bash
-curl -X POST https://curevirtual-2-production-2656.up.railway.app/api/otp/verify \
+curl -X POST https://curevirtual-2-production-ee33.up.railway.app/api/otp/verify \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -257,7 +257,7 @@ For production, set up a cron job to clean expired OTPs:
 
 ```bash
 # Add to crontab (runs every hour)
-0 * * * * curl -X DELETE https://curevirtual-2-production-2656.up.railway.app/api/otp/cleanup
+0 * * * * curl -X DELETE https://curevirtual-2-production-ee33.up.railway.app/api/otp/cleanup
 ```
 
 Or use a Node.js scheduler in your backend:
