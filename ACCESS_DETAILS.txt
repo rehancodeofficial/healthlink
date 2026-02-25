@@ -1,0 +1,17 @@
+SUPER ADMIN CREDENTIALS:
+-----------------------
+Email: superadmin@curevirtual.com
+Password: Curevirtual@123
+Role: SUPERADMIN
+
+OTHER USERS (Password: 123456):
+-------------------------------
+admin@curevirtual.com
+support@curevirtual.com
+patient1@curevirtual.com
+patient2@curevirtual.com
+patient3@curevirtual.com
+doctor1@curevirtual.com
+doctor2@curevirtual.com
+doctor3@curevirtual.com
+pharmacy@curevirtual.com
