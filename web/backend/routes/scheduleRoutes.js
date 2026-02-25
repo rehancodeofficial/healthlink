@@ -1,6 +1,6 @@
 // FILE: backend/routes/scheduleRoutes.js
 const express = require("express");
-const prisma = require('../prisma/prismaClient');
+const prisma = require("../prisma/prismaClient");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
 const router = express.Router();
@@ -28,12 +28,12 @@ function hasTimeConflict(start1, end1, start2, end2) {
     const [h, m] = time.split(":").map(Number);
     return h * 60 + m;
   };
-  
+
   const s1 = toMinutes(start1);
   const e1 = toMinutes(end1);
   const s2 = toMinutes(start2);
   const e2 = toMinutes(end2);
-  
+
   // Check if intervals overlap
   return s1 < e2 && s2 < e1;
 }
@@ -43,74 +43,99 @@ function hasTimeConflict(start1, end1, start2, end2) {
  * Create a new availability slot
  * Body: { doctorId: User.id, dayOfWeek: 0-6, startTime: "HH:MM", endTime: "HH:MM", isActive?: boolean }
  */
-router.post("/", requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
-  try {
-    const { doctorId, dayOfWeek, startTime, endTime, isActive, effectiveFrom, effectiveTo } = req.body;
-
-    // Validation
-    if (!doctorId || dayOfWeek == null || !startTime || !endTime) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    if (dayOfWeek < 0 || dayOfWeek > 6) {
-      return res.status(400).json({ error: "dayOfWeek must be between 0 (Sunday) and 6 (Saturday)" });
-    }
-
-    // Validate time format (HH:MM)
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-      return res.status(400).json({ error: "Invalid time format. Use HH:MM (24-hour)" });
-    }
-
-    // Get doctor profile ID
-    const doctorProfileId = await getDoctorProfileId(doctorId);
-    if (!doctorProfileId) {
-      return res.status(404).json({ error: "Doctor profile not found" });
-    }
-
-    // Check for conflicts with existing schedules on the same day
-    const existingSlots = await prisma.doctorSchedule.findMany({
-      where: {
-        doctorId: doctorProfileId,
-        dayOfWeek: parseInt(dayOfWeek),
-        isActive: true,
-      },
-    });
-
-    for (const slot of existingSlots) {
-      if (hasTimeConflict(startTime, endTime, slot.startTime, slot.endTime)) {
-        return res.status(409).json({
-          error: `Time conflict with existing slot: ${slot.startTime} - ${slot.endTime}`,
-        });
-      }
-    }
-
-    // Create schedule
-    const schedule = await prisma.doctorSchedule.create({
-      data: {
-        doctorId: doctorProfileId,
-        dayOfWeek: parseInt(dayOfWeek),
+router.post(
+  "/",
+  requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const {
+        doctorId,
+        dayOfWeek,
         startTime,
         endTime,
-        isActive: isActive !== undefined ? isActive : true,
-        effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : null,
-        effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
-      },
-      include: {
-        doctor: {
-          include: {
-            user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        isActive,
+        effectiveFrom,
+        effectiveTo,
+      } = req.body;
+
+      // Validation
+      if (!doctorId || dayOfWeek == null || !startTime || !endTime) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      if (dayOfWeek < 0 || dayOfWeek > 6) {
+        return res
+          .status(400)
+          .json({
+            error: "dayOfWeek must be between 0 (Sunday) and 6 (Saturday)",
+          });
+      }
+
+      // Validate time format (HH:MM)
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+        return res
+          .status(400)
+          .json({ error: "Invalid time format. Use HH:MM (24-hour)" });
+      }
+
+      // Get doctor profile ID
+      const doctorProfileId = await getDoctorProfileId(doctorId);
+      if (!doctorProfileId) {
+        return res.status(404).json({ error: "Doctor profile not found" });
+      }
+
+      // Check for conflicts with existing schedules on the same day
+      const existingSlots = await prisma.doctorSchedule.findMany({
+        where: {
+          doctorId: doctorProfileId,
+          dayOfWeek: parseInt(dayOfWeek),
+          isActive: true,
+        },
+      });
+
+      for (const slot of existingSlots) {
+        if (hasTimeConflict(startTime, endTime, slot.startTime, slot.endTime)) {
+          return res.status(409).json({
+            error: `Time conflict with existing slot: ${slot.startTime} - ${slot.endTime}`,
+          });
+        }
+      }
+
+      // Create schedule
+      const schedule = await prisma.doctorSchedule.create({
+        data: {
+          doctorId: doctorProfileId,
+          dayOfWeek: parseInt(dayOfWeek),
+          startTime,
+          endTime,
+          isActive: isActive !== undefined ? isActive : true,
+          effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : null,
+          effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
+        },
+        include: {
+          doctor: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
           },
         },
-      },
-    });
+      });
 
-    return res.status(201).json({ success: true, data: schedule });
-  } catch (err) {
-    console.error("❌ POST /api/schedule error:", err);
-    return res.status(500).json({ error: "Failed to create schedule" });
-  }
-});
+      return res.status(201).json({ success: true, data: schedule });
+    } catch (err) {
+      console.error("❌ POST /api/schedule error:", err);
+      return res.status(500).json({ error: "Failed to create schedule" });
+    }
+  },
+);
 
 /**
  * GET /api/schedule?doctorId=<User.id>
@@ -145,95 +170,120 @@ router.get("/", async (req, res) => {
  * PATCH /api/schedule/:id
  * Update a schedule slot
  */
-router.patch("/:id", requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { dayOfWeek, startTime, endTime, isActive, effectiveFrom, effectiveTo } = req.body;
+router.patch(
+  "/:id",
+  requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        dayOfWeek,
+        startTime,
+        endTime,
+        isActive,
+        effectiveFrom,
+        effectiveTo,
+      } = req.body;
 
-    // Check if schedule exists
-    const existing = await prisma.doctorSchedule.findUnique({
-      where: { id },
-      select: { id: true, doctorId: true, dayOfWeek: true },
-    });
+      // Check if schedule exists
+      const existing = await prisma.doctorSchedule.findUnique({
+        where: { id },
+        select: { id: true, doctorId: true, dayOfWeek: true },
+      });
 
-    if (!existing) {
-      return res.status(404).json({ error: "Schedule not found" });
-    }
+      if (!existing) {
+        return res.status(404).json({ error: "Schedule not found" });
+      }
 
-    // Validate time format if provided
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (startTime && !timeRegex.test(startTime)) {
-      return res.status(400).json({ error: "Invalid startTime format. Use HH:MM" });
-    }
-    if (endTime && !timeRegex.test(endTime)) {
-      return res.status(400).json({ error: "Invalid endTime format. Use HH:MM" });
-    }
+      // Validate time format if provided
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (startTime && !timeRegex.test(startTime)) {
+        return res
+          .status(400)
+          .json({ error: "Invalid startTime format. Use HH:MM" });
+      }
+      if (endTime && !timeRegex.test(endTime)) {
+        return res
+          .status(400)
+          .json({ error: "Invalid endTime format. Use HH:MM" });
+      }
 
-    // Check for conflicts if times are being updated
-    if (startTime || endTime || dayOfWeek != null) {
-      const checkDay = dayOfWeek != null ? parseInt(dayOfWeek) : existing.dayOfWeek;
-      const checkStart = startTime || existing.startTime;
-      const checkEnd = endTime || existing.endTime;
+      // Check for conflicts if times are being updated
+      if (startTime || endTime || dayOfWeek != null) {
+        const checkDay =
+          dayOfWeek != null ? parseInt(dayOfWeek) : existing.dayOfWeek;
+        const checkStart = startTime || existing.startTime;
+        const checkEnd = endTime || existing.endTime;
 
-      const conflictingSlots = await prisma.doctorSchedule.findMany({
-        where: {
-          doctorId: existing.doctorId,
-          dayOfWeek: checkDay,
-          isActive: true,
-          id: { not: id }, // Exclude current slot
+        const conflictingSlots = await prisma.doctorSchedule.findMany({
+          where: {
+            doctorId: existing.doctorId,
+            dayOfWeek: checkDay,
+            isActive: true,
+            id: { not: id }, // Exclude current slot
+          },
+        });
+
+        for (const slot of conflictingSlots) {
+          if (
+            hasTimeConflict(checkStart, checkEnd, slot.startTime, slot.endTime)
+          ) {
+            return res.status(409).json({
+              error: `Time conflict with existing slot: ${slot.startTime} - ${slot.endTime}`,
+            });
+          }
+        }
+      }
+
+      // Update schedule
+      const updated = await prisma.doctorSchedule.update({
+        where: { id },
+        data: {
+          ...(dayOfWeek != null && { dayOfWeek: parseInt(dayOfWeek) }),
+          ...(startTime && { startTime }),
+          ...(endTime && { endTime }),
+          ...(isActive !== undefined && { isActive }),
+          ...(effectiveFrom && { effectiveFrom: new Date(effectiveFrom) }),
+          ...(effectiveTo && { effectiveTo: new Date(effectiveTo) }),
         },
       });
 
-      for (const slot of conflictingSlots) {
-        if (hasTimeConflict(checkStart, checkEnd, slot.startTime, slot.endTime)) {
-          return res.status(409).json({
-            error: `Time conflict with existing slot: ${slot.startTime} - ${slot.endTime}`,
-          });
-        }
-      }
+      return res.json({ success: true, data: updated });
+    } catch (err) {
+      console.error("❌ PATCH /api/schedule/:id error:", err);
+      return res.status(500).json({ error: "Failed to update schedule" });
     }
-
-    // Update schedule
-    const updated = await prisma.doctorSchedule.update({
-      where: { id },
-      data: {
-        ...(dayOfWeek != null && { dayOfWeek: parseInt(dayOfWeek) }),
-        ...(startTime && { startTime }),
-        ...(endTime && { endTime }),
-        ...(isActive !== undefined && { isActive }),
-        ...(effectiveFrom && { effectiveFrom: new Date(effectiveFrom) }),
-        ...(effectiveTo && { effectiveTo: new Date(effectiveTo) }),
-      },
-    });
-
-    return res.json({ success: true, data: updated });
-  } catch (err) {
-    console.error("❌ PATCH /api/schedule/:id error:", err);
-    return res.status(500).json({ error: "Failed to update schedule" });
-  }
-});
+  },
+);
 
 /**
  * DELETE /api/schedule/:id
  * Delete a schedule slot
  */
-router.delete("/:id", requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
-  try {
-    const { id } = req.params;
+router.delete(
+  "/:id",
+  requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    await prisma.doctorSchedule.delete({
-      where: { id },
-    });
+      await prisma.doctorSchedule.delete({
+        where: { id },
+      });
 
-    return res.json({ success: true, message: "Schedule deleted successfully" });
-  } catch (err) {
-    if (err.code === "P2025") {
-      return res.status(404).json({ error: "Schedule not found" });
+      return res.json({
+        success: true,
+        message: "Schedule deleted successfully",
+      });
+    } catch (err) {
+      if (err.code === "P2025") {
+        return res.status(404).json({ error: "Schedule not found" });
+      }
+      console.error("❌ DELETE /api/schedule/:id error:", err);
+      return res.status(500).json({ error: "Failed to delete schedule" });
     }
-    console.error("❌ DELETE /api/schedule/:id error:", err);
-    return res.status(500).json({ error: "Failed to delete schedule" });
-  }
-});
+  },
+);
 
 /**
  * GET /api/schedule/available-slots/:doctorProfileId?date=YYYY-MM-DD
@@ -246,7 +296,9 @@ router.get("/available-slots/:doctorProfileId", async (req, res) => {
     const { date } = req.query;
 
     if (!date) {
-      return res.status(400).json({ error: "date parameter is required (YYYY-MM-DD)" });
+      return res
+        .status(400)
+        .json({ error: "date parameter is required (YYYY-MM-DD)" });
     }
 
     const requestedDate = new Date(date);
@@ -278,14 +330,18 @@ router.get("/available-slots/:doctorProfileId", async (req, res) => {
     });
 
     if (schedules.length === 0) {
-      return res.json({ success: true, data: [], message: "No availability on this day" });
+      return res.json({
+        success: true,
+        data: [],
+        message: "No availability on this day",
+      });
     }
 
-    // Get existing appointments for this date
+    // Get existing appointments for this date - use UTC to avoid timezone shifts
     const startOfDay = new Date(requestedDate);
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(requestedDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
     const existingAppointments = await prisma.appointment.findMany({
       where: {
@@ -305,7 +361,7 @@ router.get("/available-slots/:doctorProfileId", async (req, res) => {
       existingAppointments.map((apt) => {
         const time = new Date(apt.appointmentDate);
         return `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`;
-      })
+      }),
     );
 
     for (const schedule of schedules) {
@@ -315,13 +371,22 @@ router.get("/available-slots/:doctorProfileId", async (req, res) => {
       let currentHour = startHour;
       let currentMin = startMin;
 
-      while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
+      while (
+        currentHour < endHour ||
+        (currentHour === endHour && currentMin < endMin)
+      ) {
         const timeSlot = `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`;
-        
+
         if (!bookedTimes.has(timeSlot)) {
           availableSlots.push({
             time: timeSlot,
-            datetime: new Date(requestedDate.getFullYear(), requestedDate.getMonth(), requestedDate.getDate(), currentHour, currentMin).toISOString(),
+            datetime: new Date(
+              requestedDate.getFullYear(),
+              requestedDate.getMonth(),
+              requestedDate.getDate(),
+              currentHour,
+              currentMin,
+            ).toISOString(),
           });
         }
 
