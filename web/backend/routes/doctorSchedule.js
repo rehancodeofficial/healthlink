@@ -32,7 +32,7 @@ router.post("/availability", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Ensure dates are objects
+    // Ensure dates are objects - parse as UTC to avoid timezone shift
     const dateObj = new Date(date);
     const startObj = new Date(startTime);
     const endObj = new Date(endTime);
@@ -94,10 +94,11 @@ router.get("/slots", async (req, res) => {
       return res.status(400).json({ error: "Doctor ID and Date are required" });
     }
 
+    // Use UTC methods to avoid timezone-dependent boundaries
     const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
     const slots = await prisma.appointmentSlot.findMany({
       where: {
