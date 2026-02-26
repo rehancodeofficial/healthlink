@@ -14,7 +14,7 @@ import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function VideoCallModal({ consultation, onClose }) {
+export default function VideoCallModal({ consultation, onClose, role = "PATIENT" }) {
   const [room, setRoom] = useState(null);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
@@ -32,7 +32,7 @@ export default function VideoCallModal({ consultation, onClose }) {
   const endTimeoutRef = useRef(null);
 
   const userId = localStorage.getItem("userId");
-  const role = "PATIENT";
+  // const role = "PATIENT"; // Derived from prop now
   const { id, roomName, durationMins = 30 } = consultation || {};
 
   const formatTime = (seconds) => {
@@ -200,7 +200,7 @@ export default function VideoCallModal({ consultation, onClose }) {
         activeRoom.disconnect();
       }
     };
-  }, [id, roomName, userId, durationMins, endCall]);
+  }, [id, roomName, userId, durationMins, endCall, role]);
 
   const toggleMute = () => {
     if (!room) return;
