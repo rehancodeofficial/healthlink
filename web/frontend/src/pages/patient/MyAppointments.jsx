@@ -2,9 +2,12 @@
 import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
-import { FaPlusCircle, FaTrash, FaVideo, FaCalendarAlt } from "react-icons/fa";
+import { FaPlusCircle, FaTrash, FaVideo } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+// Use the same component as BookAppointment for consistent slot logic
+import BookingSlots from "../../components/BookingSlots";
 
 export default function MyAppointments() {
   const role = "PATIENT";
@@ -17,9 +20,12 @@ export default function MyAppointments() {
   const [bookOpen, setBookOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toCancelId, setToCancelId] = useState(null);
+
+  // Updated state for slot-based booking
   const [form, setForm] = useState({
     doctorId: "",
-    appointmentDate: "",
+    appointmentDate: "", // Selected Date (YYYY-MM-DD)
+    selectedSlotId: "", // ID of the chosen slot
     reason: "",
   });
 
@@ -62,21 +68,33 @@ export default function MyAppointments() {
     if (patientUserId) fetchAppointments();
   }, [fetchAppointments, patientUserId]);
 
+  // Handle slot selection from BookingSlots component
+  const handleSlotSelect = (slot) => {
+    setForm((prev) => ({ ...prev, selectedSlotId: slot.id }));
+  };
+
   const handleBookSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.selectedSlotId) {
+      toast.error("Please select an available time slot");
+      return;
+    }
+
     try {
-      const isoDate = new Date(form.appointmentDate).toISOString();
-      await api.post("/patient/appointments", {
-        doctorId: form.doctorId,
-        appointmentDate: isoDate,
-        reason: form.reason || null,
+      // Use the robust slot booking endpoint that handles locking and validation
+      await api.post("/doctor-schedule/book-slot", {
+        slotId: form.selectedSlotId,
         patientId: patientUserId,
+        reason: form.reason || "Patient Booking",
       });
+
       toast.success("Appointment booked successfully!");
       setBookOpen(false);
-      setForm({ doctorId: "", appointmentDate: "", reason: "" });
+      setForm({ doctorId: "", appointmentDate: "", selectedSlotId: "", reason: "" });
       await fetchAppointments();
     } catch (err) {
+      console.error("Booking error:", err);
       toast.error(err?.response?.data?.error || "Failed to book appointment");
     }
   };
@@ -257,19 +275,27 @@ export default function MyAppointments() {
             className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
             onClick={() => setBookOpen(false)}
           ></div>
-          <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
               Book Appointment
             </h2>
             <form onSubmit={handleBookSubmit} className="space-y-4">
+              {/* Doctor Selection */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
                   Select Doctor
                 </label>
                 <select
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none text-[var(--text-main)]"
                   value={form.doctorId}
-                  onChange={(e) => setForm({ ...form, doctorId: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      doctorId: e.target.value,
+                      appointmentDate: "",
+                      selectedSlotId: "",
+                    })
+                  }
                   required
                 >
                   <option value="">-- Choose Specialist --</option>
@@ -280,30 +306,66 @@ export default function MyAppointments() {
                   ))}
                 </select>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
-                  Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none"
-                  value={form.appointmentDate}
-                  onChange={(e) => setForm({ ...form, appointmentDate: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
-                  Reason for consultation
-                </label>
-                <textarea
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24"
-                  value={form.reason}
-                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
-                  placeholder="Describe your symptoms..."
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
+
+              {/* Date Selection */}
+              {form.doctorId && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Select Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none text-[var(--text-main)]"
+                    value={form.appointmentDate}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        appointmentDate: e.target.value,
+                        selectedSlotId: "",
+                      })
+                    }
+                    min={new Date().toISOString().split("T")[0]}
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Available Slots */}
+              {form.doctorId && form.appointmentDate && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Select Time Slot
+                  </label>
+                  <BookingSlots
+                    doctorId={form.doctorId}
+                    date={new Date(form.appointmentDate)}
+                    onSlotSelect={handleSlotSelect}
+                  />
+                  {/* Visual feedback for selected slot */}
+                  {form.selectedSlotId && (
+                    <p className="text-xs text-[var(--brand-green)] mt-2 font-bold px-1">
+                      ✓ Slot selected
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Reason */}
+              {form.selectedSlotId && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Reason for consultation
+                  </label>
+                  <textarea
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24 text-[var(--text-main)]"
+                    value={form.reason}
+                    onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                    placeholder="Describe your symptoms..."
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setBookOpen(false)}
@@ -311,7 +373,15 @@ export default function MyAppointments() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary flex-[2]">
+                <button
+                  type="submit"
+                  disabled={!form.selectedSlotId}
+                  className={`btn flex-[2] ${
+                    !form.selectedSlotId
+                      ? "bg-gray-600 cursor-not-allowed opacity-50"
+                      : "btn-primary"
+                  }`}
+                >
                   Initialize Booking
                 </button>
               </div>
