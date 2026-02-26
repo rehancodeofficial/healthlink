@@ -129,45 +129,6 @@ enum SlotStatus {
 // MODELS
 // =========================================================
 
-model DoctorAvailability {
-  id           String   @id @default(uuid())
-  doctorId     String
-  date         DateTime @db.Date 
-  startTime    DateTime 
-  endTime      DateTime 
-  slotDuration Int      @default(15) 
-  
-  slots        AppointmentSlot[]
-
-  doctor       DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@unique([doctorId, date])
-  @@map("DoctorAvailability")
-}
-
-model AppointmentSlot {
-  id             String   @id @default(uuid())
-  doctorId       String
-  availabilityId String
-  
-  startTime      DateTime
-  endTime        DateTime
-  status         SlotStatus @default(AVAILABLE)
-  
-  appointmentId  String?  @unique
-  bookedBy       String?  
-  
-  availability   DoctorAvailability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
-  doctor         DoctorProfile      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  appointment    Appointment?       @relation(fields: [appointmentId], references: [id]) 
-  
-  @@index([doctorId, startTime])
-  @@index([status])
-  @@map("AppointmentSlot")
-}
-
 model EmailOTP {
   id        Int      @id @default(autoincrement())
   email     String
@@ -299,9 +260,6 @@ model DoctorProfile {
   appointments   Appointment[]       @relation("DoctorAppointments")
   doctorPatients DoctorPatient[]     @relation("DoctorPatient_Doctor")
   schedules      DoctorSchedule[]    @relation("DoctorSchedules")
-  
-  availabilities DoctorAvailability[]
-  slots          AppointmentSlot[]
 
   encounters     ClinicalEncounter[]
   labOrders      LabOrder[]
@@ -385,7 +343,11 @@ model Appointment {
   id              String            @id @default(uuid())
   doctorId        String
   patientId       String
-  appointmentDate DateTime
+  
+  appointmentDate DateTime          // Start time
+  startTime       DateTime?         // New explicit start time
+  endTime         DateTime?         // New explicit end time
+  
   reason          String?
   status          AppointmentStatus @default(PENDING)
   
@@ -399,10 +361,9 @@ model Appointment {
   patient PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
   encounter ClinicalEncounter?
 
-  slot    AppointmentSlot?
-
   @@index([doctorId])
   @@index([patientId])
+  @@index([appointmentDate])
 
   @@map("Appointment")
 }
@@ -410,12 +371,16 @@ model Appointment {
 model DoctorSchedule {
   id        String   @id @default(uuid())
   doctorId  String
-  dayOfWeek Int
-  startTime String
-  endTime   String
+  dayOfWeek Int      // 0=Sunday, 1=Monday, ...
+  startTime String   // "09:00"
+  endTime   String   // "17:00"
+  
+  slotDuration Int      @default(15) // Duration in minutes
+  
   effectiveFrom DateTime?
   effectiveTo   DateTime?
   isActive  Boolean  @default(true)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -461,6 +426,7 @@ model SupportReply {
   @@map("SupportReply")
 }
 
+// Prescription and other models kept as is
 model Prescription {
   id            String   @id @default(cuid())
   doctorId      String
