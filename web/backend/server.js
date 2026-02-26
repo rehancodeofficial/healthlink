@@ -125,9 +125,7 @@ app.use("/api/clinical-encounter", clinicalEncounterRoutes);
 // ✅ SCHEDULE ROUTES
 // ----------------------------
 const scheduleRoutes = require("./routes/scheduleRoutes");
-const doctorScheduleRoutes = require("./routes/doctorSchedule"); // New Slot System
 app.use("/api/schedule", scheduleRoutes);
-app.use("/api/doctor-schedule", doctorScheduleRoutes);
 
 // ----------------------------
 // ✅ PATIENT ROUTES
