@@ -5,7 +5,6 @@ import api from "../Lib/api";
 import { supabase } from "../Lib/supabase";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
-import { useTheme } from "../context/ThemeContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,23 +21,58 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
     try {
       if (loginMode === "password") {
-        // 1. Supabase Auth Login
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
+        let sbUser = null;
+        let sbError = null;
 
-        if (authError) throw authError;
+        // 1. Try Supabase Auth
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+          if (error) {
+            sbError = error;
+          } else {
+            sbUser = data?.user;
+          }
+        } catch (err) {
+          sbError = err;
+        }
 
-        // 2. Get User Details and Sync with Backend
-        const res = await api.post("/auth/login-sync", {
-          email,
-          supabaseId: data.user.id,
-        });
+        // 2. If Supabase succeeds, Sync & Login
+        if (sbUser) {
+          try {
+            const res = await api.post("/auth/login-sync", {
+              email,
+              supabaseId: sbUser.id,
+            });
+            handleAuthSuccess(res.data, email);
+            return;
+          } catch (syncErr) {
+            // If sync fails, it might be a server error, but let's try local fallback just in case
+            console.warn("Supabase sync failed, trying local fallback...", syncErr);
+          }
+        }
 
-        handleAuthSuccess(res.data, email);
+        // 3. Fallback: Try Local Backend Login (For Admins or non-Supabase users)
+        // If Supabase failed or sync failed, we attempt this.
+        try {
+          const res = await api.post("/auth/login", { email, password });
+          handleAuthSuccess(res.data, email);
+        } catch (localErr) {
+          // If both failed, throw error
+          // Prefer local error message if available, else Supabase error
+          if (localErr.response?.data?.error) {
+            throw new Error(localErr.response.data.error);
+          } else if (sbError) {
+            throw sbError;
+          } else {
+            throw localErr;
+          }
+        }
       } else {
         // OTP Mode
         if (!otpSent) {
