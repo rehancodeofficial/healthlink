@@ -12,8 +12,8 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
     try {
       // API expects YYYY-MM-DD
       const dateStr = date.toISOString().split("T")[0];
-      const res = await api.get(`/doctor-schedule/slots?doctorId=${doctorId}&date=${dateStr}`);
-      setSlots(res.data);
+      const res = await api.get(`/schedule/slots?doctorId=${doctorId}&date=${dateStr}`);
+      setSlots(res.data.data || []);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load slots");
