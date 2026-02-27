@@ -36,6 +36,7 @@
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.12",
+    "pg": "^8.18.0",
     "stripe": "^19.1.0",
     "twilio": "^5.10.2",
     "uuid": "^13.0.0",
