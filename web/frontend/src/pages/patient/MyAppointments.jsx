@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
-import { FaPlusCircle, FaTrash, FaVideo } from "react-icons/fa";
+import { FaPlusCircle, FaTrash, FaVideo, FaEdit } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import VideoCallModal from "./VideoCallModal"; // Import VideoCallModal
@@ -21,6 +21,7 @@ export default function MyAppointments() {
   const [bookOpen, setBookOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toCancelId, setToCancelId] = useState(null);
+  const [rescheduleId, setRescheduleId] = useState(null);
 
   // Video Call State
   const [videoCallData, setVideoCallData] = useState(null);
@@ -77,6 +78,22 @@ export default function MyAppointments() {
     setForm((prev) => ({ ...prev, selectedSlotId: slot.id }));
   };
 
+  const handleUpdate = (appt) => {
+    setRescheduleId(appt.id);
+    setForm((prev) => ({
+      ...prev,
+      doctorId: appt.doctorId,
+      appointmentDate: "",
+      selectedSlotId: "",
+      reason: appt.reason || "",
+    }));
+    // We need to trigger doctor loading if not already loaded, but for now assuming user clicks the button
+    // which usually happens after page load where doctors might not be fully loaded if we lazy load.
+    // However, loadDoctors() is called on "Book New" button. We should probably call it here too or ensure it's loaded.
+    // The "Book New" button calls loadDoctors(). Let's call it here to be safe.
+    loadDoctors().then(() => setBookOpen(true));
+  };
+
   const handleBookSubmit = async (e) => {
     e.preventDefault();
 
@@ -94,8 +111,15 @@ export default function MyAppointments() {
         reason: form.reason || "Patient Booking",
       });
 
-      toast.success("Appointment booked successfully!");
+      if (rescheduleId) {
+        await api.patch(`/patient/appointments/${rescheduleId}/cancel`);
+        toast.success("Appointment rescheduled successfully!");
+      } else {
+        toast.success("Appointment booked successfully!");
+      }
+
       setBookOpen(false);
+      setRescheduleId(null);
       setForm({ doctorId: "", appointmentDate: "", selectedSlotId: "", reason: "" });
       await fetchAppointments();
     } catch (err) {
@@ -274,18 +298,28 @@ export default function MyAppointments() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-3">
-                          {a.status === "PENDING" && (
-                            <button
-                              onClick={() => askCancel(a.id)}
-                              className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-[var(--text-main)] transition-all"
-                            >
-                              <FaTrash size={14} />
-                            </button>
+                          {(a.status === "PENDING" || a.status === "APPROVED") && (
+                            <>
+                              <button
+                                onClick={() => handleUpdate(a)}
+                                className="p-2 rounded-xl bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] hover:bg-[var(--brand-blue)] hover:text-white transition-all"
+                                title="Reschedule / Update"
+                              >
+                                <FaEdit size={14} />
+                              </button>
+                              <button
+                                onClick={() => askCancel(a.id)}
+                                className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                title="Cancel Appointment"
+                              >
+                                <FaTrash size={14} />
+                              </button>
+                            </>
                           )}
                           {a.status === "APPROVED" && (
                             <button
                               onClick={() => handleStartVideo(a)}
-                              className="p-2 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-[var(--text-main)] transition-all"
+                              className="p-2 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all"
                               title="Join Video Consultation"
                             >
                               <FaVideo size={14} />
@@ -310,7 +344,7 @@ export default function MyAppointments() {
           ></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
-              Book Appointment
+              {rescheduleId ? "Reschedule Appointment" : "Book Appointment"}
             </h2>
             <form onSubmit={handleBookSubmit} className="space-y-4">
               {/* Doctor Selection */}
@@ -401,7 +435,11 @@ export default function MyAppointments() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setBookOpen(false)}
+                  onClick={() => {
+                    setBookOpen(false);
+                    setRescheduleId(null);
+                    setForm({ doctorId: "", appointmentDate: "", selectedSlotId: "", reason: "" });
+                  }}
                   className="btn flex-1 bg-[var(--bg-main)] border border-[var(--border)] text-[var(--text-soft)]"
                 >
                   Cancel
@@ -415,7 +453,7 @@ export default function MyAppointments() {
                       : "btn-primary"
                   }`}
                 >
-                  Initialize Booking
+                  {rescheduleId ? "Confirm Helper" : "Initialize Booking"}
                 </button>
               </div>
             </form>
