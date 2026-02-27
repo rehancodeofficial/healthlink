@@ -63,8 +63,9 @@ const BookAppointment = () => {
 
     setLoading(true);
     try {
-      await api.post("/doctor-schedule/book-slot", {
-        slotId: formData.selectedSlotId,
+      await api.post("/schedule/book", {
+        startTime: formData.selectedSlotId, // The ID is now the ISO startTime
+        doctorId: formData.doctorId,
         patientId,
         reason: formData.reason,
       });
