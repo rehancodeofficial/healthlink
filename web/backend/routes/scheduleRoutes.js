@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const prisma = require("../prisma/prismaClient");
-const { verifyToken, requireRole } = require("../middleware/auth");
+const { verifyToken, requireRole } = require("../middleware/rbac");
 
 // Middleware
 router.use(verifyToken);
@@ -88,11 +88,9 @@ router.post("/", async (req, res) => {
 
     for (const slot of existing) {
       if (hasTimeConflict(startTime, endTime, slot.startTime, slot.endTime)) {
-        return res
-          .status(409)
-          .json({
-            error: `Conflict with existing slot: ${slot.startTime}-${slot.endTime}`,
-          });
+        return res.status(409).json({
+          error: `Conflict with existing slot: ${slot.startTime}-${slot.endTime}`,
+        });
       }
     }
 
