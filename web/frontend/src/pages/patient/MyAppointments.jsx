@@ -5,6 +5,7 @@ import api from "../../Lib/api";
 import { FaPlusCircle, FaTrash, FaVideo } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import VideoCallModal from "./VideoCallModal"; // Import VideoCallModal
 
 // Use the same component as BookAppointment for consistent slot logic
 import BookingSlots from "../../components/BookingSlots";
@@ -20,6 +21,9 @@ export default function MyAppointments() {
   const [bookOpen, setBookOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toCancelId, setToCancelId] = useState(null);
+
+  // Video Call State
+  const [videoCallData, setVideoCallData] = useState(null);
 
   // Updated state for slot-based booking
   const [form, setForm] = useState({
@@ -83,8 +87,9 @@ export default function MyAppointments() {
 
     try {
       // Use the robust slot booking endpoint that handles locking and validation
-      await api.post("/doctor-schedule/book-slot", {
-        slotId: form.selectedSlotId,
+      await api.post("/schedule/book", {
+        startTime: form.selectedSlotId, // ID is now ISO time
+        doctorId: form.doctorId,
         patientId: patientUserId,
         reason: form.reason || "Patient Booking",
       });
@@ -116,6 +121,33 @@ export default function MyAppointments() {
       console.error(err);
       toast.error("Failed to cancel appointment");
     }
+  };
+
+  // Check if call is allowed
+  const handleStartVideo = (appt) => {
+    const now = new Date();
+    // Use startTime/endTime if available, otherwise fall back to appointmentDate + 15m
+    const start = appt.startTime ? new Date(appt.startTime) : new Date(appt.appointmentDate);
+    const end = appt.endTime ? new Date(appt.endTime) : new Date(start.getTime() + 15 * 60000);
+
+    // Buffer: Allow 2 mins early
+    const authorizedStart = new Date(start.getTime() - 2 * 60000);
+
+    if (now < authorizedStart) {
+      toast.warn(`Session locked. Please wait until ${start.toLocaleTimeString()}`);
+      return;
+    }
+
+    if (now > end) {
+      toast.error("Session expired.");
+      return;
+    }
+
+    setVideoCallData({
+      id: appt.id,
+      roomName: `consult_${appt.id}`,
+      durationMins: 15,
+    });
   };
 
   const getStatusColor = (status) => {
@@ -252,8 +284,9 @@ export default function MyAppointments() {
                           )}
                           {a.status === "APPROVED" && (
                             <button
-                              onClick={() => toast.info("Starting video...")}
+                              onClick={() => handleStartVideo(a)}
                               className="p-2 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-[var(--text-main)] transition-all"
+                              title="Join Video Consultation"
                             >
                               <FaVideo size={14} />
                             </button>
@@ -416,6 +449,11 @@ export default function MyAppointments() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Video Call Modal */}
+      {videoCallData && (
+        <VideoCallModal consultation={videoCallData} onClose={() => setVideoCallData(null)} />
       )}
 
       <ToastContainer position="top-right" autoClose={2200} />
