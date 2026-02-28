@@ -87,69 +87,6 @@ router.post("/register-success", async (req, res) => {
 });
 
 // -------------------------
-// Local Login (Bypass Supabase) - ADDED FOR LOCAL DEV
-// -------------------------
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    const normedEmail = String(email).trim().toLowerCase();
-
-    // 1) Try Finding User
-    let account = await prisma.user.findUnique({
-      where: { email: normedEmail },
-    });
-    let type = "USER";
-    let isAdmin = false;
-
-    // 2) Fall back to ADMINS
-    if (!account) {
-      account = await prisma.admin.findUnique({
-        where: { email: normedEmail },
-      });
-      type = "ADMIN";
-      isAdmin = true;
-    }
-
-    if (!account) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // 3) Check Password
-    const isValid = await bcrypt.compare(password, account.password);
-    if (!isValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    // 4) Create Token
-    const token = jwt.sign(
-      { id: account.id, role: account.role, type },
-      JWT_SECRET,
-      { expiresIn: "1d" },
-    );
-
-    return res.json({
-      token,
-      user: {
-        id: account.id,
-        name: isAdmin
-          ? account.name
-          : `${account.firstName} ${account.lastName}`.trim(),
-        role: account.role,
-        email: account.email,
-        type,
-      },
-    });
-  } catch (err) {
-    console.error("Local Login Error:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
-
-// -------------------------
 // Login Sync (Supabase Sync)
 // -------------------------
 router.post("/login-sync", async (req, res) => {
@@ -166,23 +103,14 @@ router.post("/login-sync", async (req, res) => {
     let account = await prisma.user.findUnique({
       where: { email: normedEmail },
     });
-    let type = "USER";
-
-    // 2) Fall back to ADMINS
-    if (!account) {
-      account = await prisma.admin.findUnique({
-        where: { email: normedEmail },
-      });
-      type = "ADMIN";
-    }
 
     if (!account) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // 3) Create Legacy JWT
+    // 2) Create Legacy JWT
     const token = jwt.sign(
-      { id: account.id, role: account.role, type },
+      { id: account.id, role: account.role, type: "USER" },
       JWT_SECRET,
       { expiresIn: "1d" },
     );
@@ -191,13 +119,10 @@ router.post("/login-sync", async (req, res) => {
       token,
       user: {
         id: account.id,
-        name:
-          type === "ADMIN"
-            ? account.name
-            : `${account.firstName} ${account.lastName}`.trim(),
+        name: `${account.firstName} ${account.lastName}`.trim(),
         role: account.role,
         email: account.email,
-        type,
+        type: "USER",
       },
     });
   } catch (err) {
