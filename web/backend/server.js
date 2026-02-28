@@ -151,6 +151,8 @@ app.use("/api/internal", internalRoutes);
 // ----------------------------
 const subscriptionRoutes = require("./routes/subscription");
 app.use("/api/subscription", subscriptionRoutes);
+// Alias for subscribers (frontend compatibility)
+app.use("/api/subscribers", subscriptionRoutes);
 
 // ADMIN subscription views
 const adminSubscriptionRoutes = require("./routes/adminSubscription");
