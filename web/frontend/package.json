@@ -21,6 +21,7 @@
     "react-router-dom": "^7.9.3",
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.4",
+    "serve": "^14.2.5",
     "twilio-video": "^2.32.1"
   },
   "devDependencies": {
