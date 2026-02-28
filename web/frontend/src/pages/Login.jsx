@@ -24,55 +24,21 @@ export default function Login() {
 
     try {
       if (loginMode === "password") {
-        let sbUser = null;
-        let sbError = null;
+        // 1. Supabase Auth Login
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
 
-        // 1. Try Supabase Auth
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-          });
-          if (error) {
-            sbError = error;
-          } else {
-            sbUser = data?.user;
-          }
-        } catch (err) {
-          sbError = err;
-        }
+        if (authError) throw authError;
 
-        // 2. If Supabase succeeds, Sync & Login
-        if (sbUser) {
-          try {
-            const res = await api.post("/auth/login-sync", {
-              email,
-              supabaseId: sbUser.id,
-            });
-            handleAuthSuccess(res.data, email);
-            return;
-          } catch (syncErr) {
-            // If sync fails, it might be a server error, but let's try local fallback just in case
-            console.warn("Supabase sync failed, trying local fallback...", syncErr);
-          }
-        }
+        // 2. Get User Details and Sync with Backend
+        const res = await api.post("/auth/login-sync", {
+          email,
+          supabaseId: data.user.id,
+        });
 
-        // 3. Fallback: Try Local Backend Login (For Admins or non-Supabase users)
-        // If Supabase failed or sync failed, we attempt this.
-        try {
-          const res = await api.post("/auth/login", { email, password });
-          handleAuthSuccess(res.data, email);
-        } catch (localErr) {
-          // If both failed, throw error
-          // Prefer local error message if available, else Supabase error
-          if (localErr.response?.data?.error) {
-            throw new Error(localErr.response.data.error);
-          } else if (sbError) {
-            throw sbError;
-          } else {
-            throw localErr;
-          }
-        }
+        handleAuthSuccess(res.data, email);
       } else {
         // OTP Mode
         if (!otpSent) {
