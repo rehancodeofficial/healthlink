@@ -127,7 +127,7 @@ router.post("/login-sync", async (req, res) => {
     });
   } catch (err) {
     console.error("Login Sync error:", err);
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: `Server error: ${err.message}` });
   }
 });
 
