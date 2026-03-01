@@ -1,7 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = require('../prisma/prismaClient');
+const prisma = require("../prisma/prismaClient");
 const router = express.Router();
 
 // ✅ System Reports Summary
@@ -27,15 +27,21 @@ router.get("/summary", async (req, res) => {
       prisma.user.count(),
       prisma.user.count({ where: { role: "DOCTOR" } }),
       prisma.user.count({ where: { role: "PATIENT" } }),
-      prisma.admin.count(),
-      prisma.admin.count({ where: { isSuspended: true } }),
+      prisma.user.count({
+        where: { role: { in: ["ADMIN", "SUPERADMIN", "SUPPORT"] } },
+      }),
+      0, // prisma.user has no isSuspended yet
       prisma.videoConsultation.count(),
       prisma.videoConsultation.count({ where: { status: "COMPLETED" } }),
       prisma.videoConsultation.count({ where: { status: "CANCELLED" } }),
       prisma.videoConsultation.aggregate({ _avg: { durationMins: true } }),
       prisma.prescription.count(),
       prisma.prescription.count({
-        where: { createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } },
+        where: {
+          createdAt: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          },
+        },
       }),
       prisma.supportTicket.count(),
       prisma.supportTicket.count({ where: { status: "OPEN" } }),
@@ -44,7 +50,11 @@ router.get("/summary", async (req, res) => {
     ]);
 
     res.json({
-      users: { total: totalUsers, doctors: totalDoctors, patients: totalPatients },
+      users: {
+        total: totalUsers,
+        doctors: totalDoctors,
+        patients: totalPatients,
+      },
       admins: { total: totalAdmins, suspended: suspendedAdmins },
       consultations: {
         total: totalConsultations,
@@ -52,8 +62,15 @@ router.get("/summary", async (req, res) => {
         cancelled: cancelledConsultations,
         avgDuration: avgConsultation._avg.durationMins || 0,
       },
-      prescriptions: { total: totalPrescriptions, thisMonth: monthlyPrescriptions },
-      support: { total: totalTickets, open: openTickets, resolved: resolvedTickets },
+      prescriptions: {
+        total: totalPrescriptions,
+        thisMonth: monthlyPrescriptions,
+      },
+      support: {
+        total: totalTickets,
+        open: openTickets,
+        resolved: resolvedTickets,
+      },
       subscriptions: { active: activeSubscriptions },
     });
   } catch (err) {
