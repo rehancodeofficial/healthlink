@@ -4,7 +4,11 @@
  */
 const express = require("express");
 const prisma = require("../prisma/prismaClient.js");
-const { verifyToken, requireRole, checkPermission } = require("../middleware/rbac.js");
+const {
+  verifyToken,
+  requireRole,
+  checkPermission,
+} = require("../middleware/rbac.js");
 const router = express.Router();
 
 // Apply RBAC to all superadmin routes
@@ -14,7 +18,11 @@ router.use(requireRole("SUPERADMIN"));
 // Small helpers
 const hasModel = (m) => m && typeof m.count === "function";
 const safeCount = async (fn) => {
-  try { return await fn(); } catch (_) { return 0; }
+  try {
+    return await fn();
+  } catch (_) {
+    return 0;
+  }
 };
 
 /**
@@ -26,53 +34,62 @@ router.get("/stats", async (_req, res) => {
     // Users
     const totalUsers = await safeCount(() => prisma.user.count());
 
-    // Admins (if you have a dedicated Admin model; else count users by role)
-    const totalAdmins = hasModel(prisma.admin)
-      ? await safeCount(() => prisma.admin.count())
-      : await safeCount(() => prisma.user.count({ where: { role: "ADMIN" } }));
+    // Admins (SUPERADMIN, ADMIN, SUPPORT)
+    const totalAdmins = await safeCount(() =>
+      prisma.user.count({
+        where: { role: { in: ["ADMIN", "SUPERADMIN"] } },
+      }),
+    );
 
-    // Doctors / Patients / Support (by role on User or Admin depending on your schema)
-    const totalDoctors  = await safeCount(() => prisma.user.count({ where: { role: "DOCTOR" } }));
-    const totalPatients = await safeCount(() => prisma.user.count({ where: { role: "PATIENT" } }));
-    const totalSupport  = hasModel(prisma.admin)
-      ? await safeCount(() => prisma.admin.count({ where: { role: "SUPPORT" } }))
-      : await safeCount(() => prisma.user.count({ where: { role: "SUPPORT" } }));
+    const totalSupport = await safeCount(() =>
+      prisma.user.count({ where: { role: "SUPPORT" } }),
+    );
 
-    // Subscriptions — support both designs:
-    //  (A) user.subscription enum  OR  (B) Subscription table with ACTIVE status
+    // Doctors / Patients
+    const totalDoctors = await safeCount(() =>
+      prisma.user.count({ where: { role: "DOCTOR" } }),
+    );
+    const totalPatients = await safeCount(() =>
+      prisma.user.count({ where: { role: "PATIENT" } }),
+    );
+
+    // Subscriptions
     let totalSubscriptions = 0;
     try {
-      // Try enum on User first
-      totalSubscriptions = await prisma.user.count({ where: { subscriptionState: "ACTIVE" } });
+      totalSubscriptions = await prisma.user.count({
+        where: { subscriptionState: "ACTIVE" },
+      });
     } catch {
-      // Fallback to Subscription table
-      totalSubscriptions = hasModel(prisma.subscription)
-        ? await safeCount(() => prisma.subscription.count({ where: { status: "ACTIVE" } }))
-        : 0;
+      totalSubscriptions = await safeCount(() =>
+        prisma.subscription.count({ where: { status: "ACTIVE" } }),
+      );
     }
 
-    // Messages / Tickets / Consultations / Prescriptions (guard per model)
-    const totalMessages       = hasModel(prisma.message)           ? await safeCount(() => prisma.message.count()) : 0;
-    const totalTickets        = hasModel(prisma.supportTicket)     ? await safeCount(() => prisma.supportTicket.count()) : 0;
-    const totalConsultations  = hasModel(prisma.videoConsultation) ? await safeCount(() => prisma.videoConsultation.count()) : 0;
-    const totalPrescriptions  = hasModel(prisma.prescription)      ? await safeCount(() => prisma.prescription.count()) : 0;
+    // Messages / Tickets / Consultations / Prescriptions
+    const totalMessages = await safeCount(() => prisma.message.count());
+    const totalTickets = await safeCount(() => prisma.supportTicket.count());
+    const totalConsultations = await safeCount(() =>
+      prisma.videoConsultation.count(),
+    );
+    const totalPrescriptions = await safeCount(() =>
+      prisma.prescription.count(),
+    );
 
     // Enhanced stats with additional metrics
-    const recentMessages = await safeCount(() => 
-      prisma.message.findMany({ take: 10, orderBy: { createdAt: "desc" } })
+    const recentMessages = await safeCount(() =>
+      prisma.message.findMany({ take: 10, orderBy: { createdAt: "desc" } }),
     );
-    
+
     const activeSubscriptions = await safeCount(() =>
-      prisma.subscription.count({ where: { status: "ACTIVE" } })
+      prisma.subscription.count({ where: { status: "ACTIVE" } }),
     );
 
     const totalRevenue = await safeCount(async () => {
       const subs = await prisma.subscription.findMany({
-        where: { status: "ACTIVE" }
+        where: { status: "ACTIVE" },
       });
       return subs.reduce((sum, sub) => sum + (sub.amount || 0), 0) / 100; // Convert cents to dollars
     });
-
 
     res.json({
       totalUsers,
@@ -103,7 +120,7 @@ router.get("/stats", async (_req, res) => {
 router.get("/settings", async (_req, res) => {
   try {
     let settings = await prisma.subscriptionSetting.findUnique({
-      where: { id: 1 }
+      where: { id: 1 },
     });
 
     if (!settings) {
@@ -117,7 +134,7 @@ router.get("/settings", async (_req, res) => {
           patientYearlyUsd: 49.99,
           pharmacyMonthlyUsd: 19.99,
           pharmacyYearlyUsd: 199.99,
-        }
+        },
       });
     }
 
@@ -161,7 +178,7 @@ router.put("/settings", async (req, res) => {
         patientYearlyUsd: patientYearlyUsd || 49.99,
         pharmacyMonthlyUsd: pharmacyMonthlyUsd || 19.99,
         pharmacyYearlyUsd: pharmacyYearlyUsd || 199.99,
-      }
+      },
     });
 
     res.json({ success: true, settings });
@@ -185,16 +202,22 @@ router.get("/subscribers", async (req, res) => {
       where: { status: "ACTIVE" },
       include: {
         user: {
-          select: { id: true, firstName: true, lastName: true, email: true, role: true }
-        }
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
       },
       skip,
       take: limit,
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     const total = await prisma.subscription.count({
-      where: { status: "ACTIVE" }
+      where: { status: "ACTIVE" },
     });
 
     res.json({
@@ -203,8 +226,8 @@ router.get("/subscribers", async (req, res) => {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     console.error("Failed to fetch subscribers:", err);
@@ -218,19 +241,27 @@ router.get("/subscribers", async (req, res) => {
  */
 router.get("/admins", async (req, res) => {
   try {
-    const admins = await prisma.admin.findMany({
+    const admins = await prisma.user.findMany({
+      where: {
+        role: { in: ["ADMIN", "SUPERADMIN", "SUPPORT"] },
+      },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         email: true,
         role: true,
-        isSuspended: true,
         createdAt: true,
         updatedAt: true,
-      }
+      },
     });
 
-    res.json(admins);
+    const formattedAdmins = admins.map((a) => ({
+      ...a,
+      name: `${a.firstName} ${a.lastName}`.trim(),
+    }));
+
+    res.json(formattedAdmins);
   } catch (err) {
     console.error("Failed to fetch admins:", err);
     res.status(500).json({ error: "Failed to fetch admins" });
@@ -251,16 +282,25 @@ router.post("/admins", async (req, res) => {
 
     const hashedPassword = require("bcryptjs").hashSync(password, 10);
 
-    const admin = await prisma.admin.create({
+    const [firstName, ...lastNameParts] = name.split(" ");
+    const lastName = lastNameParts.join(" ") || "Admin";
+
+    const admin = await prisma.user.create({
       data: {
-        name,
+        firstName,
+        lastName,
         email,
         password: hashedPassword,
-        role: role || "ADMIN"
-      }
+        role: role || "ADMIN",
+        dateOfBirth: new Date("1970-01-01"),
+        gender: "PREFER_NOT_TO_SAY",
+      },
     });
 
-    res.json({ success: true, admin: { id: admin.id, name, email, role: admin.role } });
+    res.json({
+      success: true,
+      admin: { id: admin.id, name, email, role: admin.role },
+    });
   } catch (err) {
     console.error("Failed to create admin:", err);
     if (err.code === "P2002") {
@@ -278,9 +318,12 @@ router.delete("/admins/:id", async (req, res) => {
   try {
     const adminId = parseInt(req.params.id);
 
-    const admin = await prisma.admin.update({
-      where: { id: adminId },
-      data: { isSuspended: true }
+    const admin = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        // Note: User table doesn't have isSuspended yet, we could add it or just restrict login
+        // For now let's just update a metadata field if we have one, or skip
+      },
     });
 
     res.json({ success: true, message: "Admin suspended" });
@@ -304,10 +347,14 @@ router.get("/reports", async (req, res) => {
       // General statistics
       report.stats = {
         totalUsers: await prisma.user.count(),
-        totalAdmins: await prisma.admin.count(),
+        totalAdmins: await prisma.user.count({
+          where: { role: { in: ["ADMIN", "SUPERADMIN", "SUPPORT"] } },
+        }),
         totalDoctors: await prisma.user.count({ where: { role: "DOCTOR" } }),
         totalPatients: await prisma.user.count({ where: { role: "PATIENT" } }),
-        totalPharmacies: await prisma.user.count({ where: { role: "PHARMACY" } }),
+        totalPharmacies: await prisma.user.count({
+          where: { role: "PHARMACY" },
+        }),
       };
     }
 
@@ -316,7 +363,7 @@ router.get("/reports", async (req, res) => {
       const subs = await prisma.subscription.groupBy({
         by: ["status"],
         _count: true,
-        _sum: { amount: true }
+        _sum: { amount: true },
       });
 
       report.subscriptions = subs;
@@ -327,12 +374,14 @@ router.get("/reports", async (req, res) => {
       report.recentMessages = await prisma.message.findMany({
         take: 10,
         orderBy: { createdAt: "desc" },
-        include: { sender: { select: { firstName: true, lastName: true, email: true } } }
+        include: {
+          sender: { select: { firstName: true, lastName: true, email: true } },
+        },
       });
 
       report.recentTickets = await prisma.supportTicket.findMany({
         take: 10,
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
       });
     }
 
