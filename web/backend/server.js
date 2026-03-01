@@ -56,7 +56,7 @@ app.get("/", (_req, res) => {
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "UP",
-    version: "1.0.4",
+    version: "1.0.5",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
   });
