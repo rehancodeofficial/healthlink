@@ -97,13 +97,11 @@ app.use("/api/superadmin/activity-logs", activityLogsRoutes);
 const adminRoutes = require("./routes/admins"); // manage admins (superadmin)
 const adminUsersRoutes = require("./routes/adminUsers"); // manage users (patients/doctors)
 const adminDashboardRoutes = require("./routes/adminRoutes"); // admin dashboard
-//const adminAppointmentsRoutes = require("./routes/adminAppointments");
 const adminMessagesRoutes = require("./routes/messages"); // admin messaging
 
 app.use("/api/admins", adminRoutes); // ONLY for superadmin use
-app.use("/api/admin", adminDashboardRoutes); // admin dashboard & user management
 app.use("/api/admin/users", adminUsersRoutes);
-//app.use("/api/admin/appointments", adminAppointmentsRoutes);
+app.use("/api/admin", adminDashboardRoutes); // admin dashboard & user management
 app.use("/api/admin/messages", adminMessagesRoutes);
 
 // ----------------------------
