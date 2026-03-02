@@ -233,4 +233,153 @@ router.post("/verify-otp-login", async (req, res) => {
   }
 });
 
+// -------------------------
+// Request OTP for Signup
+// -------------------------
+router.post("/request-otp-signup", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const normedEmail = String(email).trim().toLowerCase();
+
+    // Check if user ALREADY exists
+    const user = await prisma.user.findUnique({
+      where: { email: normedEmail },
+    });
+    if (user) {
+      return res
+        .status(400)
+        .json({
+          error: "Account already exists with this email. Please login.",
+        });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = getOTPExpiration();
+
+    // Store OTP in DB
+    await prisma.emailOTP.create({
+      data: {
+        email: normedEmail,
+        otp,
+        expiresAt,
+      },
+    });
+
+    // Send via email service
+    await sendOTPEmail(normedEmail, otp);
+
+    return res.json({ message: "OTP sent to your email" });
+  } catch (err) {
+    console.error("OTP Signup Request Error:", err);
+    return res.status(500).json({ error: "Failed to send OTP" });
+  }
+});
+
+// -------------------------
+// Verify OTP for Signup & Create User
+// -------------------------
+router.post("/verify-otp-signup", async (req, res) => {
+  try {
+    const {
+      email,
+      otp,
+      firstName,
+      lastName,
+      role,
+      specialization,
+      customProfession,
+      dateOfBirth,
+      gender,
+    } = req.body;
+
+    if (!email || !otp || !firstName || !lastName || !role) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const normedEmail = String(email).trim().toLowerCase();
+
+    // Verify OTP
+    const record = await prisma.emailOTP.findFirst({
+      where: {
+        email: normedEmail,
+        otp,
+        verified: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!record) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    // Mark OTP as verified
+    await prisma.emailOTP.update({
+      where: { id: record.id },
+      data: { verified: true },
+    });
+
+    // Create User atomically
+    const user = await prisma.user.create({
+      data: {
+        firstName,
+        lastName,
+        email: normedEmail,
+        password: "otp-managed",
+        role,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+        gender: gender || "PREFER_NOT_TO_SAY",
+        organization: {
+          create: {
+            name: `${firstName}'s Organization`,
+          },
+        },
+      },
+    });
+
+    // Update Organization Owner
+    if (user.organizationId) {
+      await prisma.organization.update({
+        where: { id: user.organizationId },
+        data: { ownerId: user.id },
+      });
+    }
+
+    // Provision Profile
+    try {
+      const finalSpecialization =
+        specialization === "Other" ? customProfession : specialization;
+      await ensureDefaultProfile(user, finalSpecialization);
+    } catch (e) {
+      console.error("Profile provisioning error (non-fatal):", e);
+    }
+
+    // Generate Token
+    const token = jwt.sign(
+      { id: user.id, role: user.role, type: "USER" },
+      JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        role: user.role,
+        email: user.email,
+        type: "USER",
+      },
+    });
+  } catch (err) {
+    console.error("Signup Verification Error:", err);
+    return res
+      .status(500)
+      .json({ error: "Registration failed: " + err.message });
+  }
+});
+
 module.exports = router;
