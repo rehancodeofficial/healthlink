@@ -1,5 +1,5 @@
 // FILE: src/pages/Register.jsx
-import { useState } from 'react';
+import { useState } from "react";
 import {
   FiEye,
   FiEyeOff,
@@ -9,33 +9,33 @@ import {
   FiArrowLeft,
   FiShield,
   FiSettings,
-} from 'react-icons/fi';
-import { FaArrowRight, FaStethoscope, FaUserShield } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../Lib/api';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useTheme } from '../context/ThemeContext';
-import OTPVerification from '../components/OTPVerification';
-import { supabase } from '../Lib/supabase';
+} from "react-icons/fi";
+import { FaArrowRight, FaStethoscope, FaUserShield } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../Lib/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "../context/ThemeContext";
+import OTPVerification from "../components/OTPVerification";
+import { supabase } from "../Lib/supabase";
 
 export default function Register() {
   const [form, setForm] = useState({
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'PATIENT',
-    specialization: '',
-    gender: 'PREFER_NOT_TO_SAY',
-    dateOfBirth: '',
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "PATIENT",
+    specialization: "",
+    gender: "PREFER_NOT_TO_SAY",
+    dateOfBirth: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
   const { theme } = useTheme();
 
@@ -48,60 +48,63 @@ export default function Register() {
     if (submitting) return;
 
     if (form.password !== form.confirmPassword) {
-      toast.error('Passwords do not match.');
+      toast.error("Passwords do not match.");
       return;
     }
 
     setSubmitting(true);
     try {
-      // 1. Supabase Auth Signup
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // 1. Request OTP from backend
+      await api.post("/auth/request-otp-signup", {
         email: form.email.trim().toLowerCase(),
-        password: form.password,
-        options: {
-          data: {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            role: form.role,
-          },
-        },
       });
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error('User creation failed');
-      }
-
-      // 2. Call backend for further processing (profile, organization, etc.)
-      const response = await api.post('/auth/register-success', {
-        ...form,
-        specialization: form.specialization === 'Other' ? form.customProfession : form.specialization,
-        supabaseId: authData.user.id,
-        email: String(form.email || '')
-          .trim()
-          .toLowerCase(),
-      });
-      
-      toast.success('Registration successful! Please verify your email.');
-      // Session persists automatically in Supabase, but we might want them to log in again or verify first.
-      setTimeout(() => navigate('/login'), 1500);
+      setRegisteredEmail(form.email.trim().toLowerCase());
+      setShowOTP(true);
+      toast.info("OTP sent to your email. Please verify.");
     } catch (err) {
-      console.error('Registration error:', err);
-      toast.error(err.response?.data?.error || err.message || 'Registration failed');
+      console.error("Registration error:", err);
+      toast.error(err.response?.data?.error || err.message || "Registration failed");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleVerified = () => {
-    toast.success('Email verified successfully! You can now log in.');
-    setTimeout(() => navigate('/login'), 1500);
+  const handleVerified = async (otp) => {
+    setSubmitting(true);
+    try {
+      // 2. Verify OTP & Create User
+      const response = await api.post("/auth/verify-otp-signup", {
+        ...form,
+        email: registeredEmail,
+        otp,
+        specialization:
+          form.specialization === "Other" ? form.customProfession : form.specialization,
+      });
+
+      const { token, user } = response.data;
+
+      // 3. Login User
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Update Auth Context (if available via window event or reload)
+      window.dispatchEvent(new Event("storage"));
+
+      toast.success("Registration successful!");
+      setTimeout(() => navigate("/dashboard"), 1500);
+    } catch (err) {
+      console.error("OTP Verification error:", err);
+      toast.error(err.response?.data?.error || "Verification failed");
+      setSubmitting(false);
+      // Re-throw to let OTP component know it failed (if it handles errors)
+      throw err;
+    }
   };
 
   const handleBackFromOTP = () => {
     setShowOTP(false);
-    setRegisteredEmail('');
+    setRegisteredEmail("");
   };
 
   // Show OTP verification screen if needed
@@ -116,9 +119,7 @@ export default function Register() {
   }
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]`}
-    >
+    <div className={`min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]`}>
       {/* Triple Color Atmospheric Glow */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[var(--brand-orange)] opacity-[0.05] blur-[150px] rounded-full"></div>
@@ -144,19 +145,14 @@ export default function Register() {
             </Link>
 
             <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-8 border border-[var(--border)] shadow-2xl">
-              <img
-                src="/images/logo/Asset3.png"
-                alt="Logo"
-                className="w-10 h-10"
-              />
+              <img src="/images/logo/Asset3.png" alt="Logo" className="w-10 h-10" />
               <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
                 CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
               </span>
             </div>
 
             <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-[0.9] uppercase text-emerald-300">
-              Create <br />{' '}
-              <span className="text-emerald-300">Account</span>
+              Create <br /> <span className="text-emerald-300">Account</span>
             </h2>
             <p className="text-emerald-300 text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic text-justify">
               Sign up to access virtual care.
@@ -184,8 +180,7 @@ export default function Register() {
         <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
           <div className="mb-8">
             <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
-              Create{' '}
-              <span className="text-[var(--brand-green)]">Account</span>
+              Create <span className="text-[var(--brand-green)]">Account</span>
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
               Fill in your details to get started.
@@ -207,7 +202,7 @@ export default function Register() {
                   required
                 />
               </div>
-               <div className="space-y-1.5">
+              <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   Middle Name
                 </label>
@@ -219,7 +214,7 @@ export default function Register() {
                   placeholder="(Opt)"
                 />
               </div>
-               <div className="space-y-1.5">
+              <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   Last Name
                 </label>
@@ -234,38 +229,37 @@ export default function Register() {
               </div>
             </div>
 
-             <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                        Date of Birth
-                    </label>
-                     <input
-                        type="date"
-                        name="dateOfBirth"
-                        value={form.dateOfBirth}
-                        onChange={handleChange}
-                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                        required
-                    />
-                </div>
-                 <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                        Gender
-                    </label>
-                    <select
-                        name="gender"
-                        value={form.gender}
-                        onChange={handleChange}
-                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner appearance-none"
-                    >
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
-                        <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-                    </select>
-                </div>
-             </div>
-
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={form.dateOfBirth}
+                  onChange={handleChange}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner appearance-none"
+                >
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                  <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
 
             <div className="space-y-1.5">
               <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
@@ -297,7 +291,7 @@ export default function Register() {
                     <FiLock />
                   </div>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     value={form.password}
                     onChange={handleChange}
@@ -318,7 +312,7 @@ export default function Register() {
                     <FiLock />
                   </div>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={form.confirmPassword}
                     onChange={handleChange}
@@ -344,19 +338,19 @@ export default function Register() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   {
-                    id: 'PATIENT',
-                    label: 'PATIENT',
-                    color: 'var(--brand-orange)',
+                    id: "PATIENT",
+                    label: "PATIENT",
+                    color: "var(--brand-orange)",
                   },
                   {
-                    id: 'DOCTOR',
-                    label: 'DOCTOR',
-                    color: 'var(--brand-green)',
+                    id: "DOCTOR",
+                    label: "DOCTOR",
+                    color: "var(--brand-green)",
                   },
                   {
-                    id: 'PHARMACY',
-                    label: 'PHARMACIST',
-                    color: 'var(--brand-blue)',
+                    id: "PHARMACY",
+                    label: "PHARMACIST",
+                    color: "var(--brand-blue)",
                   },
                 ].map((role) => (
                   <button
@@ -366,11 +360,9 @@ export default function Register() {
                     className={`py-3 rounded-2xl border-2 text-[9px] font-black uppercase tracking-widest transition-all ${
                       form.role === role.id
                         ? `bg-white text-black shadow-xl`
-                        : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-main)]'
+                        : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-main)]"
                     }`}
-                    style={
-                      form.role === role.id ? { borderColor: role.color } : {}
-                    }
+                    style={form.role === role.id ? { borderColor: role.color } : {}}
                   >
                     {role.label}
                   </button>
@@ -378,7 +370,7 @@ export default function Register() {
               </div>
             </div>
 
-            {form.role === 'DOCTOR' && (
+            {form.role === "DOCTOR" && (
               <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   Medical Specialization
@@ -412,14 +404,14 @@ export default function Register() {
                   </select>
                 </div>
 
-                {form.specialization === 'Other' && (
+                {form.specialization === "Other" && (
                   <div className="relative group mt-3 animate-in fade-in slide-in-from-top-1">
-                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--brand-green)]">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--brand-green)]">
                       <FaStethoscope />
                     </div>
                     <input
                       name="customProfession"
-                      value={form.customProfession || ''}
+                      value={form.customProfession || ""}
                       onChange={handleChange}
                       className="w-full bg-[var(--bg-main)] border border-[var(--brand-green)]/30 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
                       placeholder="Specify your profession..."
@@ -439,8 +431,7 @@ export default function Register() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Submit{' '}
-                  <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                  Submit <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
@@ -448,7 +439,7 @@ export default function Register() {
 
           <footer className="mt-8 text-center border-t border-[var(--border)] pt-8">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link
                 to="/login"
                 className="text-[var(--brand-orange)] font-black hover:underline ml-1"
@@ -462,7 +453,7 @@ export default function Register() {
       <ToastContainer
         position="top-right"
         autoClose={2500}
-        theme={theme === 'dark' ? 'dark' : 'light'}
+        theme={theme === "dark" ? "dark" : "light"}
       />
     </div>
   );
