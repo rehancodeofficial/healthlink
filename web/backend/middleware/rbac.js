@@ -1,8 +1,8 @@
 /**
  * Role-Based Access Control (RBAC) Middleware
- * 
+ *
  * Hierarchy: SUPERADMIN > ADMIN > DOCTOR/PATIENT/PHARMACY/SUPPORT
- * 
+ *
  * Usage:
  *   router.get("/superadmin/users", requireRole("SUPERADMIN"), handler)
  *   router.get("/admin/reports", requireRole(["SUPERADMIN", "ADMIN"]), handler)
@@ -18,13 +18,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const verifyToken = (req, res, next) => {
   if (!JWT_SECRET) {
     console.error("❌ JWT_SECRET is missing in environment variables!");
-    return res.status(500).json({ success: false, message: "Internal server error: Security configuration missing" });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error: Security configuration missing",
+      });
   }
 
   let token;
-  
+
   // Try to get token from Authorization header first
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
     token = req.headers.authorization.slice(7); // Remove "Bearer " prefix
   }
   // Fall back to cookies if available
@@ -33,19 +41,34 @@ const verifyToken = (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No token provided" });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (!decoded || !decoded.id) {
-      return res.status(403).json({ success: false, message: "Forbidden: Malformed token payload" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Forbidden: Malformed token payload",
+        });
     }
     req.user = decoded; // user contains id, role, email, etc.
+    console.log(
+      `[RBAC] Token verified for: ${req.user.email} (ID: ${req.user.id}, Role: ${req.user.role})`,
+    );
     next();
   } catch (err) {
     console.warn(`JWT verification failed: ${err.message}`);
-    return res.status(401).json({ success: false, message: "Unauthorized: Invalid or expired token" });
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Unauthorized: Invalid or expired token",
+      });
   }
 };
 
@@ -57,20 +80,36 @@ const requireRole = (allowedRoles) => {
   return (req, res, next) => {
     // Ensure verifyToken ran first
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized: Please log in first" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Please log in first" });
     }
 
     if (!req.user.role) {
-      return res.status(403).json({ success: false, message: "Forbidden: User role not found in token" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Forbidden: User role not found in token",
+        });
     }
 
     const userRole = String(req.user.role).toUpperCase();
-    const rolesArray = (Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]).map(r => String(r).toUpperCase());
+    const rolesArray = (
+      Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
+    ).map((r) => String(r).toUpperCase());
+
+    console.log(
+      `[RBAC] Role check: userRole=${userRole}, allowed=${rolesArray.join(", ")}`,
+    );
 
     if (!rolesArray.includes(userRole) && userRole !== "SUPERADMIN") {
-      return res.status(403).json({ 
-        success: false, 
-        message: `Forbidden: This action requires one of: ${rolesArray.join(", ")}. You have ${userRole}` 
+      console.warn(
+        `[RBAC] Access denied for ${req.user.email}. Role ${userRole} not in ${rolesArray.join(", ")}`,
+      );
+      return res.status(403).json({
+        success: false,
+        message: `Forbidden: This action requires one of: ${rolesArray.join(", ")}. You have ${userRole}`,
       });
     }
 
@@ -86,19 +125,21 @@ const requireRole = (allowedRoles) => {
  */
 const requireHierarchy = (minRole) => {
   const hierarchy = {
-    "SUPERADMIN": 5,
-    "ADMIN": 4,
-    "DOCTOR": 3,
-    "PATIENT": 2,
-    "PHARMACY": 2,
-    "SUPPORT": 1,
+    SUPERADMIN: 5,
+    ADMIN: 4,
+    DOCTOR: 3,
+    PATIENT: 2,
+    PHARMACY: 2,
+    SUPPORT: 1,
   };
 
   const minLevel = hierarchy[minRole] || 0;
 
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized: Token not verified" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Token not verified" });
     }
 
     const userLevel = hierarchy[req.user.role] || 0;
@@ -106,7 +147,7 @@ const requireHierarchy = (minRole) => {
     if (userLevel < minLevel) {
       return res.status(403).json({
         success: false,
-        message: `Forbidden: Insufficient permissions (requires ${minRole})`
+        message: `Forbidden: Insufficient permissions (requires ${minRole})`,
       });
     }
 
@@ -123,14 +164,15 @@ const verifyOwnerOrAdmin = (req, res, next) => {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  const resourceId = req.params.userId || req.params.patientId || req.params.doctorId;
+  const resourceId =
+    req.params.userId || req.params.patientId || req.params.doctorId;
   const isOwner = req.user.id === resourceId;
   const isAdmin = ["ADMIN", "SUPERADMIN"].includes(req.user.role);
 
   if (!isOwner && !isAdmin) {
     return res.status(403).json({
       success: false,
-      message: "Forbidden: Cannot access other users' resources"
+      message: "Forbidden: Cannot access other users' resources",
     });
   }
 
@@ -219,7 +261,7 @@ const checkPermission = (permission) => {
     if (!rolePerms[permission]) {
       return res.status(403).json({
         success: false,
-        message: `Forbidden: Permission '${permission}' denied for ${req.user.role}`
+        message: `Forbidden: Permission '${permission}' denied for ${req.user.role}`,
       });
     }
 
