@@ -1,22 +1,11 @@
 // FILE: src/pages/Register.jsx
 import { useState } from "react";
-import {
-  FiEye,
-  FiEyeOff,
-  FiUser,
-  FiMail,
-  FiLock,
-  FiArrowLeft,
-  FiShield,
-  FiSettings,
-} from "react-icons/fi";
-import { FaArrowRight, FaStethoscope, FaUserShield } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../Lib/api";
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiShield } from "react-icons/fi";
+import { FaArrowRight, FaStethoscope } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
-import OTPVerification from "../components/OTPVerification";
 import { supabase } from "../Lib/supabase";
 
 export default function Register() {
@@ -29,14 +18,13 @@ export default function Register() {
     confirmPassword: "",
     role: "PATIENT",
     specialization: "",
+    customProfession: "",
     gender: "PREFER_NOT_TO_SAY",
     dateOfBirth: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
-  const navigate = useNavigate();
+  const [emailSent, setEmailSent] = useState(false);
   const { theme } = useTheme();
 
   const handleChange = (e) => {
@@ -52,75 +40,103 @@ export default function Register() {
       return;
     }
 
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // 1. Request OTP from backend
-      await api.post("/auth/request-otp-signup", {
+      // Register with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
         email: form.email.trim().toLowerCase(),
+        password: form.password,
+        options: {
+          data: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            role: form.role,
+            dateOfBirth: form.dateOfBirth,
+            gender: form.gender,
+            specialization:
+              form.specialization === "Other" ? form.customProfession : form.specialization,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      setRegisteredEmail(form.email.trim().toLowerCase());
-      setShowOTP(true);
-      toast.info("OTP sent to your email. Please verify.");
+      if (error) throw error;
+
+      console.log("✅ Registration successful:", data);
+
+      // Show success message
+      setEmailSent(true);
+      toast.success("Please check your email to verify your account!");
     } catch (err) {
       console.error("Registration error:", err);
-      // Detailed error for debugging
-      const errorMsg =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        "Registration failed";
-      toast.error(`Error: ${errorMsg}`);
+      toast.error(err.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleVerified = async (otp) => {
-    setSubmitting(true);
-    try {
-      // 2. Verify OTP & Create User
-      const response = await api.post("/auth/verify-otp-signup", {
-        ...form,
-        email: registeredEmail,
-        otp,
-        specialization:
-          form.specialization === "Other" ? form.customProfession : form.specialization,
-      });
-
-      const { token, user } = response.data;
-
-      // 3. Login User
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // Update Auth Context (if available via window event or reload)
-      window.dispatchEvent(new Event("storage"));
-
-      toast.success("Registration successful!");
-      setTimeout(() => navigate("/dashboard"), 1500);
-    } catch (err) {
-      console.error("OTP Verification error:", err);
-      toast.error(err.response?.data?.error || "Verification failed");
-      setSubmitting(false);
-      // Re-throw to let OTP component know it failed (if it handles errors)
-      throw err;
-    }
-  };
-
-  const handleBackFromOTP = () => {
-    setShowOTP(false);
-    setRegisteredEmail("");
-  };
-
-  // Show OTP verification screen if needed
-  if (showOTP) {
+  // Email confirmation screen
+  if (emailSent) {
     return (
-      <OTPVerification
-        email={registeredEmail}
-        onVerified={handleVerified}
-        onBack={handleBackFromOTP}
-      />
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]">
+        <div className="w-full max-w-md glass p-12 rounded-[3rem] border border-[var(--border)] text-center">
+          <div className="mb-8">
+            <div className="h-20 w-20 mx-auto mb-6 rounded-full bg-[var(--brand-green)]/10 flex items-center justify-center">
+              <FiMail className="text-4xl text-[var(--brand-green)]" />
+            </div>
+            <h1 className="text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-4">
+              Check Your Email
+            </h1>
+            <p className="text-[var(--text-soft)] text-sm leading-relaxed max-w-sm mx-auto">
+              We've sent a verification link to <strong>{form.email}</strong>
+            </p>
+          </div>
+
+          <div className="space-y-4 text-left bg-[var(--bg-main)] p-6 rounded-2xl mb-8">
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[var(--brand-green)] text-xs font-bold">1</span>
+              </div>
+              <p className="text-xs text-[var(--text-soft)]">
+                Check your email inbox (and spam folder)
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[var(--brand-green)] text-xs font-bold">2</span>
+              </div>
+              <p className="text-xs text-[var(--text-soft)]">
+                Click the verification link in the email
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[var(--brand-green)] text-xs font-bold">3</span>
+              </div>
+              <p className="text-xs text-[var(--text-soft)]">
+                You'll be automatically redirected to your dashboard
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to="/login"
+            className="btn btn-secondary w-full !py-4 !rounded-2xl text-xs flex items-center justify-center gap-3"
+          >
+            Already verified? Login <FaArrowRight />
+          </Link>
+        </div>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme={theme === "dark" ? "dark" : "light"}
+        />
+      </div>
     );
   }
 
@@ -182,7 +198,7 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Right Side: Deployment Form */}
+        {/* Right Side: Registration Form */}
         <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
           <div className="mb-8">
             <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
