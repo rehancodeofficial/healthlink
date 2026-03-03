@@ -31,10 +31,13 @@ if (EMAIL_PROVIDER === "gmail") {
     // Force IPv4 to avoid Docker IPv6 issues
     family: 4,
     // Add connection timeouts
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000, // 10 seconds
-    socketTimeout: 10000, // 10 seconds
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 30000, // 30 seconds
+    socketTimeout: 30000, // 30 seconds
   });
+  console.log(
+    `📧 Gmail Transporter initialized with 30s timeout. Host: ${process.env.EMAIL_HOST}`,
+  );
 }
 
 /**
