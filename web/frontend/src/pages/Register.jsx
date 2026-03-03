@@ -64,7 +64,13 @@ export default function Register() {
       toast.info("OTP sent to your email. Please verify.");
     } catch (err) {
       console.error("Registration error:", err);
-      toast.error(err.response?.data?.error || err.message || "Registration failed");
+      // Detailed error for debugging
+      const errorMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Registration failed";
+      toast.error(`Error: ${errorMsg}`);
     } finally {
       setSubmitting(false);
     }
