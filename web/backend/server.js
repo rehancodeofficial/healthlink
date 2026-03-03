@@ -208,6 +208,9 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ✅ Diagnostics (Temporary)
+app.use("/api/diagnostics", require("./routes/diagnostic"));
+
 // ✅ Server start
 const PORT = process.env.PORT || 5001;
 const HOST = "0.0.0.0"; // Required for Railway compatibility
