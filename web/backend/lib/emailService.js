@@ -13,16 +13,27 @@ if (SENDGRID_API_KEY && EMAIL_PROVIDER === "sendgrid") {
 }
 
 // Configure Gmail/SMTP transporter
+// Configure Gmail/SMTP transporter
 let transporter = null;
 if (EMAIL_PROVIDER === "gmail") {
+  const defaultPort = parseInt(process.env.EMAIL_PORT || "465");
+  const defaultSecure =
+    process.env.EMAIL_SECURE === "true" || defaultPort === 465;
+
   transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.EMAIL_PORT || "587"),
-    secure: process.env.EMAIL_SECURE === "true", // true for 465, false for other ports
+    port: defaultPort,
+    secure: defaultSecure, // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    // Force IPv4 to avoid Docker IPv6 issues
+    family: 4,
+    // Add connection timeouts
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 10000, // 10 seconds
   });
 }
 
