@@ -1,19 +1,12 @@
 // FILE: backend/routes/auth.js
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const prisma = require("../prisma/prismaClient");
 const { ensureDefaultProfile } = require("../lib/provisionProfile");
-const { generateOTP, getOTPExpiration } = require("../lib/otpGenerator");
-const { sendOTPEmail } = require("../lib/emailService");
+const { supabaseAdmin } = require("../lib/supabaseAdmin");
 
 const router = express.Router();
-
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// Allowed roles (match Prisma enum)
-const ALLOWED_USER_ROLES = new Set(["DOCTOR", "PATIENT", "PHARMACY"]);
-const ALLOWED_ADMIN_ROLES = new Set(["SUPERADMIN", "ADMIN", "SUPPORT"]);
 
 // -------------------------
 // Register Success (Supabase Sync)
@@ -29,6 +22,7 @@ router.post("/register-success", async (req, res) => {
       role,
       dateOfBirth,
       gender,
+      specialization,
     } = req.body || {};
 
     if (!supabaseId || !email) {
@@ -48,21 +42,19 @@ router.post("/register-success", async (req, res) => {
     if (!existingUser) {
       existingUser = await prisma.user.create({
         data: {
-          id: supabaseId, // Use Supabase ID as our primary key
+          id: supabaseId, // Use Supabase ID as primary key
           firstName: firstName || "First",
           lastName: lastName || "Last",
           email: normedEmail,
           phone: phone || null,
-          password: "supabase-managed", // Placeholder since password is in Supabase
+          password: "supabase-managed", // Placeholder
           role: role || "PATIENT",
           dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
           gender: gender || "PREFER_NOT_TO_SAY",
-
-          // Create a default Organization for this user
           organization: {
             create: {
               name: `${firstName || "User"}'s Organization`,
-              ownerId: supabaseId, // We set it here, but it's optional in schema for now
+              ownerId: supabaseId,
             },
           },
         },
@@ -70,15 +62,23 @@ router.post("/register-success", async (req, res) => {
 
       // Provision default profile
       try {
-        await ensureDefaultProfile(existingUser, req.body.specialization);
+        await ensureDefaultProfile(existingUser, specialization);
       } catch (e) {
         console.error("⚠️ Failed to provision default profile:", e);
       }
     }
 
+    // Create legacy JWT for backend API
+    const token = jwt.sign(
+      { id: existingUser.id, role: existingUser.role, type: "USER" },
+      JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
     return res.status(201).json({
       message: "User synchronized successfully",
       user: existingUser,
+      token,
     });
   } catch (err) {
     console.error("Register Sync error:", err);
@@ -87,11 +87,11 @@ router.post("/register-success", async (req, res) => {
 });
 
 // -------------------------
-// Login Sync (Supabase Sync)
+// Login Sync (Validate Supabase JWT & Sync)
 // -------------------------
 router.post("/login-sync", async (req, res) => {
   try {
-    const { email, supabaseId } = req.body || {};
+    const { email, supabaseId, supabaseAccessToken } = req.body || {};
 
     if (!email) {
       return res.status(400).json({ error: "Missing email" });
@@ -99,16 +99,39 @@ router.post("/login-sync", async (req, res) => {
 
     const normedEmail = String(email).trim().toLowerCase();
 
-    // 1) Try Finding User
+    // Validate Supabase JWT if provided
+    if (supabaseAccessToken) {
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(supabaseAccessToken);
+      if (error || !user) {
+        return res.status(401).json({ error: "Invalid Supabase session" });
+      }
+
+      // Check if email is verified
+      if (!user.email_confirmed_at) {
+        return res.status(403).json({
+          error:
+            "Email not verified. Please check your email and verify your account before logging in.",
+        });
+      }
+    }
+
+    // Find User in our DB
     let account = await prisma.user.findUnique({
       where: { email: normedEmail },
     });
 
     if (!account) {
-      return res.status(404).json({ error: "User not found" });
+      return res
+        .status(404)
+        .json({
+          error: "User not found in database. Please complete registration.",
+        });
     }
 
-    // 2) Create Legacy JWT
+    // Create Legacy JWT for backend API
     const token = jwt.sign(
       { id: account.id, role: account.role, type: "USER" },
       JWT_SECRET,
@@ -132,7 +155,7 @@ router.post("/login-sync", async (req, res) => {
 });
 
 // -------------------------
-// Request OTP (Backend-driven)
+// Request OTP Login (via Supabase)
 // -------------------------
 router.post("/request-otp-login", async (req, res) => {
   try {
@@ -141,30 +164,31 @@ router.post("/request-otp-login", async (req, res) => {
 
     const normedEmail = String(email).trim().toLowerCase();
 
-    // Check if user exists in our DB first (Security)
+    // Check if user exists in our DB first
     const user = await prisma.user.findUnique({
       where: { email: normedEmail },
     });
+
     if (!user) {
       return res
         .status(404)
         .json({ error: "No account found with this email" });
     }
 
-    const otp = generateOTP();
-    const expiresAt = getOTPExpiration();
-
-    // Store OTP in DB
-    await prisma.emailOTP.create({
-      data: {
-        email: normedEmail,
-        otp,
-        expiresAt,
+    // Send OTP via Supabase
+    const { error } = await supabaseAdmin.auth.signInWithOtp({
+      email: normedEmail,
+      options: {
+        shouldCreateUser: false, // Don't create new users via OTP login
       },
     });
 
-    // Send via email service
-    await sendOTPEmail(normedEmail, otp);
+    if (error) {
+      console.error("Supabase OTP error:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to send OTP. Please try again." });
+    }
 
     return res.json({ message: "OTP sent to your email" });
   } catch (err) {
@@ -174,41 +198,36 @@ router.post("/request-otp-login", async (req, res) => {
 });
 
 // -------------------------
-// Verify OTP (Backend-driven)
+// Verify OTP Login (via Supabase)
 // -------------------------
 router.post("/verify-otp-login", async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp)
+    if (!email || !otp) {
       return res.status(400).json({ error: "Email and OTP are required" });
+    }
 
     const normedEmail = String(email).trim().toLowerCase();
 
-    // Find valid OTP
-    const record = await prisma.emailOTP.findFirst({
-      where: {
-        email: normedEmail,
-        otp,
-        verified: false,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: "desc" },
+    // Verify OTP with Supabase
+    const { data, error } = await supabaseAdmin.auth.verifyOtp({
+      email: normedEmail,
+      token: otp,
+      type: "email",
     });
 
-    if (!record) {
+    if (error || !data.user) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
-    // Mark as verified
-    await prisma.emailOTP.update({
-      where: { id: record.id },
-      data: { verified: true },
-    });
-
-    // Get user and generate token
+    // Get user from our DB
     const user = await prisma.user.findUnique({
       where: { email: normedEmail },
     });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     // Create JWT
     const token = jwt.sign(
@@ -230,155 +249,6 @@ router.post("/verify-otp-login", async (req, res) => {
   } catch (err) {
     console.error("OTP Verification Error:", err);
     return res.status(500).json({ error: "Verification failed" });
-  }
-});
-
-// -------------------------
-// Request OTP for Signup
-// -------------------------
-router.post("/request-otp-signup", async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: "Email is required" });
-
-    const normedEmail = String(email).trim().toLowerCase();
-
-    // Check if user ALREADY exists
-    const user = await prisma.user.findUnique({
-      where: { email: normedEmail },
-    });
-    if (user) {
-      return res
-        .status(400)
-        .json({
-          error: "Account already exists with this email. Please login.",
-        });
-    }
-
-    const otp = generateOTP();
-    const expiresAt = getOTPExpiration();
-
-    // Store OTP in DB
-    await prisma.emailOTP.create({
-      data: {
-        email: normedEmail,
-        otp,
-        expiresAt,
-      },
-    });
-
-    // Send via email service
-    await sendOTPEmail(normedEmail, otp);
-
-    return res.json({ message: "OTP sent to your email" });
-  } catch (err) {
-    console.error("OTP Signup Request Error:", err);
-    return res.status(500).json({ error: "Failed to send OTP" });
-  }
-});
-
-// -------------------------
-// Verify OTP for Signup & Create User
-// -------------------------
-router.post("/verify-otp-signup", async (req, res) => {
-  try {
-    const {
-      email,
-      otp,
-      firstName,
-      lastName,
-      role,
-      specialization,
-      customProfession,
-      dateOfBirth,
-      gender,
-    } = req.body;
-
-    if (!email || !otp || !firstName || !lastName || !role) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const normedEmail = String(email).trim().toLowerCase();
-
-    // Verify OTP
-    const record = await prisma.emailOTP.findFirst({
-      where: {
-        email: normedEmail,
-        otp,
-        verified: false,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!record) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
-    }
-
-    // Mark OTP as verified
-    await prisma.emailOTP.update({
-      where: { id: record.id },
-      data: { verified: true },
-    });
-
-    // Create User atomically
-    const user = await prisma.user.create({
-      data: {
-        firstName,
-        lastName,
-        email: normedEmail,
-        password: "otp-managed",
-        role,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-        gender: gender || "PREFER_NOT_TO_SAY",
-        organization: {
-          create: {
-            name: `${firstName}'s Organization`,
-          },
-        },
-      },
-    });
-
-    // Update Organization Owner
-    if (user.organizationId) {
-      await prisma.organization.update({
-        where: { id: user.organizationId },
-        data: { ownerId: user.id },
-      });
-    }
-
-    // Provision Profile
-    try {
-      const finalSpecialization =
-        specialization === "Other" ? customProfession : specialization;
-      await ensureDefaultProfile(user, finalSpecialization);
-    } catch (e) {
-      console.error("Profile provisioning error (non-fatal):", e);
-    }
-
-    // Generate Token
-    const token = jwt.sign(
-      { id: user.id, role: user.role, type: "USER" },
-      JWT_SECRET,
-      { expiresIn: "1d" },
-    );
-
-    return res.status(201).json({
-      message: "User registered successfully",
-      token,
-      user: {
-        id: user.id,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-        role: user.role,
-        email: user.email,
-        type: "USER",
-      },
-    });
-  } catch (err) {
-    console.error("Signup Verification Error:", err);
-    return res
-      .status(500)
-      .json({ error: "Registration failed: " + err.message });
   }
 });
 
