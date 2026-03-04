@@ -126,18 +126,7 @@ enum SlotStatus {
 // MODELS
 // =========================================================
 
-model EmailOTP {
-  id        Int      @id @default(autoincrement())
-  email     String
-  otp       String
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
 
-  @@index([email])
-  @@index([expiresAt])
-  @@map("EmailOTP")
-}
 
 model User {
   id          String   @id @default(uuid())
