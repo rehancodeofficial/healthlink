@@ -5,6 +5,8 @@ import api from "../Lib/api";
 import { supabase } from "../Lib/supabase";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,38 +26,72 @@ export default function Login() {
 
     try {
       if (loginMode === "password") {
-        // 1. Supabase Auth Login
+        // Password Login via Supabase
         const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: email,
+          email: email.trim().toLowerCase(),
           password: password,
         });
 
         if (authError) throw authError;
 
-        // 2. Get User Details and Sync with Backend
+        // Check if email is verified
+        if (!data.user.email_confirmed_at) {
+          throw new Error(
+            "Email not verified. Please check your email and verify your account before logging in."
+          );
+        }
+
+        // Sync with backend
         const res = await api.post("/auth/login-sync", {
-          email,
+          email: email.trim().toLowerCase(),
           supabaseId: data.user.id,
+          supabaseAccessToken: data.session.access_token,
         });
 
-        handleAuthSuccess(res.data, email);
+        handleAuthSuccess(res.data, email.trim().toLowerCase());
       } else {
-        // OTP Mode
+        // OTP Login via Supabase
         if (!otpSent) {
-          // Request OTP
-          await api.post("/auth/request-otp-login", { email });
+          // Send OTP
+          const { error: otpError } = await supabase.auth.signInWithOtp({
+            email: email.trim().toLowerCase(),
+            options: {
+              shouldCreateUser: false,
+            },
+          });
+
+          if (otpError) throw otpError;
+
           setOtpSent(true);
+          toast.success("OTP sent to your email!");
         } else {
           // Verify OTP
-          const res = await api.post("/auth/verify-otp-login", { email, otp });
-          handleAuthSuccess(res.data, email);
+          const { data, error: verifyError } = await supabase.auth.verifyOtp({
+            email: email.trim().toLowerCase(),
+            token: otp,
+            type: "email",
+          });
+
+          if (verifyError) throw verifyError;
+
+          if (!data.user) {
+            throw new Error("Invalid OTP. Please try again.");
+          }
+
+          // Sync with backend
+          const res = await api.post("/auth/login-sync", {
+            email: email.trim().toLowerCase(),
+            supabaseId: data.user.id,
+            supabaseAccessToken: data.session.access_token,
+          });
+
+          handleAuthSuccess(res.data, email.trim().toLowerCase());
         }
       }
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.error || err.message || "Invalid credentials. Please try again."
-      );
+      console.error("Login error:", err);
+      setError(err.response?.data?.error || err.message || "Login failed. Please try again.");
+      toast.error(err.response?.data?.error || err.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -73,28 +109,32 @@ export default function Login() {
     localStorage.setItem("type", user.type || "USER");
     localStorage.setItem("email", user.email || userEmail);
 
-    switch (user.role) {
-      case "SUPERADMIN":
-        navigate("/superadmin/dashboard");
-        break;
-      case "ADMIN":
-        navigate("/admin/dashboard");
-        break;
-      case "SUPPORT":
-        navigate("/support/dashboard");
-        break;
-      case "DOCTOR":
-        navigate("/doctor/dashboard");
-        break;
-      case "PATIENT":
-        navigate("/patient/dashboard");
-        break;
-      case "PHARMACY":
-        navigate("/pharmacy/dashboard");
-        break;
-      default:
-        navigate("/");
-    }
+    toast.success("Login successful! Redirecting...");
+
+    setTimeout(() => {
+      switch (user.role) {
+        case "SUPERADMIN":
+          navigate("/superadmin/dashboard");
+          break;
+        case "ADMIN":
+          navigate("/admin/dashboard");
+          break;
+        case "SUPPORT":
+          navigate("/support/dashboard");
+          break;
+        case "DOCTOR":
+          navigate("/doctor/dashboard");
+          break;
+        case "PATIENT":
+          navigate("/patient/dashboard");
+          break;
+        case "PHARMACY":
+          navigate("/pharmacy/dashboard");
+          break;
+        default:
+          navigate("/");
+      }
+    }, 1000);
   };
 
   return (
@@ -279,6 +319,7 @@ export default function Login() {
                 setLoginMode(loginMode === "password" ? "otp" : "password");
                 setOtpSent(false);
                 setError("");
+                setOtp("");
               }}
               className="w-full text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-widest hover:underline text-center"
             >
@@ -301,6 +342,7 @@ export default function Login() {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
