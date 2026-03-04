@@ -135,7 +135,7 @@ model User {
   lastName    String
   email       String   @unique
   phone       String?
-  password    String
+  password    String?  // Made optional - Supabase manages passwords
   role        UserRole @default(PATIENT)
   dateOfBirth DateTime
   gender      Gender
