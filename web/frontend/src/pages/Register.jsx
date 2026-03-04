@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../Lib/supabase";
+import api from "../Lib/api";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -24,7 +25,6 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const { theme } = useTheme();
 
   const handleChange = (e) => {
@@ -61,7 +61,6 @@ export default function Register() {
             specialization:
               form.specialization === "Other" ? form.customProfession : form.specialization,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -69,9 +68,24 @@ export default function Register() {
 
       console.log("✅ Registration successful:", data);
 
-      // Show success message
-      setEmailSent(true);
-      toast.success("Please check your email to verify your account!");
+      // Sync with backend immediately
+      await api.post("/auth/register-success", {
+        supabaseId: data.user.id,
+        email: form.email.trim().toLowerCase(),
+        firstName: form.firstName,
+        lastName: form.lastName,
+        role: form.role,
+        dateOfBirth: form.dateOfBirth,
+        gender: form.gender,
+        specialization:
+          form.specialization === "Other" ? form.customProfession : form.specialization,
+      });
+
+      toast.success("Registration successful! Please check your email for the verification link.");
+
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 3000);
     } catch (err) {
       console.error("Registration error:", err);
       toast.error(err.message || "Registration failed. Please try again.");
@@ -79,66 +93,6 @@ export default function Register() {
       setSubmitting(false);
     }
   };
-
-  // Email confirmation screen
-  if (emailSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]">
-        <div className="w-full max-w-md glass p-12 rounded-[3rem] border border-[var(--border)] text-center">
-          <div className="mb-8">
-            <div className="h-20 w-20 mx-auto mb-6 rounded-full bg-[var(--brand-green)]/10 flex items-center justify-center">
-              <FiMail className="text-4xl text-[var(--brand-green)]" />
-            </div>
-            <h1 className="text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-4">
-              Check Your Email
-            </h1>
-            <p className="text-[var(--text-soft)] text-sm leading-relaxed max-w-sm mx-auto">
-              We've sent a verification link to <strong>{form.email}</strong>
-            </p>
-          </div>
-
-          <div className="space-y-4 text-left bg-[var(--bg-main)] p-6 rounded-2xl mb-8">
-            <div className="flex items-start gap-3">
-              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[var(--brand-green)] text-xs font-bold">1</span>
-              </div>
-              <p className="text-xs text-[var(--text-soft)]">
-                Check your email inbox (and spam folder)
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[var(--brand-green)] text-xs font-bold">2</span>
-              </div>
-              <p className="text-xs text-[var(--text-soft)]">
-                Click the verification link in the email
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="h-6 w-6 rounded-full bg-[var(--brand-green)]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[var(--brand-green)] text-xs font-bold">3</span>
-              </div>
-              <p className="text-xs text-[var(--text-soft)]">
-                You'll be automatically redirected to your dashboard
-              </p>
-            </div>
-          </div>
-
-          <Link
-            to="/login"
-            className="btn btn-secondary w-full !py-4 !rounded-2xl text-xs flex items-center justify-center gap-3"
-          >
-            Already verified? Login <FaArrowRight />
-          </Link>
-        </div>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          theme={theme === "dark" ? "dark" : "light"}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={`min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]`}>
