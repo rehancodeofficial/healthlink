@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
-import { useTheme } from '../context/ThemeContext';
-import Chatbot from '../components/Chatbot';
+import { useState } from "react";
+import Sidebar from "../components/Sidebar";
+import Topbar from "../components/Topbar";
+import { useTheme } from "../context/ThemeContext";
+import Chatbot from "../components/Chatbot";
 
 export default function DashboardLayout({ children, role, user }) {
   const { theme } = useTheme();
@@ -13,18 +13,18 @@ export default function DashboardLayout({ children, role, user }) {
       className={`flex min-h-screen bg-[var(--bg-main)] transition-colors duration-300 ${theme}`}
     >
       {/* Sidebar */}
-      <Sidebar 
-        role={role} 
+      <Sidebar
+        role={role}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full">
         {/* Topbar */}
         <Topbar
-          userId={user?.id || ''}
-          userName={user?.name || localStorage.getItem('userName') || 'User'}
+          userId={user?.id || ""}
+          userName={user?.name || localStorage.getItem("userName") || "User"}
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
@@ -35,9 +35,9 @@ export default function DashboardLayout({ children, role, user }) {
             {children}
           </div>
         </main>
-        
+
         {/* AI Medical Chatbot (Only for Patients) */}
-        {role === 'PATIENT' && <Chatbot />}
+        {role === "PATIENT" && <Chatbot />}
       </div>
     </div>
   );
