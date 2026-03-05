@@ -71,21 +71,14 @@ router.post("/register-success", async (req, res) => {
         }
       } catch (dbError) {
         console.error("❌ Database error creating user:", dbError);
-        console.error("Payload was:", {
-          supabaseId,
-          email,
-          role,
-          gender,
-          dateOfBirth,
-        });
-
-        // Handle Prisma Validation Errors (P2009, etc)
         return res.status(500).json({
           error: "Database error saving new user",
-          details: dbError.message,
-          meta: dbError.meta,
-          code: dbError.code,
-          payload: { supabaseId, email, role, gender, dateOfBirth },
+          details:
+            process.env.NODE_ENV === "development"
+              ? dbError.message || JSON.stringify(dbError)
+              : "Please contact support",
+          prismaError:
+            process.env.NODE_ENV === "development" ? dbError : undefined,
         });
       }
     }
