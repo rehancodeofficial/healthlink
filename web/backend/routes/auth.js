@@ -40,31 +40,44 @@ router.post("/register-success", async (req, res) => {
 
     // If not, create them
     if (!existingUser) {
-      existingUser = await prisma.user.create({
-        data: {
-          id: supabaseId, // Use Supabase ID as primary key
-          firstName: firstName || "First",
-          lastName: lastName || "Last",
-          email: normedEmail,
-          phone: phone || null,
-          password: "supabase-managed", // Placeholder
-          role: role || "PATIENT",
-          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-          gender: gender || "PREFER_NOT_TO_SAY",
-          organization: {
-            create: {
-              name: `${firstName || "User"}'s Organization`,
-              ownerId: supabaseId,
-            },
-          },
-        },
-      });
-
-      // Provision default profile
       try {
-        await ensureDefaultProfile(existingUser, specialization);
-      } catch (e) {
-        console.error("⚠️ Failed to provision default profile:", e);
+        existingUser = await prisma.user.create({
+          data: {
+            id: supabaseId, // Use Supabase ID as primary key
+            firstName: firstName || "First",
+            lastName: lastName || "Last",
+            email: normedEmail,
+            phone: phone || null,
+            password: null, // Supabase manages passwords
+            role: role || "PATIENT",
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+            gender: gender || "PREFER_NOT_TO_SAY",
+            // Organization can be created separately if needed
+          },
+        });
+
+        console.log("✅ User created successfully:", existingUser.id);
+
+        // Provision default profile
+        try {
+          await ensureDefaultProfile(existingUser, specialization);
+          console.log("✅ Default profile created for:", existingUser.role);
+        } catch (profileError) {
+          console.error(
+            "⚠️ Failed to provision default profile:",
+            profileError,
+          );
+          // Don't fail the entire signup if profile creation fails
+        }
+      } catch (dbError) {
+        console.error("❌ Database error creating user:", dbError);
+        return res.status(500).json({
+          error: "Database error saving new user",
+          details:
+            process.env.NODE_ENV === "development"
+              ? dbError.message
+              : "Please contact support",
+        });
       }
     }
 
@@ -82,7 +95,10 @@ router.post("/register-success", async (req, res) => {
     });
   } catch (err) {
     console.error("Register Sync error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      error: "Internal server error",
+      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
   }
 });
 
@@ -124,11 +140,9 @@ router.post("/login-sync", async (req, res) => {
     });
 
     if (!account) {
-      return res
-        .status(404)
-        .json({
-          error: "User not found in database. Please complete registration.",
-        });
+      return res.status(404).json({
+        error: "User not found in database. Please complete registration.",
+      });
     }
 
     // Create Legacy JWT for backend API
