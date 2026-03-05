@@ -1,8 +1,13 @@
-[dotenv@17.2.3] injecting env (43) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (34) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+📧 Gmail Transporter initialized with 30s timeout. Host: smtp.gmail.com
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
 -------------------------------------------
-🚀 Server running on port: 5555
+🚀 Server running on: http://0.0.0.0:5001
 🌍 Environment: development
-⏱️  Started at: 2026-01-12T14:21:35.422Z
+⏱️  Started at: 2026-02-09T16:48:53.315Z
 -------------------------------------------
+✅ User created successfully: fake-sub-patient-uuid-1
+[RBAC] Token verified for: undefined (ID: fake-sub-patient-uuid-1, Role: PATIENT)
+✅ Default profile created for: PATIENT
+⚠️  Mocking checkout for Price ID: price_********PM
