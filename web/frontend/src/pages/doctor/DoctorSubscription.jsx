@@ -78,7 +78,15 @@ export default function DoctorSubscription() {
         plan, // "MONTHLY" | "YEARLY"
       });
 
-      const url = res?.data?.url;
+      const data = res?.data || {};
+      const url = data.url;
+
+      if (data.mockSuccess) {
+        toast.success("Subscription updated successfully!");
+        load(); // Refresh data in place
+        return;
+      }
+
       if (!url) throw new Error("Checkout URL not returned from server");
 
       window.location.href = url; // redirect to Stripe
@@ -118,52 +126,50 @@ export default function DoctorSubscription() {
           <h1 className="text-3xl font-bold text-[var(--text-main)]">Subscription</h1>
 
           {/* Status card */}
-            <div className="flex items-center justify-between flex-col md:flex-row gap-4">
-              <div className="w-full">
-                <div className="text-sm text-[var(--text-soft)]">Current Status</div>
-                <div className={`text-2xl font-semibold ${statusColor}`}>{status.status}</div>
-                {status.startDate && (
-                  <div className="text-[var(--text-muted)] text-sm mt-1">
-                    {status.plan} • {new Date(status.startDate).toLocaleDateString()} →{" "}
-                    {new Date(status.endDate).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
+          <div className="flex items-center justify-between flex-col md:flex-row gap-4">
+            <div className="w-full">
+              <div className="text-sm text-[var(--text-soft)]">Current Status</div>
+              <div className={`text-2xl font-semibold ${statusColor}`}>{status.status}</div>
+              {status.startDate && (
+                <div className="text-[var(--text-muted)] text-sm mt-1">
+                  {status.plan} • {new Date(status.startDate).toLocaleDateString()} →{" "}
+                  {new Date(status.endDate).toLocaleDateString()}
+                </div>
+              )}
             </div>
-              {/* Pick plan & subscribe */}
+          </div>
+          {/* Pick plan & subscribe */}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value="MONTHLY"
-                    checked={plan === "MONTHLY"}
-                    onChange={() => setPlan("MONTHLY")}
-                  />
-                  <span>Monthly — {fmtUSD(Number(prices.monthlyUsd || 0))}</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value="YEARLY"
-                    checked={plan === "YEARLY"}
-                    onChange={() => setPlan("YEARLY")}
-                  />
-                  <span>Yearly — {fmtUSD(Number(prices.yearlyUsd || 0))}</span>
-                </label>
-              </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="plan"
+                value="MONTHLY"
+                checked={plan === "MONTHLY"}
+                onChange={() => setPlan("MONTHLY")}
+              />
+              <span>Monthly — {fmtUSD(Number(prices.monthlyUsd || 0))}</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="plan"
+                value="YEARLY"
+                checked={plan === "YEARLY"}
+                onChange={() => setPlan("YEARLY")}
+              />
+              <span>Yearly — {fmtUSD(Number(prices.yearlyUsd || 0))}</span>
+            </label>
+          </div>
 
-              <button
-                onClick={handleSubscribe}
-                disabled={processing}
-                className="rounded bg-[#027906] hover:bg-[#190366] px-5 py-2 font-semibold disabled:opacity-60"
-              >
-                {processing ? "Processing..." : "Subscribe / Renew"}
-              </button>
-            
-          
+          <button
+            onClick={handleSubscribe}
+            disabled={processing}
+            className="rounded bg-[#027906] hover:bg-[#190366] px-5 py-2 font-semibold disabled:opacity-60"
+          >
+            {processing ? "Processing..." : "Subscribe / Renew"}
+          </button>
 
           {/* History */}
           <div className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg">
