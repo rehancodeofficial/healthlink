@@ -138,9 +138,7 @@ export default function Login() {
   };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 bg-[var(--bg-main)]`}
-    >
+    <div className={`min-h-screen flex items-center justify-center p-4 bg-[var(--bg-transparent)]`}>
       {/* Dynamic Triple Color Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] bg-[var(--brand-green)] opacity-[0.07] blur-[120px] rounded-full animate-pulse"></div>
@@ -165,7 +163,7 @@ export default function Login() {
           <div className="z-10">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
+              className="inline-flex items-center gap-2 mb-8 md:mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Home
             </Link>
@@ -195,12 +193,20 @@ export default function Login() {
         </div>
 
         {/* Right Side: Form */}
-        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col justify-center">
-          <div className="mb-10">
+        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col justify-center">
+          <div className="mb-8 md:mb-10">
+            {/* Mobile Branding */}
+            <div className="md:hidden flex items-center gap-2 mb-6 opacity-80">
+              <img src="/images/logo/Asset3.png" alt="Logo" className="w-6 h-6" />
+              <span className="text-sm font-black tracking-tighter text-[var(--text-main)] uppercase">
+                CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+              </span>
+            </div>
+
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 text-[var(--brand-green)] text-[9px] font-black uppercase tracking-[0.2em] mb-4">
               <FiLock /> Secure
             </div>
-            <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
+            <h1 className="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
               Login
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
