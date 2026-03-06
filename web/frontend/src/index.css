@@ -35,8 +35,7 @@
   --text-muted: #666666;
   --border: rgba(0, 0, 0, 0.1);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Dark Theme - High-End Deep Navy (Replaces Pure Black) */
@@ -144,87 +143,74 @@ body {
   }
 }
 
-/* Mobile optimizations */
+/* Base Responsive Typography & Spacing */
+html {
+  font-size: 16px; /* Desktop base */
+}
+
+@media (max-width: 1024px) {
+  html {
+    font-size: 15px; /* Tablet base */
+  }
+  .page-container {
+    @apply px-6;
+  }
+}
+
 @media (max-width: 768px) {
-  /* Smaller base font for mobile */
   html {
-    font-size: 15px;
-  }
-
-  /* Optimize page container for mobile */
-  .page-container {
-    @apply px-4;
-  }
-
-  /* Reduce button padding on mobile while maintaining touch targets */
-  .btn {
-    @apply px-6 py-3 text-[11px] min-h-[44px] min-w-[44px];
-  }
-
-  /* Smaller cards on mobile */
-  .card {
-    @apply p-6 rounded-[2rem];
-  }
-
-  .glass {
-    @apply p-6 rounded-[2rem];
-  }
-
-  /* Disable floating animation on mobile for better performance */
-  .animate-float {
-    animation: none;
-  }
-
-  /* Optimize text gradient for mobile */
-  .text-gradient {
-    background-size: 100%;
-  }
-}
-
-/* Very small devices (< 640px) */
-@media (max-width: 640px) {
-  html {
-    font-size: 14px;
+    font-size: 14px; /* Mobile base */
   }
 
   .page-container {
-    @apply px-3;
+    @apply px-4 max-w-full;
   }
 
+  /* Increase touch targets for mobile */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Adjust headings for mobile */
+  h1 {
+    line-height: 1.1 !important;
+  }
+
+  h2,
+  h3 {
+    line-height: 1.2 !important;
+  }
+
+  /* Stack flex containers by default on mobile unless specified otherwise */
+  .flex-responsive {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Smaller mobile optimizations */
   .btn {
-    @apply px-5 py-2.5 text-[10px];
+    @apply px-5 py-3 text-xs w-full justify-center;
   }
 
-  .card {
-    @apply p-5 rounded-[1.5rem];
-  }
-
+  .card,
   .glass {
-    @apply p-5 rounded-[1.5rem];
+    @apply p-5 rounded-2xl;
   }
 }
 
-/* Touch-friendly utilities */
-.touch-target {
-  @apply min-h-[44px] min-w-[44px];
-}
-
-.touch-target-lg {
-  @apply min-h-[48px] min-w-[48px];
-}
-
-/* Mobile-specific utilities */
-.mobile-hidden {
+/* Utility Classes for Responsiveness */
+.hide-on-mobile {
   @apply hidden md:block;
 }
 
-.mobile-only {
+.show-on-mobile {
   @apply block md:hidden;
-}
-
-/* Better spacing for mobile */
-.mobile-spacing {
-  @apply space-y-4 md:space-y-6 lg:space-y-8;
 }
 
 /* iOS safe area support */
@@ -232,5 +218,6 @@ body {
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
