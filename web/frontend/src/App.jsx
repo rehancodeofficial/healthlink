@@ -641,7 +641,7 @@ export default function App() {
           />
 
           <Route
-            path="/pharmacy/subscription"
+            path="/pharmacist/subscription"
             element={
               <RequireRole role="PHARMACY">
                 {" "}
