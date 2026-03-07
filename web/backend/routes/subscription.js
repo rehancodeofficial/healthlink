@@ -555,6 +555,7 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
 
       // Redirect user to success URL immediately
       return res.json({
+        mockSuccess: true,
         url: successUrl.replace("{CHECKOUT_SESSION_ID}", mockSessionId),
       });
     }
