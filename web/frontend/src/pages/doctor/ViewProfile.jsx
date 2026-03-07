@@ -1,9 +1,9 @@
 // FILE: src/pages/doctor/ViewProfile.jsx
-import { useEffect, useState, useCallback } from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
-import api from '../../Lib/api';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useEffect, useState, useCallback } from "react";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import api from "../../Lib/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   FaUserMd,
   FaIdBadge,
@@ -13,34 +13,31 @@ import {
   FaEdit,
   FaLanguage,
   FaStethoscope,
-} from 'react-icons/fa';
+} from "react-icons/fa";
 
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return "—";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   } catch {
-    return '—';
+    return "—";
   }
 }
 
 function getInitials(name) {
-  if (!name) return 'D';
+  if (!name) return "D";
   const parts = String(name).trim().split(/\s+/);
-  return (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  return (parts[0]?.[0] || "") + (parts[1]?.[0] || "");
 }
 
 export default function DoctorViewProfile() {
-  const role = 'DOCTOR';
-  const userId = localStorage.getItem('userId') || '';
-  const userName =
-    localStorage.getItem('userName') ||
-    localStorage.getItem('name') ||
-    'Doctor';
+  const role = "DOCTOR";
+  const userId = localStorage.getItem("userId") || "";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -48,10 +45,10 @@ export default function DoctorViewProfile() {
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/doctor/profile', { params: { userId } });
+      const res = await api.get("/doctor/profile", { params: { userId } });
       setProfile(res.data?.data || null);
     } catch {
-      toast.error('Profile Registry Failure: Data not found.');
+      toast.error("Profile Registry Failure: Data not found.");
     } finally {
       setLoading(false);
     }
@@ -107,16 +104,16 @@ export default function DoctorViewProfile() {
                     {userName}
                   </h3>
                   <p className="text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-[0.2em] mb-6">
-                    {profile.specialization || 'General Specialist'}
+                    {profile.specialization || "General Specialist"}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-4 py-6 border-y border-[var(--border)]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6 border-y border-[var(--border)]">
                     <div>
                       <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">
                         License
                       </p>
                       <p className="text-xs font-black text-[var(--text-soft)]">
-                        {profile.licenseNumber || 'VOID'}
+                        {profile.licenseNumber || "VOID"}
                       </p>
                     </div>
                     <div>
@@ -124,7 +121,7 @@ export default function DoctorViewProfile() {
                         Experience
                       </p>
                       <p className="text-xs font-black text-[var(--text-soft)]">
-                        {profile.yearsOfExperience ?? '0'} YRS
+                        {profile.yearsOfExperience ?? "0"} YRS
                       </p>
                     </div>
                   </div>
@@ -145,20 +142,15 @@ export default function DoctorViewProfile() {
 
               <div className="card !bg-[var(--bg-main)]/50 border border-[var(--border)] !p-6 space-y-4">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-2 mb-4">
-                  <FaClock className="text-[var(--brand-blue)]" /> Matrix
-                  Telemetry
+                  <FaClock className="text-[var(--brand-blue)]" /> Matrix Telemetry
                 </h4>
                 <div className="flex justify-between items-center text-[10px] font-bold">
                   <span className="text-[var(--text-muted)]">INITIALIZED</span>
-                  <span className="text-[var(--text-soft)]">
-                    {formatDate(profile.createdAt)}
-                  </span>
+                  <span className="text-[var(--text-soft)]">{formatDate(profile.createdAt)}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-bold">
                   <span className="text-[var(--text-muted)]">LAST_SYNC</span>
-                  <span className="text-[var(--text-soft)]">
-                    {formatDate(profile.updatedAt)}
-                  </span>
+                  <span className="text-[var(--text-soft)]">{formatDate(profile.updatedAt)}</span>
                 </div>
               </div>
             </div>
@@ -167,11 +159,10 @@ export default function DoctorViewProfile() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="card glass !p-8 space-y-6">
                   <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] flex items-center gap-3">
-                    <FaGraduationCap className="text-[var(--brand-blue)]" />{' '}
-                    Qualifications
+                    <FaGraduationCap className="text-[var(--brand-blue)]" /> Qualifications
                   </h3>
                   <p className="text-xs font-bold text-[var(--text-soft)] leading-relaxed">
-                    {profile.qualifications || 'No academic data available.'}
+                    {profile.qualifications || "No academic data available."}
                   </p>
                   <div className="pt-4 border-t border-[var(--border)]">
                     <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">
@@ -185,18 +176,17 @@ export default function DoctorViewProfile() {
 
                 <div className="card glass !p-8 space-y-6">
                   <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] flex items-center gap-3">
-                    <FaHospital className="text-[var(--brand-green)]" />{' '}
-                    Practice Node
+                    <FaHospital className="text-[var(--brand-green)]" /> Practice Node
                   </h3>
                   <p className="text-xs font-bold text-[var(--text-soft)] leading-relaxed">
-                    {profile.hospitalAffiliation || 'Independent Practitioner'}
+                    {profile.hospitalAffiliation || "Independent Practitioner"}
                   </p>
                   <div className="pt-4 border-t border-[var(--border)]">
                     <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">
                       Availability Window
                     </p>
                     <p className="text-xs font-bold text-[var(--text-main)] whitespace-pre-wrap">
-                      {profile.availability || 'Synchronized on demand.'}
+                      {profile.availability || "Synchronized on demand."}
                     </p>
                   </div>
                 </div>
@@ -204,21 +194,19 @@ export default function DoctorViewProfile() {
 
               <div className="card glass !p-8 space-y-6">
                 <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] flex items-center gap-3">
-                  <FaStethoscope className="text-[var(--brand-blue)]" />{' '}
-                  Clinical Narrative
+                  <FaStethoscope className="text-[var(--brand-blue)]" /> Clinical Narrative
                 </h3>
                 <p className="text-sm font-bold text-[var(--text-soft)] leading-relaxed whitespace-pre-wrap">
-                  {profile.bio || 'No biographical telemetry encoded.'}
+                  {profile.bio || "No biographical telemetry encoded."}
                 </p>
               </div>
 
               <div className="card glass !p-8 space-y-6">
                 <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] flex items-center gap-3">
-                  <FaLanguage className="text-[var(--brand-orange)]" />{' '}
-                  Communication Protocols
+                  <FaLanguage className="text-[var(--brand-orange)]" /> Communication Protocols
                 </h3>
                 <p className="text-xs font-bold text-[var(--text-soft)] leading-relaxed uppercase tracking-widest">
-                  {profile.languages || 'Standard English Interface'}
+                  {profile.languages || "Standard English Interface"}
                 </p>
               </div>
             </div>
