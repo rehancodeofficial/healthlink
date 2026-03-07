@@ -8,14 +8,12 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
 
-const fmtUSD = (n) =>
-  typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—";
+const fmtUSD = (n) => (typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—");
 
 export default function PatientSubscription() {
   const role = "PATIENT";
   const userId = localStorage.getItem("userId");
-  const userName =
-    localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
 
   const [prices, setPrices] = useState({ monthlyUsd: null, yearlyUsd: null });
   const [status, setStatus] = useState({
@@ -77,14 +75,21 @@ export default function PatientSubscription() {
         plan, // "MONTHLY" | "YEARLY"
       });
 
-      const url = res?.data?.url;
+      const data = res?.data || {};
+      const url = data.url;
+
+      if (data.mockSuccess) {
+        toast.success("Subscription updated successfully!");
+        load(); // Refresh data in place
+        return;
+      }
+
       if (!url) throw new Error("Checkout URL not returned from server");
 
       window.location.href = url; // Stripe Checkout
     } catch (err) {
       console.error(err);
-      const msg =
-        err?.response?.data?.error || err?.message || "Failed to start checkout";
+      const msg = err?.response?.data?.error || err?.message || "Failed to start checkout";
       toast.error(msg);
     } finally {
       setProcessing(false);
@@ -95,10 +100,10 @@ export default function PatientSubscription() {
     status.status === "ACTIVE"
       ? "text-green-400"
       : status.status === "EXPIRED"
-      ? "text-yellow-400"
-      : status.status === "DEACTIVATED"
-      ? "text-red-400"
-      : "text-gray-300";
+        ? "text-yellow-400"
+        : status.status === "DEACTIVATED"
+          ? "text-red-400"
+          : "text-gray-300";
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-main)]/90 text-[var(--text-main)]">
@@ -122,13 +127,10 @@ export default function PatientSubscription() {
             <div className="flex items-center justify-between flex-col md:flex-row gap-4">
               <div className="w-full">
                 <div className="text-sm text-[var(--text-soft)]">Current Status</div>
-                <div className={`text-2xl font-semibold ${statusColor}`}>
-                  {status.status}
-                </div>
+                <div className={`text-2xl font-semibold ${statusColor}`}>{status.status}</div>
                 {status.startDate && (
                   <div className="text-[var(--text-muted)] text-sm mt-1">
-                    {status.plan} •{" "}
-                    {new Date(status.startDate).toLocaleDateString()} →{" "}
+                    {status.plan} • {new Date(status.startDate).toLocaleDateString()} →{" "}
                     {new Date(status.endDate).toLocaleDateString()}
                   </div>
                 )}
@@ -227,9 +229,7 @@ export default function PatientSubscription() {
                                 ).toLocaleDateString()}`
                               : "—"}
                           </td>
-                          <td className="p-3">
-                            {new Date(s.createdAt).toLocaleString()}
-                          </td>
+                          <td className="p-3">{new Date(s.createdAt).toLocaleString()}</td>
                         </tr>
                       );
                     })}
