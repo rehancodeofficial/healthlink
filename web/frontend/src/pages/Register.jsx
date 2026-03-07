@@ -95,7 +95,7 @@ export default function Register() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 bg-[var(--bg-main)]`}>
+    <div className={`min-h-screen flex items-center justify-center p-4 bg-[var(--bg-transparent)]`}>
       {/* Triple Color Atmospheric Glow */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[var(--brand-orange)] opacity-[0.05] blur-[150px] rounded-full"></div>
@@ -153,9 +153,17 @@ export default function Register() {
         </div>
 
         {/* Right Side: Registration Form */}
-        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-8 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
-          <div className="mb-8">
-            <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
+        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
+          <div className="mb-6 md:mb-8">
+            {/* Mobile Branding */}
+            <div className="md:hidden flex items-center gap-2 mb-6 opacity-80">
+              <img src="/images/logo/Asset3.png" alt="Logo" className="w-6 h-6" />
+              <span className="text-sm font-black tracking-tighter text-[var(--text-main)] uppercase">
+                CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+              </span>
+            </div>
+
+            <h1 className="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
               Create <span className="text-[var(--brand-green)]">Account</span>
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
@@ -164,7 +172,7 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-2">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   First Name
@@ -205,7 +213,7 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   Date of Birth
@@ -257,7 +265,7 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
                   Password
