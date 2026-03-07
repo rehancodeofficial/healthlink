@@ -37,26 +37,21 @@ const Pill = ({ value }) => {
     v === "ACTIVE"
       ? "bg-[#027906] text-white"
       : v === "PENDING"
-      ? "bg-amber-500 text-black"
-      : v === "EXPIRED"
-      ? "bg-red-600 text-white"
-      : v === "DEACTIVATED"
-      ? "bg-gray-600 text-white"
-      : v === "FAILED"
-      ? "bg-red-700 text-white"
-      : "bg-gray-500 text-white";
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cls}`}>
-      {v}
-    </span>
-  );
+        ? "bg-amber-500 text-black"
+        : v === "EXPIRED"
+          ? "bg-red-600 text-white"
+          : v === "DEACTIVATED"
+            ? "bg-gray-600 text-white"
+            : v === "FAILED"
+              ? "bg-red-700 text-white"
+              : "bg-gray-500 text-white";
+  return <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cls}`}>{v}</span>;
 };
 
 export default function PharmacySubscription() {
   const role = "PHARMACY";
   const userId = localStorage.getItem("userId");
-  const userName =
-    localStorage.getItem("userName") || localStorage.getItem("name") || "Pharmacy";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Pharmacy";
 
   const [loading, setLoading] = useState(true);
   const [prices, setPrices] = useState({ monthlyUsd: null, yearlyUsd: null });
@@ -113,17 +108,14 @@ export default function PharmacySubscription() {
     fetchAll();
   }, [fetchAll]);
 
-  const active = useMemo(
-    () => (status.status || "").toUpperCase() === "ACTIVE",
-    [status.status]
-  );
+  const active = useMemo(() => (status.status || "").toUpperCase() === "ACTIVE", [status.status]);
 
   const handleSubscribe = async (plan) => {
     try {
       // Prefer PAYSTACK in NG; fallback to STRIPE if backend uses it
       const provider = "PAYSTACK";
-      const successUrl = `${window.location.origin}/pharmacy/subscription`;
-      const cancelUrl = `${window.location.origin}/pharmacy/subscription`;
+      const successUrl = `${window.location.origin}/pharmacist/subscription`;
+      const cancelUrl = `${window.location.origin}/pharmacist/subscription`;
 
       const res = await api.post("/subscription/stripe/checkout", {
         userId,
@@ -193,12 +185,10 @@ export default function PharmacySubscription() {
               </div>
               <div className="mt-4 text-[var(--text-soft)] text-sm space-y-1">
                 <p>
-                  <strong>Plan:</strong>{" "}
-                  {status.plan ? status.plan : "—"}
+                  <strong>Plan:</strong> {status.plan ? status.plan : "—"}
                 </p>
                 <p>
-                  <strong>Provider:</strong>{" "}
-                  {status.provider || "—"}
+                  <strong>Provider:</strong> {status.provider || "—"}
                 </p>
                 <p>
                   <strong>Start:</strong>{" "}
