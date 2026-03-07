@@ -521,14 +521,17 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
       });
     }
 
+    const origin =
+      req.headers.origin ||
+      req.headers.referer ||
+      "https://cure-virtual-2.vercel.app";
     const roleSlug =
       user.role.toLowerCase() === "pharmacy"
         ? "pharmacist"
         : user.role.toLowerCase();
-    const APP_BASE_URL = "https://cure-virtual-2.vercel.app";
 
-    const successUrl = `${APP_BASE_URL}/${roleSlug}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${APP_BASE_URL}/${roleSlug}/subscription?status=cancel`;
+    const successUrl = `${origin}/${roleSlug}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${origin}/${roleSlug}/subscription?status=cancel`;
 
     // ✅ MOCK CHECKOUT for invalid/placeholder keys
     // If the price ID looks fake (contains * or X), bypass Stripe and create subscription directly.
@@ -553,10 +556,9 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
         },
       });
 
-      // Redirect user to success URL immediately
+      // Return success but NO url to trigger a "refresh in place" on frontend
       return res.json({
         mockSuccess: true,
-        url: successUrl.replace("{CHECKOUT_SESSION_ID}", mockSessionId),
       });
     }
 
