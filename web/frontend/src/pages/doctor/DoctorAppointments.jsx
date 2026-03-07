@@ -232,8 +232,8 @@ export default function DoctorAppointments() {
         )}
 
         <div className="card !p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-emerald-500/20 scrollbar-track-transparent">
+            <table className="w-full text-left border-collapse min-w-[800px] md:min-w-0">
               <thead>
                 <tr className="bg-[var(--bg-main)]/50 border-b border-[var(--border)]">
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
