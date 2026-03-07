@@ -55,7 +55,12 @@
   @apply transition-all duration-300 border-[var(--border)];
 }
 
+html,
 body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
   @apply bg-[var(--bg-main)] text-[var(--text-main)] font-sans antialiased overflow-x-hidden;
 }
 
