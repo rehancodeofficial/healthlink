@@ -220,13 +220,11 @@ router.put("/profile", async (req, res) => {
     });
   } catch (err) {
     console.error("PUT /api/patient/profile error:", err);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        error: "Failed to update profile",
-        details: err.message,
-      });
+    return res.status(500).json({
+      success: false,
+      error: "Failed to update profile",
+      details: err.message,
+    });
   }
 });
 
@@ -382,13 +380,11 @@ router.get("/all", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching patients (paginated):", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch patients",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch patients",
+      error: error.message,
+    });
   }
 });
 
@@ -763,10 +759,13 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
         .status(500)
         .json({ error: "PAYSTACK_SECRET_KEY not configured" });
 
+    const origin =
+      req.headers.origin ||
+      req.headers.referer ||
+      "https://cure-virtual-2.vercel.app";
     const reference = `cv_sub_${user.id}_${Date.now()}`;
     const callback_url =
-      process.env.PAYSTACK_CALLBACK_URL ||
-      `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription`;
+      process.env.PAYSTACK_CALLBACK_URL || `${origin}/subscription`;
 
     // Pending payment record
     const pending = await prisma.subscriptionPayment.create({
@@ -1036,13 +1035,11 @@ router.get("/profile/:id", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching patient:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch patient",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch patient",
+      error: error.message,
+    });
   }
 });
 
