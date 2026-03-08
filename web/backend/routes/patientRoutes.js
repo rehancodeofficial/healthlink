@@ -119,7 +119,7 @@ router.get("/profile", async (req, res) => {
  */
 router.put("/profile", async (req, res) => {
   try {
-    const {
+    let {
       userId,
       firstName,
       middleName,
@@ -144,19 +144,55 @@ router.put("/profile", async (req, res) => {
       insuranceMemberId,
     } = req.body;
 
+    // Fallback: If no userId provided, use the logged-in user's ID
+    if (!userId && req.user && req.user.id) {
+      userId = req.user.id;
+    }
+
     if (!userId) {
       return res.status(400).json({ error: "userId is required" });
     }
+
+    // Ensure only the user themselves or an admin can update
+    // (This is a simplified check; ideally use verifyOwnerOrAdmin middleware)
+    if (req.user.role === "PATIENT" && req.user.id !== userId) {
+      return res.status(403).json({ error: "Unauthorized update attempt" });
+    }
+
+    // Validate Date of Birth
+    let validDob = null;
+    if (dateOfBirth) {
+      const d = new Date(dateOfBirth);
+      if (!isNaN(d.getTime())) {
+        validDob = d;
+      }
+    }
+
+    // Validate Blood Group Logic (Ensure it matches Enum or is UNKNOWN)
+    const VALID_BLOOD_GROUPS = [
+      "A_POSITIVE",
+      "A_NEGATIVE",
+      "B_POSITIVE",
+      "B_NEGATIVE",
+      "AB_POSITIVE",
+      "AB_NEGATIVE",
+      "O_POSITIVE",
+      "O_NEGATIVE",
+      "UNKNOWN",
+    ];
+    const finalBloodGroup = VALID_BLOOD_GROUPS.includes(bloodGroup)
+      ? bloodGroup
+      : "UNKNOWN";
 
     // Update User Core Info
     await prisma.user.update({
       where: { id: userId },
       data: {
-        ...(firstName && { firstName }),
-        ...(middleName && { middleName }),
-        ...(lastName && { lastName }),
-        ...(phone && { phone }),
-        ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
+        ...(firstName !== undefined && { firstName }),
+        ...(middleName !== undefined && { middleName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(phone !== undefined && { phone }),
+        ...(validDob && { dateOfBirth: validDob }),
         ...(gender && { gender }),
       },
     });
@@ -165,10 +201,10 @@ router.put("/profile", async (req, res) => {
     const updated = await prisma.patientProfile.upsert({
       where: { userId },
       update: {
-        bloodGroup: bloodGroup || "UNKNOWN",
-        height: height ?? null,
+        bloodGroup: finalBloodGroup,
+        height: height === "" ? null : Number(height) || null,
         heightUnit: heightUnit || "cm",
-        weight: weight ?? null,
+        weight: weight === "" ? null : Number(weight) || null,
         weightUnit: weightUnit || "kg",
         allergies: allergies || "",
         medications: medications || "",
@@ -183,10 +219,10 @@ router.put("/profile", async (req, res) => {
       },
       create: {
         userId,
-        bloodGroup: bloodGroup || "UNKNOWN",
-        height: height ?? null,
+        bloodGroup: finalBloodGroup,
+        height: height === "" ? null : Number(height) || null,
         heightUnit: heightUnit || "cm",
-        weight: weight ?? null,
+        weight: weight === "" ? null : Number(weight) || null,
         weightUnit: weightUnit || "kg",
         allergies: allergies || "",
         medications: medications || "",
@@ -201,7 +237,7 @@ router.put("/profile", async (req, res) => {
       },
     });
 
-    // Send Notification Email
+    // Send Notification Email (async, don't block)
     const userForEmail = await prisma.user.findUnique({
       where: { id: userId },
     });
