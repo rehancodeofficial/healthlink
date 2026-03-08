@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UserProvider } from "./context/UserContext";
 
 /* ================================
    SUPERADMIN
@@ -143,600 +144,602 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+      <UserProvider>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
-          {/* Video shared */}
-          <Route path="/video/lobby" element={<VideoLobby />} />
-          <Route path="/video/room/:roomName" element={<VideoRoom />} />
+            {/* Video shared */}
+            <Route path="/video/lobby" element={<VideoLobby />} />
+            <Route path="/video/room/:roomName" element={<VideoRoom />} />
 
-          {/* ================= SUPERADMIN ================= */}
-          <Route
-            path="/superadmin/dashboard"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperadminDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/manage-admins"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <ManageAdmins />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/system-reports"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SystemReports />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/settings"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <Settings />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/messages/inbox"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperadminInbox />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/messages/send"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperadminSendMessage />
-              </RequireRole>
-            }
-          />
+            {/* ================= SUPERADMIN ================= */}
+            <Route
+              path="/superadmin/dashboard"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperadminDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/manage-admins"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <ManageAdmins />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/system-reports"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SystemReports />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/settings"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <Settings />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/messages/inbox"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperadminInbox />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/messages/send"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperadminSendMessage />
+                </RequireRole>
+              }
+            />
 
-          {/* Subscribers */}
-          <Route
-            path="/superadmin/subscribers"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperSubscribersStats />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/subscribers/doctors"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperSubscribedDoctors />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/subscribers/patients"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperSubscribedPatients />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/superadmin/subscribers/pharmacy"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperadminSubscribedPharmacy />
-              </RequireRole>
-            }
-          />
+            {/* Subscribers */}
+            <Route
+              path="/superadmin/subscribers"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperSubscribersStats />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/subscribers/doctors"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperSubscribedDoctors />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/subscribers/patients"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperSubscribedPatients />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/superadmin/subscribers/pharmacy"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperadminSubscribedPharmacy />
+                </RequireRole>
+              }
+            />
 
-          <Route
-            path="/superadmin/activity-logs"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <SuperadminActivityLogs />
-              </RequireRole>
-            }
-          />
+            <Route
+              path="/superadmin/activity-logs"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <SuperadminActivityLogs />
+                </RequireRole>
+              }
+            />
 
-          <Route
-            path="/superadmin/profile"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <UserProfile />
-              </RequireRole>
-            }
-          />
-          {/* ================= ADMIN ================= */}
-          <Route
-            path="/admin/dashboard"
-            element={
-              <RequireRole role="ADMIN">
-                <AdminDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/manage-users"
-            element={
-              <RequireRole role="ADMIN">
-                <ManageUsers />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/reports"
-            element={
-              <RequireRole role="ADMIN">
-                <Reports />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/messages/inbox"
-            element={
-              <RequireRole role="ADMIN">
-                <Inbox />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/messages/send"
-            element={
-              <RequireRole role="ADMIN">
-                <SendMessage />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/admin-list"
-            element={
-              <RequireRole role="SUPERADMIN">
-                <AdminList />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/users-list"
-            element={
-              <RequireRole role="ADMIN">
-                <UsersList />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/subscription"
-            element={
-              <RequireRole role="ADMIN">
-                <SubscriptionSettings />
-              </RequireRole>
-            }
-          />
+            <Route
+              path="/superadmin/profile"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <UserProfile />
+                </RequireRole>
+              }
+            />
+            {/* ================= ADMIN ================= */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireRole role="ADMIN">
+                  <AdminDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/manage-users"
+              element={
+                <RequireRole role="ADMIN">
+                  <ManageUsers />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/reports"
+              element={
+                <RequireRole role="ADMIN">
+                  <Reports />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/messages/inbox"
+              element={
+                <RequireRole role="ADMIN">
+                  <Inbox />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/messages/send"
+              element={
+                <RequireRole role="ADMIN">
+                  <SendMessage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/admin-list"
+              element={
+                <RequireRole role="SUPERADMIN">
+                  <AdminList />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/users-list"
+              element={
+                <RequireRole role="ADMIN">
+                  <UsersList />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/subscription"
+              element={
+                <RequireRole role="ADMIN">
+                  <SubscriptionSettings />
+                </RequireRole>
+              }
+            />
 
-          {/* Admin Subscribers */}
-          <Route
-            path="/admin/subscribers"
-            element={
-              <RequireRole role="ADMIN">
-                <AdminSubscribersStats />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/subscribers/doctors"
-            element={
-              <RequireRole role="ADMIN">
-                <AdminSubscribedDoctors />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/subscribers/patients"
-            element={
-              <RequireRole role="ADMIN">
-                <AdminSubscribedPatients />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/admin/subscribers/pharmacy"
-            element={
-              <RequireRole role="ADMIN">
-                <AdminSubscribedPharmacy />
-              </RequireRole>
-            }
-          />
+            {/* Admin Subscribers */}
+            <Route
+              path="/admin/subscribers"
+              element={
+                <RequireRole role="ADMIN">
+                  <AdminSubscribersStats />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/subscribers/doctors"
+              element={
+                <RequireRole role="ADMIN">
+                  <AdminSubscribedDoctors />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/subscribers/patients"
+              element={
+                <RequireRole role="ADMIN">
+                  <AdminSubscribedPatients />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/subscribers/pharmacy"
+              element={
+                <RequireRole role="ADMIN">
+                  <AdminSubscribedPharmacy />
+                </RequireRole>
+              }
+            />
 
-          <Route
-            path="/admin/profile"
-            element={
-              <RequireRole role="ADMIN">
-                <UserProfile />
-              </RequireRole>
-            }
-          />
-          {/* ================= DOCTOR ================= */}
-          <Route
-            path="/doctor/dashboard"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/appointments"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorAppointments />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/prescriptions"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorPrescriptions />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/messages/inbox"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorInbox />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/messages/send"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorSendMessage />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/subscription"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorSubscription />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/patients"
-            element={
-              <RequireRole role="DOCTOR">
-                <PatientList />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/view-profile"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorViewProfile />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/profile"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorProfile />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/my-patients"
-            element={
-              <RequireRole role="DOCTOR">
-                <MyPatientList />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/video-consultation"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorVideoConsultation />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/doctor/schedule"
-            element={
-              <RequireRole role="DOCTOR">
-                <DoctorSchedule />
-              </RequireRole>
-            }
-          />
+            <Route
+              path="/admin/profile"
+              element={
+                <RequireRole role="ADMIN">
+                  <UserProfile />
+                </RequireRole>
+              }
+            />
+            {/* ================= DOCTOR ================= */}
+            <Route
+              path="/doctor/dashboard"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/appointments"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorAppointments />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/prescriptions"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorPrescriptions />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/messages/inbox"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorInbox />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/messages/send"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorSendMessage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/subscription"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorSubscription />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/patients"
+              element={
+                <RequireRole role="DOCTOR">
+                  <PatientList />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/view-profile"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorViewProfile />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/profile"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorProfile />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/my-patients"
+              element={
+                <RequireRole role="DOCTOR">
+                  <MyPatientList />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/video-consultation"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorVideoConsultation />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/doctor/schedule"
+              element={
+                <RequireRole role="DOCTOR">
+                  <DoctorSchedule />
+                </RequireRole>
+              }
+            />
 
-          {/* ================= PATIENT ================= */}
-          <Route
-            path="/patient/dashboard"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/book-appointment"
-            element={
-              <RequireRole role="PATIENT">
-                <BookAppointment />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/my-appointments"
-            element={
-              <RequireRole role="PATIENT">
-                <MyAppointments />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/prescriptions"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientPrescriptions />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/video-consultation"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientVideoConsultation />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/messages"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientInbox />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/messages/send"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientSendMessage />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/support"
-            element={
-              <RequireRole role="PATIENT">
-                <MyTickets />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/support/tickets/:id"
-            element={
-              <RequireRole role="PATIENT">
-                <TicketDetails />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/profile"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientUpdateProfile />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/profile/view-profile"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientViewProfile />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/subscription"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientSubscription />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/doctors/list"
-            element={
-              <RequireRole role="PATIENT">
-                <DoctorsList />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/patient/doctors/my"
-            element={
-              <RequireRole role="PATIENT">
-                <MyDoctors />
-              </RequireRole>
-            }
-          />
+            {/* ================= PATIENT ================= */}
+            <Route
+              path="/patient/dashboard"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/book-appointment"
+              element={
+                <RequireRole role="PATIENT">
+                  <BookAppointment />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/my-appointments"
+              element={
+                <RequireRole role="PATIENT">
+                  <MyAppointments />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/prescriptions"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientPrescriptions />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/video-consultation"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientVideoConsultation />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/messages"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientInbox />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/messages/send"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientSendMessage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/support"
+              element={
+                <RequireRole role="PATIENT">
+                  <MyTickets />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/support/tickets/:id"
+              element={
+                <RequireRole role="PATIENT">
+                  <TicketDetails />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/profile"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientUpdateProfile />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/profile/view-profile"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientViewProfile />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/subscription"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientSubscription />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/doctors/list"
+              element={
+                <RequireRole role="PATIENT">
+                  <DoctorsList />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/patient/doctors/my"
+              element={
+                <RequireRole role="PATIENT">
+                  <MyDoctors />
+                </RequireRole>
+              }
+            />
 
-          {/*================== PHARMACY ==================*/}
-          <Route
-            path="/pharmacy/dashboard"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacyDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/pharmacy/profile"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacyProfile />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/pharmacy/prescriptions"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacyPrescriptions />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/pharmacy/view-profile"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacyViewProfile />
-              </RequireRole>
-            }
-          />
+            {/*================== PHARMACY ==================*/}
+            <Route
+              path="/pharmacy/dashboard"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacyDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/pharmacy/profile"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacyProfile />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/pharmacy/prescriptions"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacyPrescriptions />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/pharmacy/view-profile"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacyViewProfile />
+                </RequireRole>
+              }
+            />
 
-          {/* Patient: select pharmacy */}
-          <Route
-            path="/patient/select-pharmacy"
-            element={
-              <RequireRole role="PATIENT">
-                <PatientSelectPharmacy />
-              </RequireRole>
-            }
-          />
-          {/* Patient: Pharmacy List (Sidebar link) */}
-          <Route
-            path="/patient/pharmacy/list"
-            element={
-              <RequireRole role="PATIENT">
-                <PharmacyList />
-              </RequireRole>
-            }
-          />
-          {/* Patient: My Pharmacy */}
-          <Route
-            path="/patient/my-pharmacy"
-            element={
-              <RequireRole role="PATIENT">
-                <MyPharmacy />
-              </RequireRole>
-            }
-          />
+            {/* Patient: select pharmacy */}
+            <Route
+              path="/patient/select-pharmacy"
+              element={
+                <RequireRole role="PATIENT">
+                  <PatientSelectPharmacy />
+                </RequireRole>
+              }
+            />
+            {/* Patient: Pharmacy List (Sidebar link) */}
+            <Route
+              path="/patient/pharmacy/list"
+              element={
+                <RequireRole role="PATIENT">
+                  <PharmacyList />
+                </RequireRole>
+              }
+            />
+            {/* Patient: My Pharmacy */}
+            <Route
+              path="/patient/my-pharmacy"
+              element={
+                <RequireRole role="PATIENT">
+                  <MyPharmacy />
+                </RequireRole>
+              }
+            />
 
-          <Route
-            path="/pharmacist/subscription"
-            element={
-              <RequireRole role="PHARMACY">
-                {" "}
-                <PharmacySubscription />{" "}
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/pharmacy/messages/inbox"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacyInbox />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/pharmacy/messages/send"
-            element={
-              <RequireRole role="PHARMACY">
-                <PharmacySendMessage />
-              </RequireRole>
-            }
-          />
+            <Route
+              path="/pharmacist/subscription"
+              element={
+                <RequireRole role="PHARMACY">
+                  {" "}
+                  <PharmacySubscription />{" "}
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/pharmacy/messages/inbox"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacyInbox />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/pharmacy/messages/send"
+              element={
+                <RequireRole role="PHARMACY">
+                  <PharmacySendMessage />
+                </RequireRole>
+              }
+            />
 
-          {/* ================= SUPPORT ================= */}
-          <Route
-            path="/support/dashboard"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportDashboard />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/tickets"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportTickets />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/live-chat"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportLiveChat />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/tickets/:id"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportTickets />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/subscribers/doctors"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportSubscribedDoctors />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/subscribers/patients"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportSubscribedPatients />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="/support/subscribers/pharmacy"
-            element={
-              <RequireRole role="SUPPORT">
-                <SupportSubscribedPharmacy />
-              </RequireRole>
-            }
-          />
+            {/* ================= SUPPORT ================= */}
+            <Route
+              path="/support/dashboard"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportDashboard />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/tickets"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportTickets />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/live-chat"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportLiveChat />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/tickets/:id"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportTickets />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/subscribers/doctors"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportSubscribedDoctors />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/subscribers/patients"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportSubscribedPatients />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/support/subscribers/pharmacy"
+              element={
+                <RequireRole role="SUPPORT">
+                  <SupportSubscribedPharmacy />
+                </RequireRole>
+              }
+            />
 
-          <Route
-            path="/support/profile"
-            element={
-              <RequireRole role="SUPPORT">
-                <UserProfile />
-              </RequireRole>
-            }
-          />
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-      <Chatbot />
+            <Route
+              path="/support/profile"
+              element={
+                <RequireRole role="SUPPORT">
+                  <UserProfile />
+                </RequireRole>
+              }
+            />
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+        <Chatbot />
+      </UserProvider>
     </BrowserRouter>
   );
 }
