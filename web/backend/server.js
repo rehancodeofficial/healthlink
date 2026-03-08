@@ -22,7 +22,6 @@ const allowedOrigins = [
   "https://curevirtual-2-production-ee33.up.railway.app",
   "https://curevirtual-2-production-6eaa.up.railway.app",
   process.env.FRONTEND_URL,
-  process.env.APP_BASE_URL,
   process.env.RAILWAY_STATIC_URL,
 ].filter(Boolean);
 
