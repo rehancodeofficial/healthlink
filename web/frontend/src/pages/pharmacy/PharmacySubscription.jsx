@@ -3,6 +3,8 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
+const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
+
 /* tiny toast */
 function Toast({ text, onClose }) {
   if (!text) return null;
@@ -113,9 +115,6 @@ export default function PharmacySubscription() {
   const handleSubscribe = async (plan) => {
     try {
       // Prefer PAYSTACK in NG; fallback to STRIPE if backend uses it
-      const provider = "PAYSTACK";
-      const successUrl = `${window.location.origin}/pharmacist/subscription`;
-      const cancelUrl = `${window.location.origin}/pharmacist/subscription`;
 
       const res = await api.post("/subscription/stripe/checkout", {
         userId,
@@ -123,6 +122,17 @@ export default function PharmacySubscription() {
       });
 
       const data = res.data || {};
+
+      if (data.mockSuccess) {
+        setToast("✅ Subscription updated successfully!");
+        fetchAll(); // Refresh data in place
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl; // Paystack/Stripe hosted checkout URL
         return;
