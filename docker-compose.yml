@@ -15,6 +15,7 @@ services:
 
   backend:
     build: ./web/backend
+    restart: always
     ports:
       - "5001:5001"
     depends_on:
@@ -30,16 +31,24 @@ services:
 
   frontend:
     build: ./web/frontend
+    restart: always
     ports:
       - "5173:5173"
     env_file:
       - ./web/frontend/.env
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5001/api
+      - VITE_CHATBOT_URL=http://localhost:5002/chat
     volumes:
       - ./web/frontend:/app
       - /app/node_modules
+    depends_on:
+      - backend
+      - python-chatbot
 
   python-chatbot:
     build: ./web/python_backend
+    restart: always
     ports:
       - "5002:5002"
     env_file:
