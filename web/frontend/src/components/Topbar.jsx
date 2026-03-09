@@ -13,16 +13,20 @@ import {
 } from "react-icons/fa";
 import api from "../Lib/api";
 import { useTheme } from "../context/ThemeContext";
+import { useUser } from "../context/UserContext";
 
-export default function Topbar({ userName, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useUser();
   const [time, setTime] = useState(new Date());
   const [notificationCount, setNotificationCount] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const userId = localStorage.getItem("userId");
-  const role = localStorage.getItem("role");
+  // Fallbacks
+  const userId = user?.id || localStorage.getItem("userId");
+  const role = user?.role || localStorage.getItem("role");
+  const userName = user?.name || propUserName || localStorage.getItem("userName") || "User";
 
   // Live clock
   useEffect(() => {
@@ -62,7 +66,7 @@ export default function Topbar({ userName, isMobileMenuOpen, setIsMobileMenuOpen
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate("/login");
   };
 
