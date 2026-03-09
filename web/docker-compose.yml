@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: curevirtual-backend
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./backend/.env
+    # Override NODE_ENV to ensure devDependencies (like nodemon) are available if needed,
+    # though we sticking to 'npm start' (node server.js) for stability as per Dockerfile default.
+    # To enable hot-reload dev mode, uncomment the next line and volumes:
+    # command: npm run dev
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+    environment:
+      - PORT=5001
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: curevirtual-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5001/api
+    depends_on:
+      - backend
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
