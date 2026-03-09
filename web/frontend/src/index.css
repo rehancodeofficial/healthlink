@@ -29,7 +29,7 @@
 :root.light {
   --bg-main: #ffffff;
   --bg-card: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.95);
+  --bg-glass: #ffffff;
   --text-main: #1a1a1a;
   --text-soft: #333333;
   --text-muted: #666666;
@@ -42,7 +42,7 @@
 :root.dark {
   --bg-main: #1e293b;
   --bg-card: #334155;
-  --bg-glass: rgba(51, 65, 85, 0.9);
+  --bg-glass: #334155;
   --text-main: #f8fafc;
   --text-soft: #cbd5e1;
   --text-muted: #94a3b8;
@@ -92,7 +92,7 @@ body {
 }
 
 .btn-glass {
-  @apply bg-white/5 backdrop-blur-md border border-white/10 text-[var(--text-main)] hover:bg-white/10;
+  @apply bg-white/5 border border-white/10 text-[var(--text-main)] hover:bg-white/10;
 }
 
 /* --- Cards & Glass --- */
@@ -101,7 +101,7 @@ body {
 }
 
 .glass {
-  @apply bg-[var(--bg-glass)] backdrop-blur-2xl border border-[var(--border)] rounded-[2.5rem] shadow-[var(--shadow-lg)];
+  @apply bg-[var(--bg-glass)] border border-[var(--border)] rounded-[2.5rem] shadow-[var(--shadow-lg)];
 }
 
 /* --- Utility --- */
