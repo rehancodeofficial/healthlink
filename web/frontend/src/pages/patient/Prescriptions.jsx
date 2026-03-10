@@ -106,8 +106,9 @@ export default function PatientPrescriptions() {
       // Body image
       pdf.addImage(imgData, "PNG", 10, 26, imgWidth, Math.min(imgHeight, pageHeight - 36));
 
-      const filenameSafeMed =
-        (selectedPrescription.medication || "prescription").toString().replace(/[^a-z0-9_-]+/gi, "_");
+      const filenameSafeMed = (selectedPrescription.medication || "prescription")
+        .toString()
+        .replace(/[^a-z0-9_-]+/gi, "_");
       pdf.save(`${filenameSafeMed}.pdf`);
     } catch (e) {
       console.error("PDF export failed:", e);
@@ -127,12 +128,14 @@ export default function PatientPrescriptions() {
         <Topbar userName={userName} />
 
         <div className="flex justify-between items-center mb-6">
-                          <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
+          <img
+            src="/images/logo/Asset3.png"
+            alt="CureVirtual"
+            style={{ width: 120, height: "auto" }}
+            onError={(e) => {
+              e.currentTarget.src = PLACEHOLDER_LOGO;
+            }} // fallback if missing
+          />
           <h1 className="text-3xl font-bold">My Prescriptions</h1>
         </div>
 
@@ -172,10 +175,10 @@ export default function PatientPrescriptions() {
                       <td className="p-3 flex justify-center gap-4">
                         <button
                           onClick={() => handleView(p)}
-                          className="hover:scale-110 transition"
+                          className="p-2 rounded-lg bg-[#dcfce7] hover:scale-110 transition"
                           title="View"
                         >
-                          <FaEye className="text-[#FFFFFF]" />
+                          <FaEye className="text-black" />
                         </button>
                       </td>
                     </tr>
@@ -203,21 +206,20 @@ export default function PatientPrescriptions() {
             >
               ✖
             </button>
-                <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
+            <img
+              src="/images/logo/Asset3.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => {
+                e.currentTarget.src = PLACEHOLDER_LOGO;
+              }} // fallback if missing
+            />
             <h2 className="text-2xl font-semibold mb-4 text-[var(--text-main)]">
               Prescription Details
             </h2>
 
             {/* Export Target */}
-            <div
-              ref={pdfRef}
-              className="space-y-3 bg-white rounded-xl p-5 text-[#111827]"
-            >
+            <div ref={pdfRef} className="space-y-3 bg-white rounded-xl p-5 text-[#111827]">
               {/* Header in exported area (light mode for print quality) */}
               <div className="flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-3">
@@ -225,7 +227,9 @@ export default function PatientPrescriptions() {
                     src="/images/logo/Asset3.png"
                     alt="CureVirtual"
                     style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
+                    onError={(e) => {
+                      e.currentTarget.src = PLACEHOLDER_LOGO;
+                    }} // fallback if missing
                   />
                   <div>
                     <h3 className="text-lg font-bold">Prescription</h3>
@@ -262,16 +266,14 @@ export default function PatientPrescriptions() {
                   {selectedPrescription?.medication}
                 </p>
                 <p>
-                  <span className="font-semibold">Dosage:</span>{" "}
-                  {selectedPrescription?.dosage}
+                  <span className="font-semibold">Dosage:</span> {selectedPrescription?.dosage}
                 </p>
                 <p>
                   <span className="font-semibold">Frequency:</span>{" "}
                   {selectedPrescription?.frequency}
                 </p>
                 <p>
-                  <span className="font-semibold">Duration:</span>{" "}
-                  {selectedPrescription?.duration}
+                  <span className="font-semibold">Duration:</span> {selectedPrescription?.duration}
                 </p>
 
                 {/* Extra rows (render only if present) */}
@@ -283,14 +285,12 @@ export default function PatientPrescriptions() {
                 )}
                 {selectedPrescription?.route && (
                   <p>
-                    <span className="font-semibold">Route:</span>{" "}
-                    {selectedPrescription.route}
+                    <span className="font-semibold">Route:</span> {selectedPrescription.route}
                   </p>
                 )}
                 {selectedPrescription?.refills != null && (
                   <p>
-                    <span className="font-semibold">Refills:</span>{" "}
-                    {selectedPrescription.refills}
+                    <span className="font-semibold">Refills:</span> {selectedPrescription.refills}
                   </p>
                 )}
                 {(selectedPrescription?.startDate || selectedPrescription?.endDate) && (
@@ -313,8 +313,7 @@ export default function PatientPrescriptions() {
                 )}
 
                 <p>
-                  <span className="font-semibold">Notes:</span>{" "}
-                  {selectedPrescription?.notes || "—"}
+                  <span className="font-semibold">Notes:</span> {selectedPrescription?.notes || "—"}
                 </p>
               </div>
 
