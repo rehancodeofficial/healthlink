@@ -351,7 +351,6 @@ export default function DoctorAppointments() {
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           ></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300">
@@ -470,7 +469,6 @@ export default function DoctorAppointments() {
 
       {confirmOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"></div>
           <div className="relative w-full max-w-md glass !p-8 animate-in zoom-in-95 duration-300">
             <h3 className="text-xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
               Delete Protocol?
