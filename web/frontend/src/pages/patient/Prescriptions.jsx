@@ -124,7 +124,7 @@ export default function PatientPrescriptions() {
   return (
     <div className="flex bg-[var(--bg-main)]/90 text-[var(--text-main)] min-h-screen">
       <Sidebar role={role || "PATIENT"} />
-      <div className="flex-1 p-6">
+      <div className="flex-1">
         <Topbar userName={userName} />
 
         <div className="flex justify-between items-center mb-6">
