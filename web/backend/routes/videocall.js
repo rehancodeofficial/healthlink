@@ -236,9 +236,13 @@ router.get("/list", verifyToken, async (req, res) => {
 ========================================== */
 router.post("/token", verifyToken, async (req, res) => {
   try {
-    const { identity, roomName } = req.body || {};
-    if (!identity || !roomName) {
-      return res.status(400).json({ error: "identity and roomName required" });
+    const { identity, room, roomName } = req.body || {};
+    const activeRoomName = room || roomName;
+
+    if (!identity || !activeRoomName) {
+      return res
+        .status(400)
+        .json({ error: "identity and room/roomName required" });
     }
 
     const AccessToken = twilio.jwt.AccessToken;
@@ -251,7 +255,7 @@ router.post("/token", verifyToken, async (req, res) => {
       { identity },
     );
 
-    token.addGrant(new VideoGrant({ room: roomName }));
+    token.addGrant(new VideoGrant({ room: activeRoomName }));
     return res.json({ token: token.toJwt() });
   } catch (err) {
     console.error("❌ Error generating Twilio token:", err);
