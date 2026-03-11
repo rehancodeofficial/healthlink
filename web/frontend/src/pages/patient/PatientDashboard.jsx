@@ -58,12 +58,6 @@ export default function PatientDashboard() {
               <FaHeartbeat className="text-[var(--brand-orange)]" />
               Vitals Nominal
             </div>
-            <button
-              onClick={() => navigate("/patient/book-appointment")}
-              className="btn btn-primary !py-3 !px-6 shadow-green-500/30"
-            >
-              <FaCalendarAlt /> Book New
-            </button>
           </div>
         </div>
 
