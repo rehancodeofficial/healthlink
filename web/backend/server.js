@@ -70,8 +70,7 @@ const twilioTokenRoute = require("./routes/twilioToken");
 const otpRoutes = require("./routes/otp");
 
 app.use("/api/auth", authRoutes);
-// app.use("/api/twilio", twilioRoutes);
-app.use("/api/token", twilioTokenRoute);
+app.use("/api/videocall", videocallRoutes);
 app.use("/api/otp", otpRoutes);
 
 // ----------------------------
