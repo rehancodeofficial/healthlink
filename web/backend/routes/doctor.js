@@ -1,8 +1,8 @@
 const express = require("express");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
-const prisma = require('../prisma/prismaClient');
-const emailService = require('../services/emailService');
+const prisma = require("../prisma/prismaClient");
+const emailService = require("../services/emailService");
 const router = express.Router();
 
 // Apply RBAC to all doctor routes
@@ -16,7 +16,8 @@ router.use(requireRole(["DOCTOR", "SUPERADMIN", "ADMIN"]));
 router.get("/waiting-patients", async (req, res) => {
   try {
     const doctorUserId = req.query.doctorId || req.user?.id;
-    if (!doctorUserId) return res.status(400).json({ error: "doctorId is required" });
+    if (!doctorUserId)
+      return res.status(400).json({ error: "doctorId is required" });
 
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorUserId },
@@ -141,7 +142,7 @@ router.get("/stats", async (req, res) => {
         urgentLabs,
         unsignedNotes,
         lateAppointments,
-      }
+      },
     });
   } catch (err) {
     console.error("❌ /api/doctor/stats error:", err);
@@ -180,14 +181,15 @@ router.get("/profile", async (req, res) => {
 });
 
 // PUT /api/doctor/profile (upsert)
+
 router.put("/profile", async (req, res) => {
   try {
     const {
       userId,
       firstName, // ✅ Extract Name
       middleName,
-      lastName,  // ✅ Extract Name
-      phone,     // ✅ Extract Phone
+      lastName, // ✅ Extract Name
+      phone, // ✅ Extract Phone
       specialization,
       customProfession,
       qualifications,
@@ -196,11 +198,12 @@ router.put("/profile", async (req, res) => {
       yearsOfExperience,
       consultationFee,
       availability, // JSON string or object
+      timezone, // String
       bio,
-      languages,    // JSON string or array
+      languages, // JSON string or array
       emergencyContact,
       emergencyContactName,
-      emergencyContactEmail
+      emergencyContactEmail,
     } = req.body || {};
 
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -231,9 +234,15 @@ router.put("/profile", async (req, res) => {
         hospitalAffiliation: hospitalAffiliation ?? "",
         yearsOfExperience: yearsOfExperience ?? 0,
         consultationFee: consultationFee ?? 0,
-        availability: typeof availability === "string" ? availability : JSON.stringify(availability || {}),
+        availability:
+          typeof availability === "string"
+            ? availability
+            : JSON.stringify(availability || {}),
+        timezone: timezone ?? "UTC",
         bio: bio ?? "",
-        languages: Array.isArray(languages) ? JSON.stringify(languages) : (languages ?? JSON.stringify(["English"])),
+        languages: Array.isArray(languages)
+          ? JSON.stringify(languages)
+          : (languages ?? JSON.stringify(["English"])),
         emergencyContact: emergencyContact ?? "",
         emergencyContactName: emergencyContactName ?? "",
         emergencyContactEmail: emergencyContactEmail ?? "",
@@ -243,13 +252,20 @@ router.put("/profile", async (req, res) => {
         specialization: specialization ?? "General Medicine",
         customProfession: customProfession || null,
         qualifications: qualifications ?? "MBBS",
-        licenseNumber: licenseNumber || `LIC-${userId.slice(0, 8).toUpperCase()}`,
+        licenseNumber:
+          licenseNumber || `LIC-${userId.slice(0, 8).toUpperCase()}`,
         hospitalAffiliation: hospitalAffiliation ?? "",
         yearsOfExperience: yearsOfExperience ?? 0,
         consultationFee: consultationFee ?? 0,
-        availability: typeof availability === "string" ? availability : JSON.stringify(availability || {}),
+        availability:
+          typeof availability === "string"
+            ? availability
+            : JSON.stringify(availability || {}),
+        timezone: timezone ?? "UTC",
         bio: bio ?? "",
-        languages: Array.isArray(languages) ? JSON.stringify(languages) : (languages ?? JSON.stringify(["English"])),
+        languages: Array.isArray(languages)
+          ? JSON.stringify(languages)
+          : (languages ?? JSON.stringify(["English"])),
         emergencyContact: emergencyContact ?? "",
         emergencyContactName: emergencyContactName ?? "",
         emergencyContactEmail: emergencyContactEmail ?? "",
@@ -257,10 +273,15 @@ router.put("/profile", async (req, res) => {
     });
 
     // Fetch updated user to get email for notification
-    const userForEmail = await prisma.user.findUnique({ where: { id: userId } });
+    const userForEmail = await prisma.user.findUnique({
+      where: { id: userId },
+    });
     if (userForEmail) {
-        emailService.sendProfileUpdateConfirmation(userForEmail, "Doctor")
-            .catch(err => console.error("Failed to send profile update email:", err));
+      emailService
+        .sendProfileUpdateConfirmation(userForEmail, "Doctor")
+        .catch((err) =>
+          console.error("Failed to send profile update email:", err),
+        );
     }
 
     return res.json({ data: updated });
@@ -292,12 +313,15 @@ router.put("/profile", async (req, res) => {
 //   }
 // });
 
-
 // GET /api/doctor/list
 router.get("/list", async (_req, res) => {
   try {
     const list = await prisma.doctorProfile.findMany({
-      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      include: {
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
     res.json(list);
@@ -373,7 +397,9 @@ router.get("/my-patients", async (req, res) => {
     // Shape a simple list for the table
     const result = patients.map((p) => ({
       id: p.id, // PatientProfile.id
-      name: `${p.user?.firstName || ""} ${p.user?.lastName || ""}`.trim() || "Unknown",
+      name:
+        `${p.user?.firstName || ""} ${p.user?.lastName || ""}`.trim() ||
+        "Unknown",
       email: p.user?.email || "",
       gender: p.user?.gender || null,
       dateOfBirth: p.user?.dateOfBirth || null,
@@ -385,7 +411,9 @@ router.get("/my-patients", async (req, res) => {
     return res.json(result);
   } catch (err) {
     console.error("❌ /api/doctor/my-patients error:", err);
-    return res.status(500).json({ error: err.message, details: err.toString() });
+    return res
+      .status(500)
+      .json({ error: err.message, details: err.toString() });
   }
 });
 
@@ -399,7 +427,15 @@ router.get("/patient/:id", async (req, res) => {
     const patient = await prisma.patientProfile.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true, createdAt: true } },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            createdAt: true,
+          },
+        },
       },
     });
 
@@ -414,7 +450,6 @@ router.get("/patient/:id", async (req, res) => {
 });
 
 //======================APPOINTMENTS=============================
-
 
 // ======================================================
 // 1️⃣ POST /api/doctor/appointment — Create Appointment
@@ -455,8 +490,15 @@ router.post("/appointments", async (req, res) => {
     });
 
     if (newAppointment.doctor?.user && newAppointment.patient?.user) {
-        emailService.sendAppointmentBookingConfirmation(newAppointment, newAppointment.patient.user, newAppointment.doctor.user)
-            .catch(err => console.error("Failed to send appointment emails:", err));
+      emailService
+        .sendAppointmentBookingConfirmation(
+          newAppointment,
+          newAppointment.patient.user,
+          newAppointment.doctor.user,
+        )
+        .catch((err) =>
+          console.error("Failed to send appointment emails:", err),
+        );
     }
 
     res.status(201).json(newAppointment);
@@ -487,13 +529,21 @@ router.patch("/appointments/:id", async (req, res) => {
       },
     });
 
-    if (status && updatedAppointment.patient?.user && updatedAppointment.doctor?.user) {
-        emailService.sendAppointmentStatusChange(
-            updatedAppointment, 
-            updatedAppointment.patient.user, 
-            updatedAppointment.doctor.user, 
-            status
-        ).catch(err => console.error("Failed to send appointment status email:", err));
+    if (
+      status &&
+      updatedAppointment.patient?.user &&
+      updatedAppointment.doctor?.user
+    ) {
+      emailService
+        .sendAppointmentStatusChange(
+          updatedAppointment,
+          updatedAppointment.patient.user,
+          updatedAppointment.doctor.user,
+          status,
+        )
+        .catch((err) =>
+          console.error("Failed to send appointment status email:", err),
+        );
     }
 
     res.json(updatedAppointment);
@@ -508,11 +558,11 @@ router.patch("/appointments/:id", async (req, res) => {
    ====================================================== */
 router.get("/appointments", async (req, res) => {
   const doctorId = req.query.doctorId || req.user?.id; // doctorId = User.id
-  
-  console.log("DEBUG: GET /doctor/appointments", { 
-      query: req.query, 
-      user: req.user, 
-      resolvedDoctorId: doctorId 
+
+  console.log("DEBUG: GET /doctor/appointments", {
+    query: req.query,
+    user: req.user,
+    resolvedDoctorId: doctorId,
   });
 
   if (!doctorId)
@@ -543,7 +593,6 @@ router.get("/appointments", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch doctor appointments" });
   }
 });
-
 
 /* ======================================================
    5️⃣  PATCH /api/doctor/appointments/:id/cancel — Cancel
@@ -618,8 +667,8 @@ router.get("/prescriptions", async (req, res) => {
 router.post("/prescriptions", async (req, res) => {
   try {
     const {
-      doctorId,            // can be User.id (recommended) OR DoctorProfile.id
-      patientId,           // PatientProfile.id
+      doctorId, // can be User.id (recommended) OR DoctorProfile.id
+      patientId, // PatientProfile.id
       medication,
       dosage,
       frequency,
@@ -628,23 +677,36 @@ router.post("/prescriptions", async (req, res) => {
     } = req.body || {};
 
     // basic validation
-    if (!doctorId || !patientId || !medication || !dosage || !frequency || !duration) {
+    if (
+      !doctorId ||
+      !patientId ||
+      !medication ||
+      !dosage ||
+      !frequency ||
+      !duration
+    ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     // Resolve doctor profile:
     // 1) try as userId
-    let doctorProfile = await prisma.doctorProfile.findUnique({ where: { userId: doctorId } });
+    let doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { userId: doctorId },
+    });
     // 2) if not found, try as profile id
     if (!doctorProfile) {
-      doctorProfile = await prisma.doctorProfile.findUnique({ where: { id: doctorId } });
+      doctorProfile = await prisma.doctorProfile.findUnique({
+        where: { id: doctorId },
+      });
     }
     if (!doctorProfile) {
       return res.status(404).json({ error: "Doctor profile not found" });
     }
 
     // Ensure patient profile exists (patientId is PatientProfile.id)
-    const patientProfile = await prisma.patientProfile.findUnique({ where: { id: patientId } });
+    const patientProfile = await prisma.patientProfile.findUnique({
+      where: { id: patientId },
+    });
     if (!patientProfile) {
       return res.status(404).json({ error: "Patient profile not found" });
     }
@@ -670,9 +732,9 @@ router.post("/prescriptions", async (req, res) => {
     const selectedMapping = await prisma.selectedPharmacy.findFirst({
       where: { patientId: patientProfile.id },
       orderBy: [
-        { preferred: 'desc' }, // Preferred ones first
-        { createdAt: 'desc' }  // Then most recent
-      ]
+        { preferred: "desc" }, // Preferred ones first
+        { createdAt: "desc" }, // Then most recent
+      ],
     });
 
     let finalPrescription = created;
@@ -693,15 +755,12 @@ router.post("/prescriptions", async (req, res) => {
       });
     }
 
-
     return res.status(201).json(finalPrescription);
   } catch (error) {
     console.error("❌ Error creating prescription:", error);
     return res.status(500).json({ error: "Failed to create prescription" });
   }
 });
-
-
 
 /* ======================================================
    9️⃣  DELETE /api/doctor/prescriptions/:id  —  Delete
@@ -710,11 +769,11 @@ router.delete("/prescriptions/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const doctorUserId = req.user?.id;
-    
+
     // Verify ownership - prescription must belong to this doctor
     const prescription = await prisma.prescription.findUnique({
       where: { id },
-      include: { doctor: { select: { userId: true } } }
+      include: { doctor: { select: { userId: true } } },
     });
 
     if (!prescription) {
@@ -722,8 +781,13 @@ router.delete("/prescriptions/:id", async (req, res) => {
     }
 
     // Only doctor who created it (or admin/superadmin) can delete
-    if (prescription.doctor.userId !== doctorUserId && !["SUPERADMIN", "ADMIN"].includes(req.user?.role)) {
-      return res.status(403).json({ error: "Not authorized to delete this prescription" });
+    if (
+      prescription.doctor.userId !== doctorUserId &&
+      !["SUPERADMIN", "ADMIN"].includes(req.user?.role)
+    ) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this prescription" });
     }
 
     await prisma.prescription.delete({ where: { id } });
@@ -741,12 +805,13 @@ router.patch("/prescriptions/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const doctorUserId = req.user?.id;
-    const { medication, dosage, frequency, duration, notes, patientId } = req.body;
-    
+    const { medication, dosage, frequency, duration, notes, patientId } =
+      req.body;
+
     // Verify ownership
     const prescription = await prisma.prescription.findUnique({
       where: { id },
-      include: { doctor: { select: { userId: true } } }
+      include: { doctor: { select: { userId: true } } },
     });
 
     if (!prescription) {
@@ -754,8 +819,13 @@ router.patch("/prescriptions/:id", async (req, res) => {
     }
 
     // Only doctor who created it (or admin/superadmin) can edit
-    if (prescription.doctor.userId !== doctorUserId && !["SUPERADMIN", "ADMIN"].includes(req.user?.role)) {
-      return res.status(403).json({ error: "Not authorized to edit this prescription" });
+    if (
+      prescription.doctor.userId !== doctorUserId &&
+      !["SUPERADMIN", "ADMIN"].includes(req.user?.role)
+    ) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to edit this prescription" });
     }
 
     const updated = await prisma.prescription.update({
@@ -787,13 +857,18 @@ router.get("/messages/inbox", async (req, res) => {
       where: { id: doctorUserId },
       select: { id: true },
     });
-    if (!doctorUser) return res.status(404).json({ error: "Doctor user not found" });
+    if (!doctorUser)
+      return res.status(404).json({ error: "Doctor user not found" });
 
     const messages = await prisma.message.findMany({
       where: { receiverId: doctorUserId },
       include: {
-        sender: { select: { id: true, firstName: true, lastName: true, email: true } },
-        receiver: { select: { id: true, firstName: true, lastName: true, email: true } },
+        sender: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        receiver: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -818,7 +893,8 @@ router.patch("/messages/read/:id", async (req, res) => {
       select: { id: true, receiverId: true },
     });
     if (!found) return res.status(404).json({ error: "Message not found" });
-    if (found.receiverId !== userId) return res.status(403).json({ error: "Not allowed" });
+    if (found.receiverId !== userId)
+      return res.status(403).json({ error: "Not allowed" });
 
     const updated = await prisma.message.update({
       where: { id },
@@ -830,7 +906,6 @@ router.patch("/messages/read/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to mark read" });
   }
 });
-
 
 // DELETE /api/doctor/messages/delete/:id  → hard delete a message
 // DELETE /api/doctor/messages/delete/:id?userId=<User.id>
@@ -860,10 +935,7 @@ router.delete("/messages/delete/:id", async (req, res) => {
   }
 });
 
-
-
 // Duplicate /patients route removed, handled in doctorPatients.js
-
 
 /**
  * POST /api/doctor/messages/send
@@ -874,13 +946,21 @@ router.post("/messages/send", async (req, res) => {
   try {
     const { senderId, receiverId, content } = req.body || {};
     if (!senderId || !receiverId || !content) {
-      return res.status(400).json({ error: "senderId, receiverId and content are required" });
+      return res
+        .status(400)
+        .json({ error: "senderId, receiverId and content are required" });
     }
 
     // Verify both users exist (helps catch wrong id issues)
     const [sender, receiver] = await Promise.all([
-      prisma.user.findUnique({ where: { id: String(senderId) }, select: { id: true } }),
-      prisma.user.findUnique({ where: { id: String(receiverId) }, select: { id: true } }),
+      prisma.user.findUnique({
+        where: { id: String(senderId) },
+        select: { id: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: String(receiverId) },
+        select: { id: true },
+      }),
     ]);
     if (!sender || !receiver) {
       return res.status(400).json({ error: "Invalid sender or receiver" });
@@ -929,8 +1009,6 @@ router.post("/messages/send", async (req, res) => {
 
 // Redundant /patients route removed
 
-
-
 // router.get("/patients", async (req, res) => {
 //   try {
 //     const patients = await prisma.patientProfile.findMany({
@@ -961,10 +1039,7 @@ router.post("/messages/send", async (req, res) => {
 //   }
 // });
 
-
 // Redundant /patients routes removed
-
-
 
 /**
  * ===========================================
@@ -1002,8 +1077,15 @@ router.get("/prescriptions", async (req, res) => {
 
 // ✅ Create new prescription
 router.post("/prescriptions", async (req, res) => {
-  const { doctorId, patientId, medication, dosage, frequency, duration, notes } =
-    req.body;
+  const {
+    doctorId,
+    patientId,
+    medication,
+    dosage,
+    frequency,
+    duration,
+    notes,
+  } = req.body;
 
   try {
     const doctorProfile = await prisma.doctorProfile.findUnique({
@@ -1077,7 +1159,8 @@ router.get("/prescriptions", async (req, res) => {
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
-    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile)
+      return res.status(404).json({ error: "Doctor profile not found" });
 
     const prescriptions = await prisma.prescription.findMany({
       where: { doctorId: doctorProfile.id },
@@ -1103,27 +1186,53 @@ router.get("/prescriptions", async (req, res) => {
 // ✅ Create new prescription (safe)
 router.post("/prescriptions", async (req, res) => {
   try {
-    let { doctorId, patientId, medication, dosage, frequency, duration, notes } = req.body;
+    let {
+      doctorId,
+      patientId,
+      medication,
+      dosage,
+      frequency,
+      duration,
+      notes,
+    } = req.body;
 
     if (!doctorId || !patientId || !medication)
       return res.status(400).json({ message: "Missing required fields" });
 
     // Doctor profile
-    let doctorProfile = await prisma.doctorProfile.findUnique({ where: { id: doctorId } });
+    let doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { id: doctorId },
+    });
     if (!doctorProfile)
-      doctorProfile = await prisma.doctorProfile.findUnique({ where: { userId: doctorId } });
-    if (!doctorProfile) return res.status(404).json({ message: "Doctor profile not found" });
+      doctorProfile = await prisma.doctorProfile.findUnique({
+        where: { userId: doctorId },
+      });
+    if (!doctorProfile)
+      return res.status(404).json({ message: "Doctor profile not found" });
     doctorId = doctorProfile.id;
 
     // Patient profile
-    let patientProfile = await prisma.patientProfile.findUnique({ where: { id: patientId } });
+    let patientProfile = await prisma.patientProfile.findUnique({
+      where: { id: patientId },
+    });
     if (!patientProfile)
-      patientProfile = await prisma.patientProfile.findUnique({ where: { userId: patientId } });
-    if (!patientProfile) return res.status(404).json({ message: "Patient profile not found" });
+      patientProfile = await prisma.patientProfile.findUnique({
+        where: { userId: patientId },
+      });
+    if (!patientProfile)
+      return res.status(404).json({ message: "Patient profile not found" });
     patientId = patientProfile.id;
 
     const newPrescription = await prisma.prescription.create({
-      data: { doctorId, patientId, medication, dosage, frequency, duration, notes },
+      data: {
+        doctorId,
+        patientId,
+        medication,
+        dosage,
+        frequency,
+        duration,
+        notes,
+      },
       include: {
         patient: { include: { user: true } },
         doctor: { include: { user: true } },
@@ -1131,31 +1240,37 @@ router.post("/prescriptions", async (req, res) => {
     });
 
     // Inside POST /api/doctor/prescriptions (after you resolved doctorProfileId + patientProfileId)
-const created = await prisma.prescription.create({
-  data: {
-    doctorId: doctorProfile.id,
-    patientId: patientProfile.id,
-    medication, dosage, frequency, duration, notes: notes || null,
-    // pharmacy fields set right after create (once we know patient's selection)
-  },
-  include: { patient: { include: { user: true } }, doctor: { include: { user: true } } }
-});
+    const created = await prisma.prescription.create({
+      data: {
+        doctorId: doctorProfile.id,
+        patientId: patientProfile.id,
+        medication,
+        dosage,
+        frequency,
+        duration,
+        notes: notes || null,
+        // pharmacy fields set right after create (once we know patient's selection)
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+      },
+    });
 
-// ✅ Attach pharmacy if patient selected one
-if (patientProfile.selectedPharmacyId) {
-  await prisma.prescription.update({
-    where: { id: created.id },
-    data: {
-      pharmacyId: patientProfile.selectedPharmacyId,
-      dispatchStatus: "SENT",
-      dispatchedAt: new Date(),
+    // ✅ Attach pharmacy if patient selected one
+    if (patientProfile.selectedPharmacyId) {
+      await prisma.prescription.update({
+        where: { id: created.id },
+        data: {
+          pharmacyId: patientProfile.selectedPharmacyId,
+          dispatchStatus: "SENT",
+          dispatchedAt: new Date(),
+        },
+      });
     }
-  });
-}
 
-// (Optional) enqueue a notification/email to pharmacy here
-return res.status(201).json(created);
-
+    // (Optional) enqueue a notification/email to pharmacy here
+    return res.status(201).json(created);
 
     res.status(201).json(newPrescription);
   } catch (error) {
@@ -1163,7 +1278,6 @@ return res.status(201).json(created);
     res.status(500).json({ message: error.message });
   }
 });
-
 
 /**
  * ===========================================
@@ -1220,7 +1334,8 @@ router.get("/", async (req, res) => {
         bio: true,
         user: {
           select: {
-            firstName: true, lastName: true,   // ✅ fixed field name
+            firstName: true,
+            lastName: true, // ✅ fixed field name
             email: true,
           },
         },
@@ -1257,6 +1372,5 @@ router.post("/subscription/stripe/checkout", async (req, res) => {
   // 3) create a pending Subscription row (status=PENDING) referencing session id
   // 4) return { url: session.url }
 });
-
 
 module.exports = router;
