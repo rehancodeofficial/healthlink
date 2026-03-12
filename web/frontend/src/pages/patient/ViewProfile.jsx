@@ -1,62 +1,67 @@
 // FILE: src/pages/patient/ViewProfile.jsx
-import { useEffect, useState, useCallback } from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
-import api from '../../Lib/api';
-import { ToastContainer, toast } from 'react-toastify';
-import EditProfileModal from './EditProfileModal';
-import 'react-toastify/dist/ReactToastify.css';
+import { useEffect, useState, useCallback } from "react";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import api from "../../Lib/api";
+import { ToastContainer, toast } from "react-toastify";
+import EditProfileModal from "./EditProfileModal";
+import "react-toastify/dist/ReactToastify.css";
 
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return "—";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   } catch {
-    return '—';
+    return "—";
   }
 }
 
 function humanBlood(b) {
-  if (!b) return '—';
-  return b.replace('_POS', '+').replace('_NEG', '-');
+  if (!b) return "—";
+  return b.replace("_POS", "+").replace("_NEG", "-");
 }
 
 function humanGender(g) {
-  if (!g) return '—';
-  const map = { MALE: 'Male', FEMALE: 'Female', OTHER: 'Other' };
+  if (!g) return "—";
+  const map = { MALE: "Male", FEMALE: "Female", OTHER: "Other" };
   return map[g] || g;
 }
 
 function getInitials(name) {
-  if (!name) return 'P';
+  if (!name) return "P";
   const parts = String(name).trim().split(/\s+/);
-  const first = parts[0]?.[0] || '';
-  const last = parts[1]?.[0] || '';
-  return (first + last).toUpperCase() || 'P';
+  const first = parts[0]?.[0] || "";
+  const last = parts[1]?.[0] || "";
+  return (first + last).toUpperCase() || "P";
 }
 
 export default function PatientViewProfile() {
-  const role = 'PATIENT';
-  const userId = localStorage.getItem('userId') || '';
-  const userName =
-    localStorage.getItem('userName') ||
-    localStorage.getItem('name') ||
-    'Patient';
+  const role = "PATIENT";
+  const userId = localStorage.getItem("userId") || "";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Derive reactive display name
+  const displayName =
+    profile?.user?.name ||
+    (profile?.user?.firstName
+      ? `${profile.user.firstName} ${profile.user.lastName || ""}`.trim()
+      : null) ||
+    userName;
+
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/patient/profile', { params: { userId } });
+      const res = await api.get("/patient/profile", { params: { userId } });
       setProfile(res.data?.data || null);
-    } catch (err) {
-      toast.error('Failed to load profile.');
+    } catch {
+      toast.error("Failed to load profile.");
     } finally {
       setLoading(false);
     }
@@ -71,7 +76,7 @@ export default function PatientViewProfile() {
   };
 
   return (
-    <DashboardLayout role={role} user={{ name: userName }}>
+    <DashboardLayout role={role} user={{ name: displayName, id: userId }}>
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -82,10 +87,7 @@ export default function PatientViewProfile() {
               View Profile
             </h1>
           </div>
-          <button 
-            onClick={() => setIsEditModalOpen(true)}
-            className="btn btn-primary"
-          >
+          <button onClick={() => setIsEditModalOpen(true)} className="btn btn-primary">
             Update Profile
           </button>
         </div>
@@ -106,14 +108,14 @@ export default function PatientViewProfile() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[var(--border)] pb-8 mb-8">
                 <div className="flex items-center gap-6">
                   <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-tr from-[var(--brand-green)] to-[var(--brand-blue)] flex items-center justify-center text-3xl font-black text-[var(--text-main)] shadow-xl">
-                    {getInitials(userName)}
+                    {getInitials(displayName)}
                   </div>
                   <div>
                     <div className="text-2xl font-black text-[var(--text-main)] tracking-tight">
-                      {userName}
+                      {displayName}
                     </div>
                     <div className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-blue)] mt-1">
-                      MRN Protocol: {profile.medicalRecordNumber || 'OFFLINE'}
+                      MRN Protocol: {profile.medicalRecordNumber || "OFFLINE"}
                     </div>
                   </div>
                 </div>
@@ -147,28 +149,32 @@ export default function PatientViewProfile() {
                   <div className="bg-[var(--bg-main)]/50 border border-[var(--border)] rounded-3xl p-6 space-y-4">
                     {[
                       {
-                        label: 'Date of Birth',
+                        label: "Date of Birth",
                         value: formatDate(profile.user?.dateOfBirth || profile.dateOfBirth),
                       },
-                      { label: 'Gender', value: humanGender(profile.user?.gender || profile.gender) },
                       {
-                        label: 'Blood Group',
+                        label: "Gender",
+                        value: humanGender(profile.user?.gender || profile.gender),
+                      },
+                      {
+                        label: "Phone",
+                        value: profile.user?.phone || profile.phone || "—",
+                      },
+                      {
+                        label: "Blood Group",
                         value: humanBlood(profile.bloodGroup),
                       },
                       {
-                        label: 'Height',
-                        value: profile.height ? `${profile.height} cm` : '—',
+                        label: "Height",
+                        value: profile.height ? `${profile.height} cm` : "—",
                       },
                       {
-                        label: 'Weight',
-                        value: profile.weight ? `${profile.weight} kg` : '—',
+                        label: "Weight",
+                        value: profile.weight ? `${profile.weight} kg` : "—",
                       },
-                      { label: 'Address', value: profile.address || '—' },
+                      { label: "Address", value: profile.address || "—" },
                     ].map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-start gap-4"
-                      >
+                      <div key={idx} className="flex justify-between items-start gap-4">
                         <dt className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">
                           {item.label}
                         </dt>
@@ -187,26 +193,31 @@ export default function PatientViewProfile() {
                   <div className="bg-[var(--bg-main)]/50 border border-[var(--border)] rounded-3xl p-6 space-y-4">
                     {[
                       {
-                        label: 'Medical Record Number',
-                        value: profile.medicalRecordNumber || '—',
+                        label: "Medical Record Number",
+                        value: profile.medicalRecordNumber || "—",
                       },
                       {
-                        label: 'Insurance Provider',
-                        value: profile.insuranceProvider || '—',
+                        label: "Insurance Provider",
+                        value: profile.insuranceProvider || "—",
                       },
                       {
-                        label: 'Member ID',
-                        value: profile.insuranceMemberId || '—',
+                        label: "Member ID",
+                        value: profile.insuranceMemberId || "—",
                       },
                       {
-                        label: 'Emergency Protocol',
-                        value: profile.emergencyContact || '—',
+                        label: "Emergency Phone",
+                        value: profile.emergencyContact || "—",
+                      },
+                      {
+                        label: "Emergency Name",
+                        value: profile.emergencyContactName || "—",
+                      },
+                      {
+                        label: "Emergency Email",
+                        value: profile.emergencyContactEmail || "—",
                       },
                     ].map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-start gap-4"
-                      >
+                      <div key={idx} className="flex justify-between items-start gap-4">
                         <dt className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">
                           {item.label}
                         </dt>
@@ -225,19 +236,19 @@ export default function PatientViewProfile() {
                   <div className="grid md:grid-cols-3 gap-6">
                     {[
                       {
-                        label: 'Allergies',
+                        label: "Allergies",
                         value: profile.allergies,
-                        color: 'orange',
+                        color: "orange",
                       },
                       {
-                        label: 'Active Medications',
+                        label: "Active Medications",
                         value: profile.medications,
-                        color: 'blue',
+                        color: "blue",
                       },
                       {
-                        label: 'Medical History',
+                        label: "Medical History",
                         value: profile.medicalHistory,
-                        color: 'green',
+                        color: "green",
                       },
                     ].map((item, idx) => (
                       <div
@@ -248,9 +259,7 @@ export default function PatientViewProfile() {
                           {item.label}
                         </p>
                         <p className="text-sm font-bold text-[var(--text-main)] whitespace-pre-wrap leading-relaxed">
-                          {item.value?.trim()
-                            ? item.value
-                            : 'No critical data logged.'}
+                          {item.value?.trim() ? item.value : "No critical data logged."}
                         </p>
                       </div>
                     ))}
@@ -261,10 +270,10 @@ export default function PatientViewProfile() {
           )}
         </div>
       </div>
-      <EditProfileModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
-        profile={profile} 
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        profile={profile}
         onProfileUpdate={handleProfileUpdate}
       />
       <ToastContainer position="top-right" autoClose={2200} />
