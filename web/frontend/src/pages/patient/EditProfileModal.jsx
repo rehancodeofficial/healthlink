@@ -78,6 +78,16 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
 
       if (res.data?.data) {
         toast.success("Profile updated successfully!");
+
+        // Sync name to localStorage if changed
+        const updatedUser = res.data.data.user;
+        if (updatedUser?.name) {
+          localStorage.setItem("userName", updatedUser.name);
+        } else if (updatedUser?.firstName) {
+          const fullName = `${updatedUser.firstName} ${updatedUser.lastName || ""}`.trim();
+          localStorage.setItem("userName", fullName);
+        }
+
         onProfileUpdate(res.data.data);
         onClose();
       }
