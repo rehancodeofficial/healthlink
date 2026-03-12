@@ -65,8 +65,7 @@ app.get("/api/health", (_req, res) => {
 // ✅ AUTH / TWILIO
 // ----------------------------
 const authRoutes = require("./routes/auth");
-// const twilioRoutes = require("./routes/twilio");
-const twilioTokenRoute = require("./routes/twilioToken");
+const videocallRoutes = require("./routes/videocall");
 const otpRoutes = require("./routes/otp");
 
 app.use("/api/auth", authRoutes);
@@ -108,13 +107,11 @@ app.use("/api/admin/messages", adminMessagesRoutes);
 const doctorRoutes = require("./routes/doctor");
 const doctorVideoRoutes = require("./routes/doctorVideo");
 const doctorPatientsRoutes = require("./routes/doctorPatients");
-const videocallRoutes = require("./routes/videocall");
 const clinicalEncounterRoutes = require("./routes/clinicalEncounter");
 
 app.use("/api", doctorPatientsRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/doctor/video", doctorVideoRoutes);
-app.use("/api/videocall", videocallRoutes);
 app.use("/api/clinical-encounter", clinicalEncounterRoutes);
 
 // ----------------------------
