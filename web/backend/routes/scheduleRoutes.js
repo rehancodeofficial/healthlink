@@ -145,9 +145,12 @@ router.delete("/:id", async (req, res) => {
 // =============================================================================
 
 // GET /api/schedule/slots?doctorId=...&date=YYYY-MM-DD
+const { formatInTimeZone, toDate } = require("date-fns-tz");
+const { parseISO, addMinutes, startOfDay, endOfDay } = require("date-fns");
+
 router.get("/slots", async (req, res) => {
   try {
-    const { doctorId, date } = req.query;
+    const { doctorId, date } = req.query; // date is YYYY-MM-DD
     if (!doctorId || !date)
       return res.status(400).json({ error: "Missing params" });
 
@@ -161,13 +164,16 @@ router.get("/slots", async (req, res) => {
     if (!doctorProfile)
       return res.status(404).json({ error: "Doctor not found" });
 
-    // Parse requested date
-    const [y, m, d] = date.split("-").map(Number);
-    // Create date object in UTC for consistent day-of-week check relative to input
-    const dateObj = new Date(Date.UTC(y, m - 1, d));
-    const dayOfWeek = dateObj.getUTCDay();
+    const doctorTz = doctorProfile.timezone || "UTC";
 
-    // Get Rules
+    // 1. Get Day of Week in DOCTOR'S timezone
+    // We want to know what day of the week the requested 'date' is in the doctor's local time.
+    // 'date' is YYYY-MM-DD. We interpret it as starting at 00:00 in doctor's timezone.
+    const localDateStr = `${date}T00:00:00`;
+    const doctorDate = toDate(localDateStr, { timeZone: doctorTz });
+    const dayOfWeek = doctorDate.getDay();
+
+    // Get Rules for this day
     const rules = await prisma.doctorSchedule.findMany({
       where: {
         doctorId: doctorProfile.id,
@@ -178,16 +184,17 @@ router.get("/slots", async (req, res) => {
 
     if (rules.length === 0) return res.json({ success: true, data: [] });
 
-    // Get Appointments for this day
-    const startOfDay = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
-    const endOfDay = new Date(Date.UTC(y, m - 1, d, 23, 59, 59));
+    // Get Appointments for this day (UTC range)
+    // To be safe, look at a 48 hour window around this date to catch all possible overlaps
+    const startRange = addMinutes(doctorDate, -24 * 60);
+    const endRange = addMinutes(doctorDate, 48 * 60);
 
     const existingAppointments = await prisma.appointment.findMany({
       where: {
         doctorId: doctorProfile.id,
         appointmentDate: {
-          gte: startOfDay,
-          lte: endOfDay,
+          gte: startRange,
+          lte: endRange,
         },
         status: { not: "CANCELLED" },
       },
@@ -200,24 +207,24 @@ router.get("/slots", async (req, res) => {
     // Generate Slots
     let slots = [];
     for (const rule of rules) {
-      const [sH, sM] = rule.startTime.split(":").map(Number);
-      const [eH, eM] = rule.endTime.split(":").map(Number);
+      // rule.startTime/endTime are "HH:MM" (doctor's local time)
+      const startLocal = toDate(`${date}T${rule.startTime}:00`, {
+        timeZone: doctorTz,
+      });
+      const endLocal = toDate(`${date}T${rule.endTime}:00`, {
+        timeZone: doctorTz,
+      });
 
-      let current = new Date(Date.UTC(y, m - 1, d, sH, sM));
-      const end = new Date(Date.UTC(y, m - 1, d, eH, eM));
-
-      while (current < end) {
-        const next = new Date(current.getTime() + 15 * 60000);
-        if (next > end) break;
+      let current = startLocal;
+      while (current < endLocal) {
+        const next = addMinutes(current, 15);
+        if (next > endLocal) break;
 
         const iso = current.toISOString();
-
-        // Allow booking if status is not Cancelled.
-        // Simple check: is exact start time in booked set?
         const isBooked = bookedSet.has(iso);
 
         slots.push({
-          id: iso, // Use ISO as ID
+          id: iso,
           startTime: iso,
           endTime: next.toISOString(),
           status: isBooked ? "BOOKED" : "AVAILABLE",
