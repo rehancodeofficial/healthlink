@@ -125,6 +125,7 @@ CREATE TABLE "DoctorProfile" (
     "yearsOfExperience" INTEGER,
     "consultationFee" DOUBLE PRECISION NOT NULL,
     "availability" TEXT,
+    "timezone" TEXT NOT NULL DEFAULT 'UTC',
     "bio" TEXT,
     "languages" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
