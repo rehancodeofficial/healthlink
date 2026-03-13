@@ -20,11 +20,20 @@ const DoctorSchedule = () => {
   const doctorId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName");
 
-  useEffect(() => {
-    fetchSchedules();
-  }, []);
+  const [profile, setProfile] = useState(null);
 
-  const fetchSchedules = async () => {
+  const fetchProfile = React.useCallback(async () => {
+    try {
+      const res = await api.get("/doctor/profile", { params: { userId: doctorId } });
+      if (res.data?.data) {
+        setProfile(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    }
+  }, [doctorId]);
+
+  const fetchSchedules = React.useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get(`/schedule?doctorId=${doctorId}`);
@@ -35,7 +44,12 @@ const DoctorSchedule = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [doctorId]);
+
+  useEffect(() => {
+    fetchSchedules();
+    fetchProfile();
+  }, [fetchSchedules, fetchProfile]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,6 +133,32 @@ const DoctorSchedule = () => {
           <h1 className="text-3xl font-bold text-[var(--text-main)] mb-6 tracking-wide">
             My Schedule
           </h1>
+
+          {/* Timezone Warning/Display */}
+          <div className="mb-6 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-glass)] flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[var(--text-muted)] font-bold uppercase tracking-wider">
+                Your Timezone Setting
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-lg font-bold text-[var(--text-main)]">
+                  {profile?.timezone || "Loading..."}
+                </span>
+                {profile?.timezone &&
+                  profile.timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone && (
+                    <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-md border border-yellow-500/30">
+                      ⚠️ Different from browser ({Intl.DateTimeFormat().resolvedOptions().timeZone})
+                    </span>
+                  )}
+              </div>
+            </div>
+            <a
+              href="/doctor/profile"
+              className="text-xs font-bold text-[var(--brand-green)] hover:underline"
+            >
+              Change Timezone →
+            </a>
+          </div>
 
           {/* Add/Edit Schedule Form */}
           <div className="max-w-4xl mx-auto bg-[var(--bg-glass)] p-6 rounded-xl shadow-lg border border-[var(--border)] mb-6">
