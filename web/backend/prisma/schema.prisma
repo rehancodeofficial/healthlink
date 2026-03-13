@@ -220,6 +220,7 @@ model DoctorProfile {
   yearsOfExperience   Int?
   consultationFee     Float
   availability        String?  @db.Text
+  timezone            String   @default("UTC")
   bio                 String?
   languages           String?  @db.Text
   
