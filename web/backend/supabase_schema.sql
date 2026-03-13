@@ -96,6 +96,7 @@ CREATE TABLE `DoctorProfile` (
     `yearsOfExperience` INTEGER NULL,
     `consultationFee` DOUBLE NOT NULL,
     `availability` LONGTEXT NULL,
+    `timezone` VARCHAR(191) NOT NULL DEFAULT 'UTC',
     `bio` VARCHAR(191) NULL,
     `languages` LONGTEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
