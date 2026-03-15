@@ -24,6 +24,10 @@ const io = new Server(server, {
   },
 });
 
+// Socket Authentication Middleware
+const socketAuth = require("./middleware/socketAuth");
+io.use(socketAuth);
+
 // Initialize Socket Handler
 require("./socket/socketHandler")(io);
 
@@ -86,10 +90,12 @@ app.get("/api/health", (_req, res) => {
 const authRoutes = require("./routes/auth");
 const videocallRoutes = require("./routes/videocall");
 const otpRoutes = require("./routes/otp");
+const webrtcRoutes = require("./routes/webrtc");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/videocall", videocallRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/webrtc", webrtcRoutes);
 
 // ----------------------------
 // ✅ SUPERADMIN ROUTES
