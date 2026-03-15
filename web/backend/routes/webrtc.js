@@ -24,12 +24,26 @@ router.get("/ice-servers", authenticateToken, async (req, res) => {
       });
     }
 
-    // Generate ICE servers configuration with TURN credentials
-    const iceConfig = getIceServers(userId);
+    let iceServers = [];
+
+    // Check if Twilio is configured
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const client = require("twilio")(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN,
+      );
+
+      const token = await client.tokens.create();
+      iceServers = token.iceServers;
+    } else {
+      // Fallback to local Coturn or Public STUN
+      const iceConfig = getIceServers(userId);
+      iceServers = iceConfig.iceServers;
+    }
 
     res.json({
       success: true,
-      iceServers: iceConfig.iceServers,
+      iceServers: iceServers,
       expiresAt: new Date(Date.now() + 86400 * 1000).toISOString(), // 24 hours
     });
   } catch (error) {
