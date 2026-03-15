@@ -198,37 +198,6 @@ module.exports = (io) => {
       },
     );
 
-    // WebRTC Signaling: Offer
-    socket.on("offer", (data) => {
-      // data: { offer, roomId }
-      console.log(`🤝 Relaying WebRTC offer in room ${data.roomId}`);
-      socket.to(data.roomId).emit("offer", data.offer);
-    });
-
-    // WebRTC Signaling: Answer
-    socket.on("answer", (data) => {
-      // data: { answer, roomId }
-      console.log(`🤝 Relaying WebRTC answer in room ${data.roomId}`);
-      socket.to(data.roomId).emit("answer", data.answer);
-    });
-
-    // WebRTC Signaling: ICE Candidate
-    socket.on("ice_candidate", (data) => {
-      // data: { candidate, roomId }
-      console.log(`🧊 Relaying ICE candidate in room ${data.roomId}`);
-      socket.to(data.roomId).emit("ice_candidate", data.candidate);
-    });
-
-    // Connection state updates
-    socket.on("connection_state", (data) => {
-      // data: { roomId, state: 'checking' | 'connected' | 'disconnected' | 'failed' }
-      console.log(`📊 Connection state in ${data.roomId}: ${data.state}`);
-      socket.to(data.roomId).emit("peer_connection_state", {
-        state: data.state,
-        socketId: socket.id,
-      });
-    });
-
     // User leaving a room
     socket.on("leave_room", (roomId) => {
       socket.leave(roomId);
@@ -249,7 +218,7 @@ module.exports = (io) => {
       console.log(`📤 Socket ${socket.id} left room: ${roomId}`);
 
       // Notify others
-      socket.to(roomId).emit("peer_left", {
+      socket.to(roomId).emit("user_left", {
         socketId: socket.id,
         user: user ? { role: user.role, name: user.name } : null,
       });
@@ -258,7 +227,10 @@ module.exports = (io) => {
     // Session end (clean termination)
     socket.on("end_session", ({ roomId }) => {
       console.log(`🛑 Session ended in room ${roomId}`);
-      socket.to(roomId).emit("session_ended", { roomId });
+      io.to(roomId).emit("session_ended", { roomId });
+
+      // Optional: disconnect all users in the room from socket room
+      io.in(roomId).socketsLeave(roomId);
     });
 
     // Handle Disconnect
@@ -272,7 +244,7 @@ module.exports = (io) => {
 
         // Notify all rooms the user was in
         for (const roomId of user.rooms) {
-          socket.to(roomId).emit("peer_left", {
+          socket.to(roomId).emit("user_left", {
             socketId: socket.id,
             user: { role: user.role, name: user.name },
           });
