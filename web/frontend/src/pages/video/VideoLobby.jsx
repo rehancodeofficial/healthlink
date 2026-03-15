@@ -1,12 +1,34 @@
-import { useState } from "react";
-import api from "../../Lib/api";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../context/SocketContext";
+import { toast } from "react-toastify";
 
 export default function VideoLobby() {
   const [identity, setIdentity] = useState(localStorage.getItem("userName") || "");
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSessionStarted = ({ doctorName, roomId }) => {
+      toast.info(`👨‍⚕️ Doctor ${doctorName} has started the session! Click 'Join' to enter.`, {
+        autoClose: false,
+        onClick: () => {
+          setRoomName(roomId);
+          navigate(`/video/room/${roomId}`);
+        },
+      });
+    };
+
+    socket.on("session_started", handleSessionStarted);
+
+    return () => {
+      socket.off("session_started", handleSessionStarted);
+    };
+  }, [socket, navigate]);
 
   const handleJoin = async (e) => {
     e.preventDefault();
@@ -14,14 +36,18 @@ export default function VideoLobby() {
 
     setLoading(true);
     try {
-      const res = await api.post("/videocall/token", { identity, roomName });
-      const { token } = res.data;
-      localStorage.setItem("twilioToken", token);
+      // We no longer need Twilio token, just join the room via route
+      // Optionally, validate room existence via API if needed
       localStorage.setItem("roomName", roomName);
+      localStorage.setItem("userName", identity);
+
+      // Emit join event to socket immediately or handle it in VideoRoom
+      // For now, we'll let VideoRoom handle the socket join
+
       navigate(`/video/room/${roomName}`);
     } catch (err) {
-      console.error("Error generating Twilio token:", err);
-      alert("Failed to connect to video service");
+      console.error("Error joining room:", err);
+      alert("Failed to join room");
     } finally {
       setLoading(false);
     }
