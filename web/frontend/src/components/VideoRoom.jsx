@@ -19,7 +19,7 @@ const VideoRoom = ({
   doctorName,
   onDisconnect,
 }) => {
-  const { room, participants, isConnected, error, startSession, endSession, disconnect } =
+  const { isConnected, error, startSession, endSession, disconnect, localStream, remoteStream } =
     useVideoSession({
       token,
       roomName,
@@ -29,71 +29,38 @@ const VideoRoom = ({
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [networkQuality, setNetworkQuality] = useState(5); // 1-5
-  const [activeSpeaker, setActiveSpeaker] = useState(null);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
+  // Attach Local Stream
   useEffect(() => {
-    if (!room) return;
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
-    // Attach local tracks
-    room.localParticipant.tracks.forEach((publication) => {
-      if (publication.track && publication.kind === "video") {
-        publication.track.attach(localVideoRef.current);
-      }
-    });
-
-    // Network Quality
-    const handleQualityChange = (level) => setNetworkQuality(level);
-    room.localParticipant.on("networkQualityLevelChanged", handleQualityChange);
-
-    // Dominant Speaker
-    room.on("dominantSpeakerChanged", (participant) => {
-      setActiveSpeaker(participant ? participant.identity : null);
-    });
-
-    // Remote Participants existing
-    participants.forEach((participant) => {
-      participant.tracks.forEach((publication) => {
-        if (publication.track && publication.kind === "video") {
-          publication.track.attach(remoteVideoRef.current);
-        }
-        if (publication.isSubscribed && publication.track && publication.kind === "audio") {
-          publication.track.attach(); // Audio usually attaches to a hidden element or handles itself
-        }
-      });
-    });
-
-    const handleTrackSubscribed = (track) => {
-      if (track.kind === "video") track.attach(remoteVideoRef.current);
-      if (track.kind === "audio") track.attach();
-    };
-
-    room.on("trackSubscribed", handleTrackSubscribed);
-
-    return () => {
-      room.off("trackSubscribed", handleTrackSubscribed);
-      room.localParticipant.off("networkQualityLevelChanged", handleQualityChange);
-    };
-  }, [room, participants]);
+  // Attach Remote Stream
+  useEffect(() => {
+    // remoteStream is a MediaStream object that tracks are added to
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
 
   const toggleMute = () => {
-    if (room) {
-      room.localParticipant.audioTracks.forEach((pub) => {
-        if (isMuted) pub.track.enable();
-        else pub.track.disable();
+    if (localStream) {
+      localStream.getAudioTracks().forEach((track) => {
+        track.enabled = !track.enabled;
       });
       setIsMuted(!isMuted);
     }
   };
 
   const toggleVideo = () => {
-    if (room) {
-      room.localParticipant.videoTracks.forEach((pub) => {
-        if (isVideoOff) pub.track.enable();
-        else pub.track.disable();
+    if (localStream) {
+      localStream.getVideoTracks().forEach((track) => {
+        track.enabled = !track.enabled;
       });
       setIsVideoOff(!isVideoOff);
     }
@@ -144,15 +111,13 @@ const VideoRoom = ({
       {/* Remote Video (Full Screen) */}
       <div className="absolute inset-0 z-0">
         <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
-        {participants.filter((p) =>
-          Array.from(p.videoTracks.values()).some((t) => t.isTrackEnabled)
-        ).length === 0 && (
+        {!isConnected && (
           <div className="absolute inset-0 bg-neutral-900/80 flex flex-col items-center justify-center space-y-4 backdrop-blur-md">
             <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center animate-pulse">
               <FaUser className="text-white/20 text-3xl" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 animate-pulse">
-              Waiting for participant...
+              Connecting...
             </p>
           </div>
         )}
@@ -168,24 +133,10 @@ const VideoRoom = ({
               Secure Live Link
             </h2>
             <div className="flex items-center gap-2">
-              <div className="flex gap-0.5 items-end h-2">
-                {[1, 2, 3, 4, 5].map((b) => (
-                  <div
-                    key={b}
-                    className={`w-0.5 rounded-full ${b <= networkQuality ? "bg-green-500" : "bg-white/10"}`}
-                    style={{ height: `${b * 20}%` }}
-                  />
-                ))}
-              </div>
               <span className="text-[7px] font-bold text-white/40 uppercase">Encrypted 4K</span>
             </div>
           </div>
         </div>
-        {activeSpeaker && (
-          <div className="bg-[var(--brand-green)] px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest shadow-lg animate-in slide-in-from-left duration-300">
-            Active Participant Speaking
-          </div>
-        )}
       </div>
 
       {/* Local Video (Floating PiP) */}
