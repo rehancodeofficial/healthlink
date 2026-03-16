@@ -1,14 +1,10 @@
 // FILE: src/pages/doctor/VideoConsultation.jsx
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../Lib/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import VideoCallModal from "./VideoCallModal";
-import {
-  FaPlusCircle,
-  FaVideo,
-  FaTimesCircle,
-  FaCheckCircle,
-} from "react-icons/fa";
+import { FaPlusCircle, FaVideo, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 
 /* ------------------- Tiny toast (success/error) ------------------- */
 function Toast({ text, onClose }) {
@@ -45,24 +41,18 @@ const StatusPill = ({ status }) => {
     s === "SCHEDULED"
       ? "bg-[var(--brand-orange)] text-black"
       : s === "ONGOING"
-      ? "bg-[var(--brand-blue)] text-white"
-      : s === "COMPLETED"
-      ? "bg-[var(--brand-green)] text-white"
-      : "bg-red-600 text-white";
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles}`}>
-      {s}
-    </span>
-  );
+        ? "bg-[var(--brand-blue)] text-white"
+        : s === "COMPLETED"
+          ? "bg-[var(--brand-green)] text-white"
+          : "bg-red-600 text-white";
+  return <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles}`}>{s}</span>;
 };
 
 export default function VideoConsultation() {
   const role = localStorage.getItem("role") || "DOCTOR";
   const doctorUserId = localStorage.getItem("userId");
-  const userName =
-    localStorage.getItem("userName") ||
-    localStorage.getItem("name") ||
-    "Doctor";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
+  const navigate = useNavigate();
 
   const [consultations, setConsultations] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -131,8 +121,8 @@ export default function VideoConsultation() {
 
     try {
       await api.post("/videocall/create", {
-        doctorId: doctorUserId,        // send User.id, backend resolves DoctorProfile
-        patientId: form.patientId,     // PatientProfile.id from dropdown
+        doctorId: doctorUserId, // send User.id, backend resolves DoctorProfile
+        patientId: form.patientId, // PatientProfile.id from dropdown
         scheduledAt: form.scheduledAt,
         durationMins: form.durationMins,
       });
@@ -180,8 +170,10 @@ export default function VideoConsultation() {
 
   /* ---------------------- Join consultation ------------------------------ */
   const handleJoin = (consultation) => {
-    setSelectedConsultation(consultation);
-    setCallModalOpen(true);
+    const roomId = `consult_${consultation.id}`;
+
+    // Navigate to video room
+    navigate(`/video/room/${roomId}`);
   };
 
   return (
@@ -189,12 +181,14 @@ export default function VideoConsultation() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
-             <img
+            <img
               src="/images/logo/Asset3.png"
               alt="CureVirtual"
               style={{ width: 60, height: "auto" }}
               onError={(e) => {
-                try { e.currentTarget.src = PLACEHOLDER_LOGO; } catch {}
+                try {
+                  e.currentTarget.src = PLACEHOLDER_LOGO;
+                } catch {}
               }}
             />
             <h1 className="text-3xl font-black text-[var(--text-main)] flex items-center gap-2 uppercase tracking-tighter">
@@ -212,30 +206,38 @@ export default function VideoConsultation() {
         {error && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
-            <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">
-              {error}
-            </p>
+            <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">{error}</p>
           </div>
         )}
 
         {loading ? (
-           <div className="py-12 text-center text-[var(--text-soft)] font-bold animate-pulse uppercase tracking-widest text-xs">
-              Loading consultations...
-           </div>
+          <div className="py-12 text-center text-[var(--text-soft)] font-bold animate-pulse uppercase tracking-widest text-xs">
+            Loading consultations...
+          </div>
         ) : consultations.length === 0 ? (
-           <div className="py-12 text-center text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs border border-dashed border-[var(--border)] rounded-3xl">
-              No consultations scheduled yet.
-           </div>
+          <div className="py-12 text-center text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs border border-dashed border-[var(--border)] rounded-3xl">
+            No consultations scheduled yet.
+          </div>
         ) : (
           <div className="glass overflow-hidden">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="bg-[var(--bg-main)]/50 border-b border-[var(--border)]">
-                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Patient</th>
-                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Date</th>
-                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Duration</th>
-                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Status</th>
-                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] text-center">Actions</th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                    Patient
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                    Date
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                    Duration
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                    Status
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -248,16 +250,20 @@ export default function VideoConsultation() {
                       {c.patient?.user?.name || c.patient?.user?.fullName || "N/A"}
                     </td>
                     <td className="p-4 text-xs font-bold text-[var(--text-soft)]">
-                      {c.scheduledAt ? new Date(c.scheduledAt).toLocaleString('en-GB', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      }) : "—"}
+                      {c.scheduledAt
+                        ? new Date(c.scheduledAt).toLocaleString("en-GB", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                        : "—"}
                     </td>
-                    <td className="p-4 text-xs font-bold text-[var(--text-soft)]">{c.durationMins || 30} mins</td>
+                    <td className="p-4 text-xs font-bold text-[var(--text-soft)]">
+                      {c.durationMins || 30} mins
+                    </td>
                     <td className="p-4">
                       <StatusPill status={c.status} />
                     </td>
@@ -299,7 +305,9 @@ export default function VideoConsultation() {
       {confirmOpen && (
         <div className="fixed inset-0 bg-[var(--bg-main)]/95 flex items-center justify-center z-[60]">
           <div className="bg-[var(--bg-card)] text-[var(--text-main)] w-full max-w-md rounded-[2rem] shadow-2xl p-8 relative border border-[var(--border)]">
-            <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Cancel Consultation?</h3>
+            <h3 className="text-xl font-black uppercase tracking-tighter mb-2">
+              Cancel Consultation?
+            </h3>
             <p className="text-[var(--text-soft)] text-sm font-bold mb-8">
               This will set the consultation status to CANCELLED.
             </p>
@@ -341,7 +349,9 @@ export default function VideoConsultation() {
 
             <form onSubmit={handleSchedule} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">Patient</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Patient
+                </label>
                 <select
                   className="w-full p-4 rounded-2xl bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] text-sm font-bold focus:border-[var(--brand-green)] outline-none shadow-inner transition"
                   value={form.patientId}
@@ -358,7 +368,9 @@ export default function VideoConsultation() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">Date & Time</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Date & Time
+                </label>
                 <input
                   type="datetime-local"
                   className="w-full p-4 rounded-2xl bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] text-sm font-bold focus:border-[var(--brand-green)] outline-none shadow-inner transition"
@@ -372,7 +384,9 @@ export default function VideoConsultation() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">Duration (minutes)</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Duration (minutes)
+                </label>
                 <input
                   type="number"
                   min="15"
