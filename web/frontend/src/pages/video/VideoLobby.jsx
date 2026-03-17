@@ -5,9 +5,6 @@ import { toast } from "react-toastify";
 import { FaVideo, FaUserMd, FaShieldAlt } from "react-icons/fa";
 
 export default function VideoLobby() {
-  const [identity, setIdentity] = useState(
-    localStorage.getItem("userName") || localStorage.getItem("name") || ""
-  );
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionNotification, setSessionNotification] = useState(null);
