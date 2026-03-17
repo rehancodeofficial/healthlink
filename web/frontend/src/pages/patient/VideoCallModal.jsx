@@ -17,7 +17,7 @@ export default function VideoCallModal({ consultation, onClose, role = "PATIENT"
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem("userId");
-  const { id, roomName, durationMins = 30 } = consultation || {};
+  const { id, roomName } = consultation || {};
   const activeRoomName = roomName || `consult_${id}`;
 
   useEffect(() => {
@@ -30,6 +30,7 @@ export default function VideoCallModal({ consultation, onClose, role = "PATIENT"
         });
         setToken(res.data.token);
       } catch (err) {
+        console.error(err);
         toast.error("Failed to connect to the session.");
         onClose();
       } finally {
