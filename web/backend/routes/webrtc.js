@@ -1,7 +1,6 @@
 // FILE: routes/webrtc.js
 const express = require("express");
 const router = express.Router();
-const { getIceServers } = require("../lib/turnCredentials");
 const { authenticateToken } = require("../middleware/auth");
 
 /**
@@ -36,9 +35,8 @@ router.get("/ice-servers", authenticateToken, async (req, res) => {
       const token = await client.tokens.create();
       iceServers = token.iceServers;
     } else {
-      // Fallback to local Coturn or Public STUN
-      const iceConfig = getIceServers(userId);
-      iceServers = iceConfig.iceServers;
+      console.warn("⚠️ TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN missing.");
+      iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
     }
 
     res.json({
@@ -54,34 +52,5 @@ router.get("/ice-servers", authenticateToken, async (req, res) => {
     });
   }
 });
-
-/**
- * GET /api/webrtc/test-turn
- *
- * Test endpoint to verify TURN server configuration
- * Only available in development mode
- */
-if (process.env.NODE_ENV !== "production") {
-  router.get("/test-turn", authenticateToken, (req, res) => {
-    const { generateTurnCredentials } = require("../lib/turnCredentials");
-
-    try {
-      const credentials = generateTurnCredentials(req.user.userId);
-
-      res.json({
-        success: true,
-        message: "TURN credentials generated successfully",
-        credentials,
-        testInstructions:
-          "Use https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/ to test connectivity",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  });
-}
 
 module.exports = router;
