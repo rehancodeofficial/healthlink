@@ -271,5 +271,33 @@ module.exports = (io) => {
         console.log(`❌ Socket disconnected: ${socket.id}`);
       }
     });
+
+    // ----------------------------
+    // ✅ WebRTC Signaling Events
+    // ----------------------------
+
+    socket.on("offer", ({ roomId, offer }) => {
+      //console.log(`📡 Relaying OFFER in room ${roomId} from ${socket.id}`);
+      socket.to(roomId).emit("offer", {
+        offer,
+        from: socket.id,
+      });
+    });
+
+    socket.on("answer", ({ roomId, answer }) => {
+      //console.log(`📡 Relaying ANSWER in room ${roomId} from ${socket.id}`);
+      socket.to(roomId).emit("answer", {
+        answer,
+        from: socket.id,
+      });
+    });
+
+    socket.on("ice-candidate", ({ roomId, candidate }) => {
+      //console.log(`❄️ Relaying ICE CANDIDATE in room ${roomId} from ${socket.id}`);
+      socket.to(roomId).emit("ice-candidate", {
+        candidate,
+        from: socket.id,
+      });
+    });
   });
 };
