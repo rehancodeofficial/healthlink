@@ -2,27 +2,27 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../context/SocketContext";
 import { toast } from "react-toastify";
+import { FaVideo, FaUserMd, FaShieldAlt } from "react-icons/fa";
 
 export default function VideoLobby() {
-  const [identity, setIdentity] = useState(localStorage.getItem("userName") || "");
+  const [identity, setIdentity] = useState(
+    localStorage.getItem("userName") || localStorage.getItem("name") || ""
+  );
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionNotification, setSessionNotification] = useState(null); // { doctorName, roomId, appointmentId }
+  const [sessionNotification, setSessionNotification] = useState(null);
   const navigate = useNavigate();
-  const { socket, isConnected, connectionState } = useSocket();
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     if (!socket) return;
 
     const handleSessionStarted = ({ doctorName, roomId, appointmentId }) => {
       console.log("🔔 Session started notification:", { doctorName, roomId, appointmentId });
-
-      // Show persistent notification
       setSessionNotification({ doctorName, roomId, appointmentId });
-
-      // Also show toast
-      toast.success(`Dr. ${doctorName} has started the session!`, {
-        autoClose: 8000,
+      toast.info(`Dr. ${doctorName} is ready for your consultation!`, {
+        autoClose: 10000,
+        position: "top-center",
       });
     };
 
@@ -33,117 +33,109 @@ export default function VideoLobby() {
     };
   }, [socket]);
 
-  const handleJoin = async (e) => {
+  const handleJoin = (e) => {
     e.preventDefault();
-    if (!identity || !roomName) {
-      toast.error("Please enter your name and room ID");
+    if (!roomName) {
+      toast.error("Please enter a valid session ID");
       return;
     }
 
     if (!isConnected) {
-      toast.error("Not connected to server. Please wait...");
+      toast.error("Connection lost. Retrying...");
       return;
     }
 
     setLoading(true);
-    try {
-      // Store in localStorage
-      localStorage.setItem("roomName", roomName);
-      localStorage.setItem("userName", identity);
-
-      // Navigate to video room
-      navigate(`/video/room/${roomName}`);
-    } catch (err) {
-      console.error("Error joining room:", err);
-      toast.error("Failed to join room");
-    } finally {
-      setLoading(false);
-    }
+    // Add prefix if not present for consistency
+    const activeRoom = roomName.startsWith("consult_") ? roomName : `consult_${roomName}`;
+    navigate(`/video/room/${activeRoom}`);
   };
 
   const handleJoinNotification = () => {
     if (!sessionNotification) return;
-
-    const { roomId } = sessionNotification;
-    setRoomName(roomId);
-    localStorage.setItem("roomName", roomId);
-
-    // Navigate directly
-    navigate(`/video/room/${roomId}`);
+    navigate(`/video/room/${sessionNotification.roomId}`);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-main)]/90 text-[var(--text-main)] p-4">
-      <div className="bg-[var(--bg-card)] p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-green-400">Join Consultation</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0f18] text-white p-6">
+      <div className="w-full max-w-lg">
+        {/* Branding */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-green-500/10 border border-green-500/20 mb-6">
+            <FaShieldAlt className="text-3xl text-green-500 animate-pulse" />
+          </div>
+          <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Virtual Lobby</h1>
+          <p className="text-gray-400 font-medium tracking-wide">
+            Secure HIPAA-Compliant Video Hub
+          </p>
+        </div>
 
-        {/* Session Notification Banner */}
+        {/* Dynamic Notification */}
         {sessionNotification && (
-          <div className="mb-6 p-4 bg-green-500/10 border-2 border-green-500 rounded-xl animate-pulse">
-            <p className="text-green-500 font-bold mb-2 text-center">
-              🎥 Dr. {sessionNotification.doctorName} is ready!
-            </p>
-            <p className="text-xs text-center text-[var(--text-soft)] mb-3">
-              Session ID: {sessionNotification.roomId}
-            </p>
+          <div className="mb-10 bg-gradient-to-br from-green-600 to-green-700 p-8 rounded-[2rem] shadow-2xl shadow-green-500/20 animate-in zoom-in-95 duration-500">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-white/20 rounded-2xl">
+                <FaUserMd className="text-2xl text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">Doctor is Ready!</h3>
+                <p className="text-white/80 text-sm">
+                  Dr. {sessionNotification.doctorName} is waiting in the secure room.
+                </p>
+              </div>
+            </div>
             <button
               onClick={handleJoinNotification}
-              className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition"
+              className="w-full py-5 bg-white text-green-700 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"
             >
-              Join Now
+              Enter Secured Session
             </button>
           </div>
         )}
 
-        {/* Connection Status */}
-        <div className="mb-4 text-center">
-          <span
-            className={`text-xs font-bold ${isConnected ? "text-green-500" : "text-yellow-500"}`}
-          >
-            {connectionState === "connected"
-              ? "✅ Connected"
-              : connectionState === "connecting"
-                ? "🔄 Connecting..."
-                : connectionState === "reconnecting"
-                  ? "🔄 Reconnecting..."
-                  : "⚠️ Disconnected"}
-          </span>
+        {/* Manual Join Card */}
+        <div className="bg-gray-900/50 backdrop-blur-xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl">
+          <h2 className="text-lg font-black uppercase tracking-widest mb-8 flex items-center gap-3">
+            <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div> Manual Entry
+          </h2>
+
+          <form onSubmit={handleJoin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">
+                Room / Appointment ID
+              </label>
+              <input
+                type="text"
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value)}
+                autoFocus
+                className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 text-sm font-bold focus:border-green-500/50 focus:bg-white/10 outline-none transition-all placeholder:text-white/10"
+                placeholder="Enter ID (e.g. 123)"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !isConnected}
+              className="w-full h-16 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-2xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1"
+            >
+              <FaVideo /> {loading ? "Authorizing..." : "Initialize Link"}
+            </button>
+          </form>
+
+          <div className="mt-8 flex items-center justify-center gap-4 text-gray-500">
+            <div
+              className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500 animate-ping"}`}
+            ></div>
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              {isConnected ? "Server Link Active" : "Searching for Uplink..."}
+            </span>
+          </div>
         </div>
 
-        <form onSubmit={handleJoin} className="space-y-4">
-          <div>
-            <label className="block mb-1 text-sm font-bold">Your Name</label>
-            <input
-              type="text"
-              value={identity}
-              onChange={(e) => setIdentity(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[var(--bg-glass)] border border-[var(--border)] focus:border-[var(--brand-green)] outline-none"
-              placeholder="Enter your name"
-            />
-          </div>
-          <div>
-            <label className="block mb-1 text-sm font-bold">Room ID</label>
-            <input
-              type="text"
-              value={roomName}
-              onChange={(e) => setRoomName(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[var(--bg-glass)] border border-[var(--border)] focus:border-[var(--brand-green)] outline-none"
-              placeholder="Enter room ID (e.g., consult_123)"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || !isConnected}
-            className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Joining..." : "Join Room"}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-xs text-[var(--text-soft)]">
-          <p>Make sure your camera and microphone are enabled</p>
-        </div>
+        <p className="mt-12 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">
+          CureVirtual Secure Encryption Active
+        </p>
       </div>
     </div>
   );
