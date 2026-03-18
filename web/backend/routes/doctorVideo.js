@@ -1,59 +1,20 @@
-const express = require('express');
-const crypto = require('crypto');
-const twilio = require('twilio');
+const express = require("express");
+const crypto = require("crypto");
 
 const router = express.Router();
-const prisma = require('../prisma/prismaClient');
-const emailService = require('../services/emailService');
-
-// ====================
-// 🔐 Twilio Credentials
-// ====================
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const TWILIO_API_KEY_SID = process.env.TWILIO_API_KEY_SID;
-const TWILIO_API_KEY_SECRET = process.env.TWILIO_API_KEY_SECRET;
-
-if (!TWILIO_ACCOUNT_SID || !TWILIO_API_KEY_SID || !TWILIO_API_KEY_SECRET) {
-  console.warn('⚠️ Missing Twilio credentials in .env');
-}
-
-// ==================================
-// 🎥 Generate Twilio Access Token
-// ==================================
-router.get('/token', async (req, res) => {
-  try {
-    const { identity, roomName } = req.query;
-    if (!identity || !roomName)
-      return res.status(400).json({ error: 'identity and roomName required' });
-
-    const AccessToken = twilio.jwt.AccessToken;
-    const VideoGrant = AccessToken.VideoGrant;
-
-    const token = new AccessToken(
-      TWILIO_ACCOUNT_SID,
-      TWILIO_API_KEY_SID,
-      TWILIO_API_KEY_SECRET,
-      { identity }
-    );
-
-    token.addGrant(new VideoGrant({ room: roomName }));
-    res.json({ token: token.toJwt() });
-  } catch (err) {
-    console.error('Error generating Twilio token:', err);
-    res.status(500).json({ error: 'Failed to generate Twilio token' });
-  }
-});
+const prisma = require("../prisma/prismaClient");
+const emailService = require("../services/emailService");
 
 // ==================================
 // 📅 Create a New Video Consultation
 // ==================================
-router.post('/doctor/video-consultations', async (req, res) => {
+router.post("/doctor/video-consultations", async (req, res) => {
   try {
     const { doctorId, patientId, title, scheduledAt, durationMins, notes } =
       req.body;
 
     if (!doctorId || !patientId || !scheduledAt) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     // ✅ Resolve the DoctorProfile & PatientProfile IDs
@@ -66,13 +27,13 @@ router.post('/doctor/video-consultations', async (req, res) => {
 
     if (!doctorProfile || !patientProfile) {
       return res.status(400).json({
-        message: 'Doctor or patient profile not found',
+        message: "Doctor or patient profile not found",
         doctorFound: !!doctorProfile,
         patientFound: !!patientProfile,
       });
     }
 
-    // ✅ Generate a Twilio room name
+    // ✅ Generate a Jitsi room name
     const roomName = `consult-${crypto.randomUUID()}`;
 
     // ✅ Create the consultation record
@@ -85,7 +46,7 @@ router.post('/doctor/video-consultations', async (req, res) => {
         durationMins: Number(durationMins) || 30,
         notes,
         meetingUrl: roomName,
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
       },
       include: {
         doctor: { include: { user: true } },
@@ -94,86 +55,93 @@ router.post('/doctor/video-consultations', async (req, res) => {
     });
 
     if (newConsultation.doctor?.user && newConsultation.patient?.user) {
-      emailService.sendVideoConsultationConfirmation(newConsultation, newConsultation.patient.user, newConsultation.doctor.user)
-          .catch(err => console.error("Failed to send video consultation emails:", err));
+      emailService
+        .sendVideoConsultationConfirmation(
+          newConsultation,
+          newConsultation.patient.user,
+          newConsultation.doctor.user,
+        )
+        .catch((err) =>
+          console.error("Failed to send video consultation emails:", err),
+        );
     }
 
     res.json(newConsultation);
   } catch (err) {
-    console.error('❌ Error scheduling consultation:', err);
+    console.error("❌ Error scheduling consultation:", err);
     res.status(500).json({
-      message: 'Failed to schedule consultation',
+      message: "Failed to schedule consultation",
       error: err.message,
     });
   }
 });
 
 // ==================================
-// 📋 Get Doctor’s Video Consultations
+// 📋 Get Doctor's Video Consultations
 // ==================================
-router.get('/doctor/video-consultations', async (req, res) => {
+router.get("/doctor/video-consultations", async (req, res) => {
   try {
     const doctorId = req.query.doctorId;
     if (!doctorId)
-      return res.status(400).json({ message: 'Doctor ID required' });
+      return res.status(400).json({ message: "Doctor ID required" });
 
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
 
     if (!doctorProfile)
-      return res.status(404).json({ message: 'Doctor profile not found' });
+      return res.status(404).json({ message: "Doctor profile not found" });
 
     const consultations = await prisma.videoConsultation.findMany({
       where: { doctorId: doctorProfile.id },
       include: {
         patient: { include: { user: true } },
       },
-      orderBy: { scheduledAt: 'desc' },
+      orderBy: { scheduledAt: "desc" },
     });
 
     res.json(consultations);
   } catch (err) {
-    console.error('❌ Error fetching consultations:', err);
-    res.status(500).json({ message: 'Failed to fetch consultations' });
+    console.error("❌ Error fetching consultations:", err);
+    res.status(500).json({ message: "Failed to fetch consultations" });
   }
 });
 
 // ==================================
 // ❌ Cancel a Consultation
 // ==================================
-router.patch('/doctor/video-consultations/:id/cancel', async (req, res) => {
+router.patch("/doctor/video-consultations/:id/cancel", async (req, res) => {
   try {
     const { id } = req.params;
 
     const updated = await prisma.videoConsultation.update({
       where: { id },
-      data: { status: 'CANCELLED' },
+      data: { status: "CANCELLED" },
     });
 
     res.json(updated);
   } catch (err) {
-    console.error('Error cancelling consultation:', err);
-    res.status(500).json({ message: 'Failed to cancel consultation' });
+    console.error("Error cancelling consultation:", err);
+    res.status(500).json({ message: "Failed to cancel consultation" });
   }
 });
 
 // ==================================
 // ✅ Mark as Completed
 // ==================================
-router.patch('/doctor/video-consultations/:id/complete', async (req, res) => {
+router.patch("/doctor/video-consultations/:id/complete", async (req, res) => {
   try {
     const { id } = req.params;
 
     const updated = await prisma.videoConsultation.update({
       where: { id },
-      data: { status: 'COMPLETED' },
+      data: { status: "COMPLETED" },
     });
 
     res.json(updated);
   } catch (err) {
-    console.error('Error completing consultation:', err);
-    res.status(500).json({ message: 'Failed to complete consultation' });
+    console.error("Error completing consultation:", err);
+    res.status(500).json({ message: "Failed to complete consultation" });
   }
 });
 
