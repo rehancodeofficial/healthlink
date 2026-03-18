@@ -1,19 +1,9 @@
 // FILE: backend/routes/videocall.js
 const express = require("express");
 const router = express.Router();
+const crypto = require("crypto");
 const prisma = require("../prisma/prismaClient");
-const twilio = require("twilio");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
-
-// ---- Twilio credentials (.env) ----
-const { TWILIO_ACCOUNT_SID, TWILIO_API_KEY_SID, TWILIO_API_KEY_SECRET } =
-  process.env;
-
-if (!TWILIO_ACCOUNT_SID || !TWILIO_API_KEY_SID || !TWILIO_API_KEY_SECRET) {
-  console.warn(
-    "⚠️ Missing Twilio credentials in .env (TWILIO_ACCOUNT_SID / TWILIO_API_KEY_SID / TWILIO_API_KEY_SECRET)",
-  );
-}
 
 /* ============================
    Helpers: Profile Resolution
@@ -230,36 +220,17 @@ router.get("/list", verifyToken, async (req, res) => {
 });
 
 /* ==========================================
-   3) TWILIO VIDEO TOKEN
-   POST /api/videocall/token
-   Body: { identity, roomName }
+   3) GENERATE JITSI ROOM NAME
+   POST /api/videocall/room-name
+   Returns a unique, secure room name for Jitsi
 ========================================== */
-router.post("/token", verifyToken, async (req, res) => {
+router.post("/room-name", verifyToken, async (req, res) => {
   try {
-    const { identity, room, roomName } = req.body || {};
-    const activeRoomName = room || roomName;
-
-    if (!identity || !activeRoomName) {
-      return res
-        .status(400)
-        .json({ error: "identity and room/roomName required" });
-    }
-
-    const AccessToken = twilio.jwt.AccessToken;
-    const VideoGrant = AccessToken.VideoGrant;
-
-    const token = new AccessToken(
-      TWILIO_ACCOUNT_SID,
-      TWILIO_API_KEY_SID,
-      TWILIO_API_KEY_SECRET,
-      { identity },
-    );
-
-    token.addGrant(new VideoGrant({ room: activeRoomName }));
-    return res.json({ token: token.toJwt() });
+    const roomName = `cv-${crypto.randomUUID()}`;
+    return res.json({ success: true, roomName });
   } catch (err) {
-    console.error("❌ Error generating Twilio token:", err);
-    return res.status(500).json({ error: "Failed to create token" });
+    console.error("❌ Error generating room name:", err);
+    return res.status(500).json({ error: "Failed to generate room name" });
   }
 });
 
