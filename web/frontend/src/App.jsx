@@ -118,6 +118,7 @@ import Chatbot from "./components/Chatbot";
 ================================ */
 const VideoLobby = lazy(() => import("./pages/video/VideoLobby"));
 const VideoRoom = lazy(() => import("./pages/video/VideoRoom"));
+const CallPage = lazy(() => import("./pages/CallPage"));
 
 /* ================================
    Tiny role guard (localStorage)
@@ -158,6 +159,7 @@ export default function App() {
             {/* Video shared */}
             <Route path="/video/lobby" element={<VideoLobby />} />
             <Route path="/video/room/:roomName" element={<VideoRoom />} />
+            <Route path="/call/:appointmentId" element={<CallPage />} />
 
             {/* ================= SUPERADMIN ================= */}
             <Route
