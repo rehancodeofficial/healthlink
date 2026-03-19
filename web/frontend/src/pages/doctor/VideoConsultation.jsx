@@ -413,7 +413,7 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* 🎥 Twilio/LiveKit Call Modal */}
+      {/* 🎥 Jitsi Video Call Modal */}
       {callModalOpen && selectedConsultation && (
         <VideoCallModal
           consultation={selectedConsultation}
