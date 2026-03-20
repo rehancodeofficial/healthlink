@@ -311,9 +311,9 @@ export default function DoctorAppointments() {
                           {/* Video Button */}
                           {a?.status === "APPROVED" && (
                             <button
-                              onClick={() => handleStartVideo(a)}
+                              onClick={() => window.open(`/call/${a.id}`, "_blank")}
                               className="p-2 rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)] hover:bg-[var(--brand-green)] hover:text-[var(--text-main)] transition-all"
-                              title="Access Video Link"
+                              title="Join Video Session"
                             >
                               <FaVideo size={14} />
                             </button>
@@ -350,9 +350,7 @@ export default function DoctorAppointments() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            onClick={() => setModalOpen(false)}
-          ></div>
+          <div onClick={() => setModalOpen(false)}></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
               {viewMode ? "Protocol View" : editing ? "Sync Protocol" : "Initialize Protocol"}
