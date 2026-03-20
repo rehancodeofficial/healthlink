@@ -136,6 +136,7 @@ app.use("/api", doctorPatientsRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/doctor/video", doctorVideoRoutes);
 app.use("/api/clinical-encounter", clinicalEncounterRoutes);
+app.use("/api/appointments", require("./routes/appointmentApi"));
 
 // ----------------------------
 // ✅ SCHEDULE ROUTES
