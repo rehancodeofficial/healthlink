@@ -10,15 +10,28 @@ const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 
+// ✅ Global Allowed Origins (Moved up for Socket.io)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://localhost:5176",
+  "https://cure-virtual-2.vercel.app",
+  "https://curevirtual-2.vercel.app",
+  "https://curevirtual.vercel.app",
+  "https://cure-virtual-2-git-main-briamstechnologies.vercel.app",
+  "https://curevirtual-2-production.up.railway.app",
+  "https://curevirtual-2-production-ee33.up.railway.app",
+  "https://curevirtual-2-production-6eaa.up.railway.app",
+  "https://bite-dash-railway-app.up.railway.app", // Added based on context if needed, but sticking to existing pattern
+  process.env.FRONTEND_URL,
+  process.env.RAILWAY_STATIC_URL,
+].filter(Boolean);
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://cure-virtual-2.vercel.app",
-      "https://curevirtual.vercel.app",
-      process.env.FRONTEND_URL,
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -32,21 +45,7 @@ io.use(socketAuth);
 require("./socket/socketHandler")(io);
 
 // ✅ Global Middlewares
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  "http://localhost:5176",
-  "https://cure-virtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual.vercel.app",
-  "https://cure-virtual-2-git-main-briamstechnologies.vercel.app",
-  "https://curevirtual-2-production.up.railway.app",
-  "https://curevirtual-2-production-ee33.up.railway.app",
-  "https://curevirtual-2-production-6eaa.up.railway.app",
-  process.env.FRONTEND_URL,
-  process.env.RAILWAY_STATIC_URL,
-].filter(Boolean);
+// allowedOrigins is defined above
 
 app.use(
   cors({
