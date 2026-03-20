@@ -318,7 +318,7 @@ export default function MyAppointments() {
                           )}
                           {a.status === "APPROVED" && (
                             <button
-                              onClick={() => handleStartVideo(a)}
+                              onClick={() => window.open(`/call/${a.id}`, "_blank")}
                               className="p-2 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all"
                               title="Join Video Consultation"
                             >
@@ -338,9 +338,7 @@ export default function MyAppointments() {
 
       {bookOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            onClick={() => setBookOpen(false)}
-          ></div>
+          <div onClick={() => setBookOpen(false)}></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
               {rescheduleId ? "Reschedule Appointment" : "Book Appointment"}
