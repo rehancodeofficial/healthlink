@@ -564,6 +564,16 @@ router.post("/appointments", async (req, res) => {
         reason: reason || null,
         status: "PENDING",
       },
+    });
+
+    // Update with roomName
+    await prisma.appointment.update({
+      where: { id: created.id },
+      data: { roomName: `appointment-${created.id}` },
+    });
+
+    const finalCreated = await prisma.appointment.findUnique({
+      where: { id: created.id },
       include: {
         doctor: {
           include: {
@@ -579,13 +589,13 @@ router.post("/appointments", async (req, res) => {
       select: { firstName: true, lastName: true, email: true },
     });
 
-    if (patientUser && created.doctor?.user) {
+    if (patientUser && finalCreated.doctor?.user) {
       // Run in background, don't await response to avoid blocking
       emailService
         .sendAppointmentBookingConfirmation(
-          created,
+          finalCreated,
           patientUser,
-          created.doctor.user,
+          finalCreated.doctor.user,
         )
         .catch((err) =>
           console.error("Failed to send appointment emails:", err),
