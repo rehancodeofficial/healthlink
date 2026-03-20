@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import VideoCallModal from "../patient/VideoCallModal"; // Import shared VideoCallModal
+import "react-toastify/dist/ReactToastify.css";
 
 const StatusPill = ({ status }) => {
   const s = (status || "").toUpperCase();
@@ -50,9 +50,6 @@ export default function DoctorAppointments() {
   const [viewMode, setViewMode] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
-  // Video Call State
-  const [videoCallData, setVideoCallData] = useState(null);
 
   const [form, setForm] = useState({
     patientId: "",
@@ -491,15 +488,6 @@ export default function DoctorAppointments() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Video Call Modal */}
-      {videoCallData && (
-        <VideoCallModal
-          consultation={videoCallData}
-          onClose={() => setVideoCallData(null)}
-          role="DOCTOR"
-        />
       )}
 
       <ToastContainer position="top-right" autoClose={2200} />
