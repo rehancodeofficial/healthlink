@@ -483,18 +483,28 @@ router.post("/appointments", async (req, res) => {
         appointmentDate: new Date(appointmentDate),
         reason,
       },
+    });
+
+    // Update with roomName
+    await prisma.appointment.update({
+      where: { id: newAppointment.id },
+      data: { roomName: `appointment-${newAppointment.id}` },
+    });
+
+    const finalAppointment = await prisma.appointment.findUnique({
+      where: { id: newAppointment.id },
       include: {
         doctor: { include: { user: true } },
         patient: { include: { user: true } },
       },
     });
 
-    if (newAppointment.doctor?.user && newAppointment.patient?.user) {
+    if (finalAppointment.doctor?.user && finalAppointment.patient?.user) {
       emailService
         .sendAppointmentBookingConfirmation(
-          newAppointment,
-          newAppointment.patient.user,
-          newAppointment.doctor.user,
+          finalAppointment,
+          finalAppointment.patient.user,
+          finalAppointment.doctor.user,
         )
         .catch((err) =>
           console.error("Failed to send appointment emails:", err),
