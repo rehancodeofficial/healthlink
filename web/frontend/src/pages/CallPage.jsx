@@ -8,6 +8,11 @@ import { toast } from "react-toastify";
 /**
  * CallPage — The main video call interface for appointments.
  * Route: /call/:appointmentId
+ *
+ * Access control:
+ * - Only accessible when callStatus is "requested" or "active"
+ * - Blocked when callStatus is "idle" (doctor hasn't started)
+ * - Calls end-call API on hangup
  */
 const CallPage = () => {
   const { appointmentId } = useParams();
@@ -21,7 +26,22 @@ const CallPage = () => {
       try {
         setLoading(true);
         const res = await api.get(`/appointments/${appointmentId}`);
-        setAppointment(res.data);
+        const data = res.data;
+
+        // Enforce callStatus access control
+        const callStatus = (data.callStatus || "idle").toLowerCase();
+        if (callStatus === "idle") {
+          setError(
+            "The doctor has not started this call yet. Please wait for the doctor to initiate the session."
+          );
+          return;
+        }
+        if (callStatus === "ended") {
+          setError("This call session has already ended.");
+          return;
+        }
+
+        setAppointment(data);
       } catch (err) {
         console.error("❌ Failed to fetch appointment:", err);
         const msg = err.response?.data?.error || "Failed to load appointment details";
@@ -37,13 +57,22 @@ const CallPage = () => {
     }
   }, [appointmentId]);
 
-  const handleClose = () => {
-    // Navigate back to dashboard or previous page
+  const handleClose = async () => {
+    // End the call via API
+    try {
+      await api.post(`/appointments/${appointmentId}/end-call`);
+      toast.info("Call ended");
+    } catch (err) {
+      console.error("Failed to end call:", err);
+      // Continue navigation even if end-call fails
+    }
+
+    // Navigate back based on role
     const role = localStorage.getItem("role") || localStorage.getItem("userRole");
     if (role === "DOCTOR") {
-      navigate("/doctor/dashboard");
+      navigate("/doctor/appointments");
     } else {
-      navigate("/patient/dashboard");
+      navigate("/patient/my-appointments");
     }
   };
 
@@ -64,7 +93,10 @@ const CallPage = () => {
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
           <p className="text-gray-400 mb-6">{error}</p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              const role = localStorage.getItem("role") || localStorage.getItem("userRole");
+              navigate(role === "DOCTOR" ? "/doctor/appointments" : "/patient/my-appointments");
+            }}
             className="px-6 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors"
           >
             Go Back
@@ -89,11 +121,16 @@ const CallPage = () => {
     );
   }
 
+  // Determine display name
+  const role = localStorage.getItem("role") || localStorage.getItem("userRole");
+  const displayName =
+    role === "DOCTOR" ? appointment.doctorName || "Doctor" : appointment.patientName || "Patient";
+
   return (
     <div className="w-full h-screen overflow-hidden bg-black">
       <JitsiVideoCall
         roomName={appointment.roomName}
-        displayName={appointment.doctorName || "User"} // Display name will be set by context normally, but we use this as fallback
+        displayName={displayName}
         onClose={handleClose}
       />
     </div>
