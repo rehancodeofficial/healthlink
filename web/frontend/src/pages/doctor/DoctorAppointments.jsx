@@ -1,5 +1,6 @@
 // FILE: src/pages/doctor/DoctorAppointments.jsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
 import {
@@ -9,10 +10,11 @@ import {
   FaPlus,
   FaCalendarAlt,
   FaClock,
-  FaVideo, // Import FaVideo
+  FaVideo,
+  FaPhoneAlt,
+  FaSpinner,
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import "react-toastify/dist/ReactToastify.css";
 
 const StatusPill = ({ status }) => {
@@ -36,10 +38,39 @@ const StatusPill = ({ status }) => {
   }
 };
 
+const CallStatusBadge = ({ callStatus }) => {
+  const s = (callStatus || "idle").toLowerCase();
+  const base =
+    "px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border inline-flex items-center gap-1";
+  switch (s) {
+    case "requested":
+      return (
+        <span className={`${base} bg-yellow-500/20 text-yellow-400 border-yellow-500/30`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+          Calling...
+        </span>
+      );
+    case "active":
+      return (
+        <span className={`${base} bg-green-500/20 text-green-400 border-green-500/30`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          In Session
+        </span>
+      );
+    case "ended":
+      return (
+        <span className={`${base} bg-gray-500/20 text-gray-400 border-gray-500/30`}>Ended</span>
+      );
+    default:
+      return null;
+  }
+};
+
 export default function DoctorAppointments() {
   const doctorUserId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
   const user = { id: doctorUserId, name: userName };
+  const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -50,6 +81,7 @@ export default function DoctorAppointments() {
   const [viewMode, setViewMode] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [startingCallId, setStartingCallId] = useState(null);
 
   const [form, setForm] = useState({
     patientId: "",
@@ -93,6 +125,39 @@ export default function DoctorAppointments() {
     fetchMyPatients();
     fetchAppointments();
   }, [fetchMyPatients, fetchAppointments]);
+
+  // Poll call statuses for approved appointments every 8 seconds
+  useEffect(() => {
+    const approvedIds = appointments
+      .filter((a) => a.status === "APPROVED" && a.callStatus !== "ended")
+      .map((a) => a.id);
+
+    if (approvedIds.length === 0) return;
+
+    const pollStatuses = async () => {
+      try {
+        const updates = await Promise.allSettled(
+          approvedIds.map((id) => api.get(`/appointments/${id}/status`))
+        );
+        setAppointments((prev) =>
+          prev.map((a) => {
+            const match = updates.find(
+              (u) => u.status === "fulfilled" && u.value.data.appointmentId === a.id
+            );
+            if (match) {
+              return { ...a, callStatus: match.value.data.callStatus };
+            }
+            return a;
+          })
+        );
+      } catch (err) {
+        // Silent polling failure
+      }
+    };
+
+    const interval = setInterval(pollStatuses, 8000);
+    return () => clearInterval(interval);
+  }, [appointments.length]);
 
   const hasPatients = useMemo(() => patients.length > 0, [patients]);
 
@@ -173,36 +238,94 @@ export default function DoctorAppointments() {
     }
   };
 
-  // Check if call is allowed
-  const handleStartVideo = (appt) => {
-    // Doctors might have broader access, but let's stick to the schedule for now
-    const now = new Date();
-    const start = appt.startTime ? new Date(appt.startTime) : new Date(appt.appointmentDate);
-    const end = appt.endTime ? new Date(appt.endTime) : new Date(start.getTime() + 15 * 60000);
+  // ========== NEW: Start Video Call via API ==========
+  const handleStartCall = async (appt) => {
+    try {
+      setStartingCallId(appt.id);
 
-    // Buffer: Allow 5 mins early for doctors to prep
-    const authorizedStart = new Date(start.getTime() - 5 * 60000);
+      const res = await api.post(`/appointments/${appt.id}/start-call`);
 
-    // Override: If doctor manually clicks, we can be lenient or strict.
-    // Let's be lenient for doctors: they can join anytime on the day of appointment?
-    // Or stick to the slot requirement "video consultation must automatically start within that same booked slot time."
-    // I'll stick to the buffer logic.
+      if (res.data.success) {
+        toast.success("Call request sent to patient!");
 
-    if (now < authorizedStart) {
-      toast.warn(`Session locked. Opens at ${authorizedStart.toLocaleTimeString()}`);
-      return;
+        // Update local state
+        setAppointments((prev) =>
+          prev.map((a) =>
+            a.id === appt.id ? { ...a, callStatus: "requested", roomName: res.data.roomName } : a
+          )
+        );
+
+        // Navigate to call page
+        navigate(`/call/${appt.id}`);
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || "Failed to start call";
+      toast.error(msg);
+    } finally {
+      setStartingCallId(null);
     }
+  };
 
-    if (now > end) {
-      toast.error("Session expired.");
-      return;
+  const handleJoinActiveSession = (appt) => {
+    navigate(`/call/${appt.id}`);
+  };
+
+  // Render video button based on callStatus
+  const renderVideoButton = (appt) => {
+    if (appt.status !== "APPROVED") return null;
+
+    const cs = (appt.callStatus || "idle").toLowerCase();
+    const isStarting = startingCallId === appt.id;
+
+    switch (cs) {
+      case "idle":
+        return (
+          <button
+            onClick={() => handleStartCall(appt)}
+            disabled={isStarting}
+            className="p-2 rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)] hover:bg-[var(--brand-green)] hover:text-[var(--text-main)] transition-all disabled:opacity-50"
+            title="Start Video Call"
+          >
+            {isStarting ? (
+              <FaSpinner size={14} className="animate-spin" />
+            ) : (
+              <FaPhoneAlt size={14} />
+            )}
+          </button>
+        );
+      case "requested":
+        return (
+          <button
+            onClick={() => handleJoinActiveSession(appt)}
+            className="p-2 rounded-xl bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-[var(--text-main)] transition-all animate-pulse"
+            title="Waiting for patient — click to enter call page"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      case "active":
+        return (
+          <button
+            onClick={() => handleJoinActiveSession(appt)}
+            className="p-2 rounded-xl bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-[var(--text-main)] transition-all"
+            title="Join Active Session"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      case "ended":
+        return (
+          <button
+            disabled
+            className="p-2 rounded-xl bg-gray-500/10 text-gray-500 cursor-not-allowed opacity-50"
+            title="Session Ended"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      default:
+        return null;
     }
-
-    setVideoCallData({
-      id: appt.id,
-      roomName: `consult_${appt.id}`,
-      durationMins: 15,
-    });
   };
 
   return (
@@ -301,20 +424,15 @@ export default function DoctorAppointments() {
                         {a?.reason || "General Observation"}
                       </td>
                       <td className="px-6 py-4">
-                        <StatusPill status={a?.status} />
+                        <div className="flex flex-col gap-1">
+                          <StatusPill status={a?.status} />
+                          <CallStatusBadge callStatus={a?.callStatus} />
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-3">
-                          {/* Video Button */}
-                          {a?.status === "APPROVED" && (
-                            <button
-                              onClick={() => window.open(`/call/${a.id}`, "_blank")}
-                              className="p-2 rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)] hover:bg-[var(--brand-green)] hover:text-[var(--text-main)] transition-all"
-                              title="Join Video Session"
-                            >
-                              <FaVideo size={14} />
-                            </button>
-                          )}
+                          {/* Video Button — Call-Status Aware */}
+                          {renderVideoButton(a)}
 
                           <button
                             onClick={() => openViewModal(a)}
