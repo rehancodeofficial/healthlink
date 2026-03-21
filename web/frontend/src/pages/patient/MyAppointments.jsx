@@ -5,7 +5,7 @@ import api from "../../Lib/api";
 import { FaPlusCircle, FaTrash, FaVideo, FaEdit } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import VideoCallModal from "./VideoCallModal"; // Import VideoCallModal
+import "react-toastify/dist/ReactToastify.css";
 
 // Use the same component as BookAppointment for consistent slot logic
 import BookingSlots from "../../components/BookingSlots";
@@ -22,9 +22,6 @@ export default function MyAppointments() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toCancelId, setToCancelId] = useState(null);
   const [rescheduleId, setRescheduleId] = useState(null);
-
-  // Video Call State
-  const [videoCallData, setVideoCallData] = useState(null);
 
   // Updated state for slot-based booking
   const [form, setForm] = useState({
@@ -483,11 +480,6 @@ export default function MyAppointments() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Video Call Modal */}
-      {videoCallData && (
-        <VideoCallModal consultation={videoCallData} onClose={() => setVideoCallData(null)} />
       )}
 
       <ToastContainer position="top-right" autoClose={2200} />
