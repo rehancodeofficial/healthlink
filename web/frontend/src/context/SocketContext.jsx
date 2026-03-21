@@ -34,6 +34,7 @@ export const SocketProvider = ({ children }) => {
     // Initialize socket connection with JWT auth
     const newSocket = io(backendUrl, {
       withCredentials: true,
+      transports: ["websocket"], // 👈 FORCE WEBSOCKET
       auth: {
         token: token, // JWT authentication
       },
