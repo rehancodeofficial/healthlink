@@ -339,6 +339,7 @@ model Appointment {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   roomName        String?
+  callStatus      String    @default("idle")
 
   doctor  DoctorProfile  @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
   patient PatientProfile @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
