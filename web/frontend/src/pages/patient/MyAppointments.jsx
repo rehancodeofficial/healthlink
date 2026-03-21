@@ -1,10 +1,10 @@
 // FILE: src/pages/patient/MyAppointments.jsx
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
-import { FaPlusCircle, FaTrash, FaVideo, FaEdit } from "react-icons/fa";
+import { FaPlusCircle, FaTrash, FaVideo, FaEdit, FaPhoneAlt, FaSpinner } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import "react-toastify/dist/ReactToastify.css";
 
 // Use the same component as BookAppointment for consistent slot logic
@@ -14,6 +14,7 @@ export default function MyAppointments() {
   const role = "PATIENT";
   const patientUserId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
+  const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,10 @@ export default function MyAppointments() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toCancelId, setToCancelId] = useState(null);
   const [rescheduleId, setRescheduleId] = useState(null);
+  const [joiningCallId, setJoiningCallId] = useState(null);
+
+  // Track previous callStatus to detect transitions
+  const prevCallStatuses = useRef({});
 
   // Updated state for slot-based booking
   const [form, setForm] = useState({
@@ -70,6 +75,55 @@ export default function MyAppointments() {
     if (patientUserId) fetchAppointments();
   }, [fetchAppointments, patientUserId]);
 
+  // ========== POLLING: Check callStatus every 5 seconds ==========
+  useEffect(() => {
+    const approvedIds = appointments
+      .filter((a) => a.status === "APPROVED" && (a.callStatus || "idle") !== "ended")
+      .map((a) => a.id);
+
+    if (approvedIds.length === 0) return;
+
+    const pollStatuses = async () => {
+      try {
+        const updates = await Promise.allSettled(
+          approvedIds.map((id) => api.get(`/appointments/${id}/status`))
+        );
+
+        setAppointments((prev) =>
+          prev.map((a) => {
+            const match = updates.find(
+              (u) => u.status === "fulfilled" && u.value.data.appointmentId === a.id
+            );
+            if (match) {
+              const newStatus = match.value.data.callStatus;
+              const oldStatus = prevCallStatuses.current[a.id] || a.callStatus || "idle";
+
+              // Detect transition to "requested" — show notification
+              if (oldStatus !== "requested" && newStatus === "requested") {
+                toast.info("📞 Doctor is calling you! Click Join to connect.", {
+                  autoClose: false,
+                  toastId: `call-${a.id}`,
+                });
+              }
+
+              prevCallStatuses.current[a.id] = newStatus;
+              return { ...a, callStatus: newStatus };
+            }
+            return a;
+          })
+        );
+      } catch (err) {
+        // Silent polling failure
+      }
+    };
+
+    // Run once immediately
+    pollStatuses();
+
+    const interval = setInterval(pollStatuses, 5000);
+    return () => clearInterval(interval);
+  }, [appointments.length]);
+
   // Handle slot selection from BookingSlots component
   const handleSlotSelect = (slot) => {
     setForm((prev) => ({ ...prev, selectedSlotId: slot.id }));
@@ -84,10 +138,6 @@ export default function MyAppointments() {
       selectedSlotId: "",
       reason: appt.reason || "",
     }));
-    // We need to trigger doctor loading if not already loaded, but for now assuming user clicks the button
-    // which usually happens after page load where doctors might not be fully loaded if we lazy load.
-    // However, loadDoctors() is called on "Book New" button. We should probably call it here too or ensure it's loaded.
-    // The "Book New" button calls loadDoctors(). Let's call it here to be safe.
     loadDoctors().then(() => setBookOpen(true));
   };
 
@@ -144,31 +194,25 @@ export default function MyAppointments() {
     }
   };
 
-  // Check if call is allowed
-  const handleStartVideo = (appt) => {
-    const now = new Date();
-    // Use startTime/endTime if available, otherwise fall back to appointmentDate + 15m
-    const start = appt.startTime ? new Date(appt.startTime) : new Date(appt.appointmentDate);
-    const end = appt.endTime ? new Date(appt.endTime) : new Date(start.getTime() + 15 * 60000);
+  // ========== NEW: Join Video Call via API ==========
+  const handleJoinCall = async (appt) => {
+    try {
+      setJoiningCallId(appt.id);
 
-    // Buffer: Allow 2 mins early
-    const authorizedStart = new Date(start.getTime() - 2 * 60000);
+      const res = await api.post(`/appointments/${appt.id}/join-call`);
 
-    if (now < authorizedStart) {
-      toast.warn(`Session locked. Please wait until ${start.toLocaleTimeString()}`);
-      return;
+      if (res.data.success) {
+        toast.success("Joining video session...");
+        // Dismiss the call notification toast
+        toast.dismiss(`call-${appt.id}`);
+        navigate(`/call/${appt.id}`);
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || "Failed to join call";
+      toast.error(msg);
+    } finally {
+      setJoiningCallId(null);
     }
-
-    if (now > end) {
-      toast.error("Session expired.");
-      return;
-    }
-
-    setVideoCallData({
-      id: appt.id,
-      roomName: `consult_${appt.id}`,
-      durationMins: 15,
-    });
   };
 
   const getStatusColor = (status) => {
@@ -183,6 +227,101 @@ export default function MyAppointments() {
         return "bg-red-500/20 text-red-500 border border-red-500/30";
       default:
         return "bg-gray-500/20 text-gray-500 border border-gray-500/30";
+    }
+  };
+
+  // Render video/call button based on callStatus
+  const renderCallButton = (appt) => {
+    if (appt.status !== "APPROVED") return null;
+
+    const cs = (appt.callStatus || "idle").toLowerCase();
+    const isJoining = joiningCallId === appt.id;
+
+    switch (cs) {
+      case "idle":
+        return (
+          <button
+            disabled
+            className="p-2 rounded-xl bg-gray-500/10 text-gray-500 cursor-not-allowed opacity-50"
+            title="Waiting for doctor to start the session"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      case "requested":
+        return (
+          <button
+            onClick={() => handleJoinCall(appt)}
+            disabled={isJoining}
+            className="p-2 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all animate-pulse ring-2 ring-green-500/30"
+            title="Doctor is calling — Join Video Call"
+          >
+            {isJoining ? (
+              <FaSpinner size={14} className="animate-spin" />
+            ) : (
+              <FaPhoneAlt size={14} />
+            )}
+          </button>
+        );
+      case "active":
+        return (
+          <button
+            onClick={() => navigate(`/call/${appt.id}`)}
+            className="p-2 rounded-xl bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white transition-all"
+            title="Rejoin Active Session"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      case "ended":
+        return (
+          <button
+            disabled
+            className="p-2 rounded-xl bg-gray-500/10 text-gray-500 cursor-not-allowed opacity-50"
+            title="Session ended"
+          >
+            <FaVideo size={14} />
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Render inline call notification banner
+  const renderCallBanner = (appt) => {
+    const cs = (appt.callStatus || "idle").toLowerCase();
+    if (appt.status !== "APPROVED") return null;
+
+    switch (cs) {
+      case "idle":
+        return (
+          <div className="text-[9px] font-black uppercase tracking-widest text-gray-500 mt-1">
+            Awaiting doctor
+          </div>
+        );
+      case "requested":
+        return (
+          <div className="text-[9px] font-black uppercase tracking-widest text-green-400 mt-1 animate-pulse flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+            Doctor is calling...
+          </div>
+        );
+      case "active":
+        return (
+          <div className="text-[9px] font-black uppercase tracking-widest text-green-400 mt-1 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            In session
+          </div>
+        );
+      case "ended":
+        return (
+          <div className="text-[9px] font-black uppercase tracking-widest text-gray-500 mt-1">
+            Session ended
+          </div>
+        );
+      default:
+        return null;
     }
   };
 
@@ -208,6 +347,27 @@ export default function MyAppointments() {
             <FaPlusCircle /> Book New
           </button>
         </div>
+
+        {/* Incoming Call Banner — shown at top when any appointment has a call request */}
+        {appointments.some((a) => a.status === "APPROVED" && a.callStatus === "requested") && (
+          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-2xl animate-pulse">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <FaPhoneAlt className="text-green-400 animate-bounce" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-green-400 uppercase tracking-widest">
+                    Incoming Call
+                  </p>
+                  <p className="text-xs font-bold text-[var(--text-soft)]">
+                    Your doctor is waiting — click the phone icon below to join
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="card !p-0 overflow-hidden">
           <div className="overflow-x-auto">
@@ -252,7 +412,12 @@ export default function MyAppointments() {
                   </tr>
                 ) : (
                   appointments.map((a) => (
-                    <tr key={a.id} className="hover:bg-[var(--bg-main)]/30 transition-colors">
+                    <tr
+                      key={a.id}
+                      className={`hover:bg-[var(--bg-main)]/30 transition-colors ${
+                        a.callStatus === "requested" ? "bg-green-500/5" : ""
+                      }`}
+                    >
                       <td className="px-6 py-4 text-sm font-black text-[var(--text-main)]">
                         {a.doctor?.user
                           ? `${a.doctor.user.firstName} ${a.doctor.user.lastName}`.trim()
@@ -292,6 +457,7 @@ export default function MyAppointments() {
                         >
                           {a.status}
                         </span>
+                        {renderCallBanner(a)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-3">
@@ -313,15 +479,8 @@ export default function MyAppointments() {
                               </button>
                             </>
                           )}
-                          {a.status === "APPROVED" && (
-                            <button
-                              onClick={() => window.open(`/call/${a.id}`, "_blank")}
-                              className="p-2 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all"
-                              title="Join Video Consultation"
-                            >
-                              <FaVideo size={14} />
-                            </button>
-                          )}
+                          {/* Call-Status Aware Video Button */}
+                          {renderCallButton(a)}
                         </div>
                       </td>
                     </tr>
