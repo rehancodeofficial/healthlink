@@ -14,8 +14,9 @@ export const SocketProvider = ({ children }) => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  // Get backend URL from env or fallback
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+  // Derive socket URL from API base URL (strip /api suffix)
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+  const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
 
   useEffect(() => {
     // Get user info from localStorage
