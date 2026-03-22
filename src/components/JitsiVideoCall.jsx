@@ -173,14 +173,19 @@ export default function JitsiVideoCall({
 
         api.addEventListener("cameraError", (e) => {
           console.error("[Jitsi] Camera error:", e);
-          // If camera fails mid-call or on start, we could try to downgrade to audio only
-          if (e.type === "gum.not_found" || e.type === "gum.permission_denied") {
-            // Already handled by initial detection, but good for runtime errors
-          }
         });
 
         api.addEventListener("micError", (e) => {
           console.error("[Jitsi] Mic error:", e);
+        });
+
+        api.addEventListener("suspend", () => {
+          console.warn("[Jitsi] Connection suspended. Attempting to recover...");
+        });
+
+        api.addEventListener("connectionFailed", (e) => {
+          console.error("[Jitsi] Connection failed:", e);
+          setError("Connection failed. Please check your internet and try again.");
         });
 
         api.addEventListener("readyToClose", () => {
