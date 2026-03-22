@@ -1,17 +1,27 @@
-web/backend.zip
-node_modules/
-.DS_Store
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.venv
-__pycache__
-*.pyc
-.marscode
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
 dist
-build
+dist-ssr
+# Environment variables
+.env
+.env.*
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
