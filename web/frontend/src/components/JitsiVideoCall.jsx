@@ -34,9 +34,13 @@ export default function JitsiVideoCall({
     if (!roomName) return;
 
     let destroyed = false;
+    let api = null;
 
     const loadJitsi = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         // Dynamically load the Jitsi External API script if not already loaded
         if (!window.JitsiMeetExternalAPI) {
           await new Promise((resolve, reject) => {
@@ -61,8 +65,67 @@ export default function JitsiVideoCall({
 
         if (destroyed) return;
 
+        // Check for devices
+        let hasCamera = false;
+        let hasMic = false;
+
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          hasCamera = devices.some((device) => device.kind === "videoinput");
+          hasMic = devices.some((device) => device.kind === "audioinput");
+          console.log(`[Jitsi] Devices detected - Camera: ${hasCamera}, Mic: ${hasMic}`);
+        } catch (err) {
+          console.warn("[Jitsi] Failed to check devices, assuming strict fallback:", err);
+          // If detection fails, assume nothing is guaranteed and let Jitsi try its best
+          // or default to audio-only if we want to be safe.
+          hasCamera = false;
+          hasMic = true; // Assume at least a mic exists or is allowed
+        }
+
+        // Configuration overrides
+        const configOverrides = {
+          startWithAudioMuted: !hasMic,
+          startWithVideoMuted: !hasCamera,
+          prejoinPageEnabled: false,
+          disableDeepLinking: true,
+          enableClosePage: false,
+          disableInviteFunctions: true,
+          // Use ideal constraints for better compatibility
+          constraints: {
+            video: hasCamera
+              ? {
+                  height: { ideal: 720, max: 1080, min: 240 },
+                  width: { ideal: 1280, max: 1920, min: 320 },
+                }
+              : false,
+            audio: hasMic,
+          },
+          toolbarButtons: [
+            "chat",
+            "settings",
+            "raisehand",
+            "tileview",
+            "desktop",
+            "fullscreen",
+            "hangup",
+          ],
+        };
+
+        // Add device-specific buttons if devices exist
+        if (hasMic) configOverrides.toolbarButtons.unshift("microphone");
+        if (hasCamera) {
+          configOverrides.toolbarButtons.splice(1, 0, "camera", "toggle-camera");
+        }
+
+        // Disable analytics in development to avoid Amplitude errors
+        if (import.meta.env.DEV) {
+          configOverrides.analytics = {
+            disabled: true,
+          };
+        }
+
         // Initialize the Jitsi Meet External API
-        const api = new window.JitsiMeetExternalAPI("meet.jit.si", {
+        api = new window.JitsiMeetExternalAPI("meet.jit.si", {
           roomName: roomName,
           parentNode: containerRef.current,
           width: "100%",
@@ -70,32 +133,13 @@ export default function JitsiVideoCall({
           userInfo: {
             displayName: displayName,
           },
-          configOverrides: {
-            startWithAudioMuted: false,
-            startWithVideoMuted: false,
-            prejoinPageEnabled: false,
-            disableDeepLinking: true,
-            enableClosePage: false,
-            disableInviteFunctions: true,
-            toolbarButtons: [
-              "microphone",
-              "camera",
-              "desktop",
-              "fullscreen",
-              "hangup",
-              "chat",
-              "settings",
-              "raisehand",
-              "tileview",
-              "toggle-camera",
-            ],
-          },
+          configOverrides: configOverrides,
           interfaceConfigOverrides: {
             SHOW_JITSI_WATERMARK: false,
             SHOW_WATERMARK_FOR_GUESTS: false,
             SHOW_BRAND_WATERMARK: false,
             SHOW_POWERED_BY: false,
-            DEFAULT_BACKGROUND: "#0a0a0a",
+            DEFAULT_BACKGROUND: "#111827", // Tailwind gray-900
             TOOLBAR_ALWAYS_VISIBLE: false,
             DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
             FILM_STRIP_MAX_HEIGHT: 120,
@@ -104,9 +148,44 @@ export default function JitsiVideoCall({
 
         apiRef.current = api;
 
-        // Handle events
-        api.addEventListener("videoConferenceJoined", () => {
+        // --- Event Listeners ---
+
+        api.addEventListener("videoConferenceJoined", (e) => {
+          console.log("[Jitsi] Joined conference:", e);
           setLoading(false);
+          // If we are in listen-only mode, notify the user
+          if (!hasMic) {
+            api.executeCommand("showNotification", {
+              title: "Listen Only Mode",
+              description: "No microphone detected. You can hear others but they cannot hear you.",
+              type: "warning",
+            });
+          }
+        });
+
+        api.addEventListener("participantJoined", (e) => {
+          console.log("[Jitsi] Participant joined:", e);
+        });
+
+        api.addEventListener("participantLeft", (e) => {
+          console.log("[Jitsi] Participant left:", e);
+        });
+
+        api.addEventListener("cameraError", (e) => {
+          console.error("[Jitsi] Camera error:", e);
+        });
+
+        api.addEventListener("micError", (e) => {
+          console.error("[Jitsi] Mic error:", e);
+        });
+
+        api.addEventListener("suspend", () => {
+          console.warn("[Jitsi] Connection suspended. Attempting to recover...");
+        });
+
+        api.addEventListener("connectionFailed", (e) => {
+          console.error("[Jitsi] Connection failed:", e);
+          setError("Connection failed. Please check your internet and try again.");
         });
 
         api.addEventListener("readyToClose", () => {
@@ -131,11 +210,11 @@ export default function JitsiVideoCall({
     // Cleanup: destroy the Jitsi instance on unmount
     return () => {
       destroyed = true;
-      if (apiRef.current) {
+      if (api) {
         try {
-          apiRef.current.dispose();
-        } catch {
-          // Ignore dispose errors during unmount
+          api.dispose();
+        } catch (e) {
+          console.warn("Failed to dispose Jitsi API:", e);
         }
         apiRef.current = null;
       }
