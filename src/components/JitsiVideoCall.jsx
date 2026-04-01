@@ -69,17 +69,31 @@ export default function JitsiVideoCall({
         let hasCamera = false;
         let hasMic = false;
 
+        // Check for devices - with timeout safety
         try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          hasCamera = devices.some((device) => device.kind === "videoinput");
-          hasMic = devices.some((device) => device.kind === "audioinput");
+          // Device enumerations can hang in some browser states; wrap in 1.5s timeout
+          const detectDevices = async () => {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            hasCamera = devices.some((device) => device.kind === "videoinput");
+            hasMic = devices.some((device) => device.kind === "audioinput");
+          };
+
+          await Promise.race([
+            detectDevices(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Device detect timeout")), 1500)
+            ),
+          ]);
+
           console.log(`[Jitsi] Devices detected - Camera: ${hasCamera}, Mic: ${hasMic}`);
         } catch (err) {
-          console.warn("[Jitsi] Failed to check devices, assuming strict fallback:", err);
-          // If detection fails, assume nothing is guaranteed and let Jitsi try its best
-          // or default to audio-only if we want to be safe.
+          console.warn(
+            "[Jitsi] Device detection issue (could be timeout or blocked):",
+            err.message
+          );
+          // Default to mic=true to let Jitsi handle permissions internally if detection hung
+          hasMic = true;
           hasCamera = false;
-          hasMic = true; // Assume at least a mic exists or is allowed
         }
 
         // Configuration overrides
@@ -125,6 +139,7 @@ export default function JitsiVideoCall({
         }
 
         // Initialize the Jitsi Meet External API
+        console.log(`[Jitsi] Initializing API for room: ${roomName}`);
         api = new window.JitsiMeetExternalAPI("meet.jit.si", {
           roomName: roomName,
           parentNode: containerRef.current,
@@ -148,10 +163,21 @@ export default function JitsiVideoCall({
 
         apiRef.current = api;
 
+        // --- Fallback Join Timeout ---
+        // If conference joined event doesn't fire in 10s, release the loading screen
+        // so the user can at least see Jitsi's internal errors or UI.
+        const joinTimeout = setTimeout(() => {
+          if (!destroyed) {
+            console.warn("[Jitsi] Join event delayed, clearing loading overlay anyway.");
+            setLoading(false);
+          }
+        }, 10000);
+
         // --- Event Listeners ---
 
         api.addEventListener("videoConferenceJoined", (e) => {
           console.log("[Jitsi] Joined conference:", e);
+          clearTimeout(joinTimeout);
           setLoading(false);
           // If we are in listen-only mode, notify the user
           if (!hasMic) {
@@ -212,6 +238,11 @@ export default function JitsiVideoCall({
       destroyed = true;
       if (api) {
         try {
+          // If the timeout is still active, clear it
+          // Note: we can't easily reference joinTimeout here if it were local to loadJitsi
+          // but we can rely on the check inside the timeout.
+          // However, for robustness, let's move joinTimeout to a wider scope if needed
+          // or just accept the local check.
           api.dispose();
         } catch (e) {
           console.warn("Failed to dispose Jitsi API:", e);
