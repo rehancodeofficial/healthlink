@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../Lib/api";
-import JitsiVideoCall from "../components/JitsiVideoCall";
+import ZegoVideoCall from "../components/ZegoVideoCall";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { toast } from "react-toastify";
 
@@ -128,9 +128,10 @@ const CallPage = () => {
 
   return (
     <div className="w-full h-screen overflow-hidden bg-black">
-      <JitsiVideoCall
+      <ZegoVideoCall
         roomName={appointment.roomName}
-        displayName={displayName}
+        userId={localStorage.getItem("userId") || "user-id"}
+        userName={displayName}
         onClose={handleClose}
       />
     </div>
