@@ -8,12 +8,7 @@ const { verifyToken, requireRole } = require("../middleware/rbac.js");
 /* ============================
    Helpers: Profile Resolution
 ============================ */
-async function resolveDoctorProfileId({
-  doctorId,
-  doctorUserId,
-  callerUserId,
-  role,
-}) {
+async function resolveDoctorProfileId({ doctorId, doctorUserId, callerUserId, role }) {
   // Prefer explicit DoctorProfile.id
   if (doctorId) {
     const d = await prisma.doctorProfile.findUnique({
@@ -50,12 +45,7 @@ async function resolveDoctorProfileId({
   return null;
 }
 
-async function resolvePatientProfileId({
-  patientId,
-  patientUserId,
-  callerUserId,
-  role,
-}) {
+async function resolvePatientProfileId({ patientId, patientUserId, callerUserId, role }) {
   // Prefer explicit PatientProfile.id
   if (patientId) {
     const p = await prisma.patientProfile.findUnique({
@@ -220,13 +210,13 @@ router.get("/list", verifyToken, async (req, res) => {
 });
 
 /* ==========================================
-   3) GENERATE JITSI ROOM NAME
-   POST /api/videocall/room-name
-   Returns a unique, secure room name for Jitsi
+   3) GENERATE ZEGO ROOM NAME
+   Returns a unique, secure room name for ZEGO
 ========================================== */
 router.post("/room-name", verifyToken, async (req, res) => {
   try {
-    const roomName = `cv-${crypto.randomUUID()}`;
+    // ✅ Generate a ZEGO room name
+    const roomName = `consult-${crypto.randomUUID()}`;
     return res.json({ success: true, roomName });
   } catch (err) {
     console.error("❌ Error generating room name:", err);
@@ -253,11 +243,7 @@ router.put("/status/:id", verifyToken, async (req, res) => {
 
     if (status === "ONGOING") {
       updateData.actualStartTime = new Date();
-    } else if (
-      status === "COMPLETED" ||
-      status === "CANCELLED" ||
-      status === "FAILED"
-    ) {
+    } else if (status === "COMPLETED" || status === "CANCELLED" || status === "FAILED") {
       updateData.actualEndTime = new Date();
     }
 
@@ -316,18 +302,14 @@ router.patch("/reschedule/:id", verifyToken, async (req, res) => {
     const { id } = req.params;
     const { scheduledAt, durationMins } = req.body || {};
     if (!scheduledAt && durationMins == null) {
-      return res
-        .status(400)
-        .json({ error: "Provide scheduledAt and/or durationMins" });
+      return res.status(400).json({ error: "Provide scheduledAt and/or durationMins" });
     }
 
     const data = {};
     if (scheduledAt) {
       const when = new Date(scheduledAt);
       if (Number.isNaN(when.getTime())) {
-        return res
-          .status(400)
-          .json({ error: "scheduledAt is not a valid date" });
+        return res.status(400).json({ error: "scheduledAt is not a valid date" });
       }
       data.scheduledAt = when;
     }
