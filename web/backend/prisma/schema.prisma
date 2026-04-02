@@ -61,6 +61,11 @@ enum ConsultationStatus {
   ONGOING
   COMPLETED
   CANCELLED
+  INITIATED
+  RINGING
+  ACCEPTED
+  REJECTED
+  MISSED
 }
 
 enum AppointmentStatus {
