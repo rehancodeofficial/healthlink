@@ -63,7 +63,7 @@ app.use(
       }
     },
     credentials: true,
-  }),
+  })
 );
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
@@ -88,10 +88,12 @@ app.get("/api/health", (_req, res) => {
 // ----------------------------
 const authRoutes = require("./routes/auth");
 const videocallRoutes = require("./routes/videocall");
+const zegoRoutes = require("./routes/zego");
 const otpRoutes = require("./routes/otp");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/videocall", videocallRoutes);
+app.use("/api/zego", zegoRoutes);
 app.use("/api/otp", otpRoutes);
 
 // ----------------------------
@@ -186,7 +188,7 @@ app.use("/api/support", supportRoutes);
 app.post(
   "/api/subscription/stripe/webhook",
   express.raw({ type: "application/json" }),
-  subscriptionRoutes.stripeWebhook,
+  subscriptionRoutes.stripeWebhook
 );
 
 // ✅ MESSAGES (Unified)
@@ -212,9 +214,7 @@ app.use((err, req, res, next) => {
 
   // Custom response for CORS or other well-known errors
   if (err.message === "Not allowed by CORS") {
-    return res
-      .status(403)
-      .json({ success: false, message: "CORS policy violation" });
+    return res.status(403).json({ success: false, message: "CORS policy violation" });
   }
 
   res.status(err.status || 500).json({
