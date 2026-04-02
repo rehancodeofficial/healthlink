@@ -33,7 +33,7 @@ router.post("/doctor/video-consultations", async (req, res) => {
       });
     }
 
-    // ✅ Generate a Jitsi room name
+    // ✅ Generate a ZEGO room name
     const roomName = `consult-${crypto.randomUUID()}`;
 
     // ✅ Create the consultation record
