@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/useSocket";
 import { FaVideo, FaPhoneSlash, FaPhone } from "react-icons/fa";
@@ -8,7 +8,6 @@ export default function IncomingCallModal() {
   const navigate = useNavigate();
   const [callData, setCallData] = useState(null); // { consultationId, doctorName, roomName }
   const [countdown, setCountdown] = useState(60);
-  const ringtoneRef = useRef(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -69,6 +68,7 @@ export default function IncomingCallModal() {
 
     socket.emit("reject-video-call", {
       consultationId: callData.consultationId,
+      doctorUserId: callData.doctorUserId,
     });
 
     setCallData(null);
