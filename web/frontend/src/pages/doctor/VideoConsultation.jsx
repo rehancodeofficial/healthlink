@@ -413,7 +413,7 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* 🎥 Jitsi Video Call Modal */}
+      {/* 🎥 ZEGO Video Call Modal */}
       {callModalOpen && selectedConsultation && (
         <VideoCallModal
           consultation={selectedConsultation}
