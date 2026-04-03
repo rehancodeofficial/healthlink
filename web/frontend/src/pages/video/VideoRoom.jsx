@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import JitsiVideoCall from "../../components/JitsiVideoCall";
+import ZegoVideoCall from "../../components/ZegoVideoCall";
 
 export default function VideoRoomPage() {
   const { roomName } = useParams();
@@ -32,7 +32,12 @@ export default function VideoRoomPage() {
 
   return (
     <div className="h-screen w-screen bg-black">
-      <JitsiVideoCall roomName={roomName} displayName={userName} onClose={handleClose} />
+      <ZegoVideoCall
+        roomName={roomName}
+        userId={localStorage.getItem("userId") || "user-id"}
+        userName={userName}
+        onClose={handleClose}
+      />
     </div>
   );
 }
