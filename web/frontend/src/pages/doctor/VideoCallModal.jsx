@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import JitsiVideoCall from "../../components/JitsiVideoCall";
+import ZegoVideoCall from "../../components/ZegoVideoCall";
 import { FaSave } from "react-icons/fa";
 import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,6 +23,7 @@ export default function VideoCallModal({ consultation, onClose }) {
   const userName = localStorage.getItem("userName") || "Doctor";
   const { id, roomName, meetingUrl, appointmentId } = consultation || {};
   const activeRoomName = meetingUrl || roomName || `consult-${id}`;
+  const userId = localStorage.getItem("userId") || `d-${Math.random().toString(36).slice(2, 7)}`;
 
   useEffect(() => {
     const init = async () => {
@@ -58,9 +59,14 @@ export default function VideoCallModal({ consultation, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black flex z-[200]">
-      {/* Video Side — Jitsi */}
+      {/* Video Side — ZEGO */}
       <div className="flex-[2] relative bg-neutral-950">
-        <JitsiVideoCall roomName={activeRoomName} displayName={userName} onClose={handleEnd} />
+        <ZegoVideoCall
+          roomName={activeRoomName}
+          userId={userId}
+          userName={userName}
+          onClose={handleEnd}
+        />
       </div>
 
       {/* Clinical Notes Side */}
