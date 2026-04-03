@@ -66,7 +66,7 @@ export default function VideoLobby() {
           <div className="mt-8 flex items-center justify-center gap-4 text-gray-500">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
             <span className="text-[10px] font-black uppercase tracking-widest">
-              Jitsi Meet — No Account Required
+              ZEGO Cloud — Secure Video Calling
             </span>
           </div>
         </div>
