@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import JitsiVideoCall from "../../components/JitsiVideoCall";
+import ZegoVideoCall from "../../components/ZegoVideoCall";
 import { FaClock } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,6 +8,7 @@ export default function VideoCallModal({ consultation, onClose }) {
   const userName = localStorage.getItem("userName") || "Patient";
   const { id, roomName, meetingUrl } = consultation || {};
   const activeRoomName = meetingUrl || roomName || `consult-${id}`;
+  const userId = localStorage.getItem("userId") || `u-${Math.random().toString(36).slice(2, 7)}`;
 
   const [callTime, setCallTime] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
@@ -26,21 +27,15 @@ export default function VideoCallModal({ consultation, onClose }) {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const handleApiReady = (api) => {
-    api.addEventListener("videoConferenceJoined", () => {
-      setIsConnected(true);
-    });
-  };
-
   return (
     <div className="fixed inset-0 bg-black flex justify-center items-center z-[200]">
       <div className="w-full h-full flex flex-col relative overflow-hidden">
-        {/* Jitsi Video Call */}
-        <JitsiVideoCall
+        {/* ZEGO Video Call */}
+        <ZegoVideoCall
           roomName={activeRoomName}
-          displayName={userName}
+          userId={userId}
+          userName={userName}
           onClose={onClose}
-          onApiReady={handleApiReady}
         />
 
         {/* Call Timer Overlay */}
