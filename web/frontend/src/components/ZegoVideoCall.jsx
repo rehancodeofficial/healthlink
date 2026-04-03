@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import axios from "axios";
+import api from "../Lib/api";
 
 /**
  * ZegoVideoCall — Reusable ZEGO video call component using the UI Kit.
@@ -25,11 +25,9 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
         setLoading(true);
         setError(null);
 
-        // 1. Fetch token from backend
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
-        const response = await axios.get(`${apiBaseUrl}/zego/token`, {
+        // 1. Fetch token from backend using the authenticated api instance
+        const response = await api.get("/zego/token", {
           params: { roomId: roomName, userId },
-          withCredentials: true,
         });
 
         if (!active) return;
