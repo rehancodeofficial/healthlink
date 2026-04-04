@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../Lib/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import VideoCallModal from "./VideoCallModal";
+import { useSocket } from "../../context/useSocket";
 import { FaPlusCircle, FaVideo, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 
 /* ------------------- Tiny toast (success/error) ------------------- */
@@ -66,6 +67,12 @@ export default function VideoConsultation() {
 
   const [toastText, setToastText] = useState("");
 
+  // Signaling state
+  const { socket } = useSocket();
+  const [isCalling, setIsCalling] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [activeCallId, setActiveCallId] = useState(null);
+
   // Confirm cancel dialog
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingCancelId, setPendingCancelId] = useState(null);
@@ -110,6 +117,60 @@ export default function VideoConsultation() {
     fetchConsultations();
     loadMyPatients();
   }, [fetchConsultations, loadMyPatients]);
+
+  // Signaling listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const onAccepted = ({ consultationId }) => {
+      if (consultationId === activeCallId) {
+        setIsCalling(false);
+        setToastText("✅ Patient joined! Starting call...");
+        // Get the full consultation object if needed, or just use ID
+        const consultation = consultations.find((c) => c.id === consultationId);
+        if (consultation) {
+          handleJoin(consultation, true); // Direct redirect
+        }
+      }
+    };
+
+    const onRejected = ({ consultationId }) => {
+      if (consultationId === activeCallId) {
+        setIsCalling(false);
+        setToastText("❌ Patient is busy or declined the call.");
+        setActiveCallId(null);
+      }
+    };
+
+    const onMissed = ({ consultationId }) => {
+      if (consultationId === activeCallId) {
+        setIsCalling(false);
+        setToastText("⏰ Patient did not respond.");
+        setActiveCallId(null);
+      }
+    };
+
+    socket.on("call-accepted", onAccepted);
+    socket.on("call-rejected", onRejected);
+    socket.on("call-missed", onMissed);
+
+    return () => {
+      socket.off("call-accepted", onAccepted);
+      socket.off("call-rejected", onRejected);
+      socket.off("call-missed", onMissed);
+    };
+  }, [socket, activeCallId, consultations]);
+
+  // Countdown timer
+  useEffect(() => {
+    let timer;
+    if (isCalling && countdown > 0) {
+      timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
+    } else if (countdown === 0) {
+      setIsCalling(false);
+    }
+    return () => clearInterval(timer);
+  }, [isCalling, countdown]);
 
   /* ---------------------- Schedule new consultation ---------------------- */
   const handleSchedule = async (e) => {
@@ -169,11 +230,30 @@ export default function VideoConsultation() {
   };
 
   /* ---------------------- Join consultation ------------------------------ */
-  const handleJoin = (consultation) => {
+  const handleJoin = (consultation, direct = false) => {
     const roomId = `consult_${consultation.id}`;
 
-    // Navigate to video room
-    navigate(`/video/room/${roomId}`);
+    if (direct) {
+      navigate(`/video/room/${roomId}`);
+      return;
+    }
+
+    // New Flow: Initiate Call Signaling
+    if (socket) {
+      setIsCalling(true);
+      setCountdown(60);
+      setActiveCallId(consultation.id);
+
+      socket.emit("initiate-video-call", {
+        consultationId: consultation.id,
+        patientId: consultation.patient?.userId,
+        doctorName: userName,
+        roomName: roomId,
+      });
+    } else {
+      setToastText("⚠️ Not connected to signaling server. Direct join...");
+      navigate(`/video/room/${roomId}`);
+    }
   };
 
   return (
@@ -419,6 +499,38 @@ export default function VideoConsultation() {
           consultation={selectedConsultation}
           onClose={() => setCallModalOpen(false)}
         />
+      )}
+      {/* 📞 Calling Overlay */}
+      {isCalling && (
+        <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] animate-in fade-in duration-300">
+          <div className="relative">
+            <div className="w-48 h-48 rounded-full border-4 border-green-500/20 flex items-center justify-center animate-pulse">
+              <div className="w-40 h-40 rounded-full border-4 border-green-500/50 flex items-center justify-center animate-ping">
+                <FaVideo className="text-5xl text-green-500" />
+              </div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FaVideo className="text-5xl text-green-500 animate-bounce" />
+            </div>
+          </div>
+
+          <h2 className="mt-8 text-3xl font-black text-white uppercase tracking-tighter">
+            Calling Patient...
+          </h2>
+          <p className="mt-2 text-gray-400 font-bold uppercase tracking-widest text-xs">
+            Waiting for response — {countdown}s remaining
+          </p>
+
+          <button
+            onClick={() => {
+              setIsCalling(false);
+              setToastText("Call cancelled.");
+            }}
+            className="mt-12 px-10 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl transition-transform hover:scale-105"
+          >
+            Cancel Call
+          </button>
+        </div>
       )}
     </DashboardLayout>
   );
