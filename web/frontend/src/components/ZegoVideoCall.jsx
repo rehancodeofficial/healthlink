@@ -68,6 +68,14 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
           },
         });
 
+        // 4. Update status to ONGOING
+        if (roomName.startsWith("consult_")) {
+          const consultationId = roomName.split("_")[1];
+          api
+            .patch(`/doctor/video-consultation/${consultationId}/status`, { status: "ONGOING" })
+            .catch((err) => console.error("Failed to update status to ONGOING:", err));
+        }
+
         setLoading(false);
       } catch (err) {
         console.error("❌ Failed to initialize ZEGO:", err);
