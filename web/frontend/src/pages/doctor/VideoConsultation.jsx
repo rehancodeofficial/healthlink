@@ -1,5 +1,5 @@
 // FILE: src/pages/doctor/VideoConsultation.jsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Lib/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
@@ -62,8 +62,6 @@ export default function VideoConsultation() {
   const [error, setError] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [callModalOpen, setCallModalOpen] = useState(false);
-  const [selectedConsultation, setSelectedConsultation] = useState(null);
 
   const [toastText, setToastText] = useState("");
 
@@ -118,18 +116,25 @@ export default function VideoConsultation() {
     loadMyPatients();
   }, [fetchConsultations, loadMyPatients]);
 
+  // Keep a ref of consultations for access inside signaling listeners without re-binding
+  const consultationsRef = useRef(consultations);
+  useEffect(() => {
+    consultationsRef.current = consultations;
+  }, [consultations]);
+
   // Signaling listeners
   useEffect(() => {
     if (!socket) return;
 
     const onAccepted = ({ consultationId }) => {
+      // Use ref to get latest activeCallId if needed, but here we can just use the closure's activeCallId
+      // since it's in the dependency array (which is okay as it only changes when a call starts/ends)
       if (consultationId === activeCallId) {
         setIsCalling(false);
         setToastText("✅ Patient joined! Starting call...");
-        // Get the full consultation object if needed, or just use ID
-        const consultation = consultations.find((c) => c.id === consultationId);
+        const consultation = consultationsRef.current.find((c) => c.id === consultationId);
         if (consultation) {
-          handleJoin(consultation, true); // Direct redirect
+          handleJoinStable(consultation, true);
         }
       }
     };
@@ -150,24 +155,34 @@ export default function VideoConsultation() {
       }
     };
 
+    const onFailed = ({ reason }) => {
+      setIsCalling(false);
+      setToastText(`⚠️ Call Failed: ${reason}`);
+      setActiveCallId(null);
+    };
+
     socket.on("call-accepted", onAccepted);
     socket.on("call-rejected", onRejected);
     socket.on("call-missed", onMissed);
+    socket.on("call-failed", onFailed);
 
     return () => {
       socket.off("call-accepted", onAccepted);
       socket.off("call-rejected", onRejected);
       socket.off("call-missed", onMissed);
+      socket.off("call-failed", onFailed);
     };
-  }, [socket, activeCallId, consultations]);
+  }, [socket, activeCallId, handleJoinStable]);
 
   // Countdown timer
   useEffect(() => {
     let timer;
     if (isCalling && countdown > 0) {
       timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
-    } else if (countdown === 0) {
+    } else if (isCalling && countdown === 0) {
       setIsCalling(false);
+      setToastText("⏰ Call timed out.");
+      setActiveCallId(null);
     }
     return () => clearInterval(timer);
   }, [isCalling, countdown]);
@@ -230,31 +245,36 @@ export default function VideoConsultation() {
   };
 
   /* ---------------------- Join consultation ------------------------------ */
-  const handleJoin = (consultation, direct = false) => {
-    const roomId = `consult_${consultation.id}`;
+  const handleJoinStable = useCallback(
+    (consultation, direct = false) => {
+      const roomId = `consult_${consultation.id}`;
 
-    if (direct) {
-      navigate(`/video/room/${roomId}`);
-      return;
-    }
+      if (direct) {
+        navigate(`/video/room/${roomId}`);
+        return;
+      }
 
-    // New Flow: Initiate Call Signaling
-    if (socket) {
-      setIsCalling(true);
-      setCountdown(60);
-      setActiveCallId(consultation.id);
+      // New Flow: Initiate Call Signaling
+      if (socket) {
+        setIsCalling(true);
+        setCountdown(60);
+        setActiveCallId(consultation.id);
 
-      socket.emit("initiate-video-call", {
-        consultationId: consultation.id,
-        patientId: consultation.patient?.userId,
-        doctorName: userName,
-        roomName: roomId,
-      });
-    } else {
-      setToastText("⚠️ Not connected to signaling server. Direct join...");
-      navigate(`/video/room/${roomId}`);
-    }
-  };
+        socket.emit("initiate-video-call", {
+          consultationId: consultation.id,
+          patientId: consultation.patient?.userId,
+          doctorName: userName,
+          roomName: roomId,
+        });
+      } else {
+        setToastText("⚠️ Not connected to signaling server. Direct join...");
+        navigate(`/video/room/${roomId}`);
+      }
+    },
+    [socket, navigate, userName]
+  );
+
+  const handleJoin = (consultation) => handleJoinStable(consultation, false);
 
   return (
     <DashboardLayout role={role} user={{ name: userName }}>
@@ -265,11 +285,6 @@ export default function VideoConsultation() {
               src="/images/logo/Asset3.png"
               alt="CureVirtual"
               style={{ width: 60, height: "auto" }}
-              onError={(e) => {
-                try {
-                  e.currentTarget.src = PLACEHOLDER_LOGO;
-                } catch {}
-              }}
             />
             <h1 className="text-3xl font-black text-[var(--text-main)] flex items-center gap-2 uppercase tracking-tighter">
               <FaVideo className="text-[var(--brand-green)]" /> Video Consultations
@@ -493,13 +508,6 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* 🎥 ZEGO Video Call Modal */}
-      {callModalOpen && selectedConsultation && (
-        <VideoCallModal
-          consultation={selectedConsultation}
-          onClose={() => setCallModalOpen(false)}
-        />
-      )}
       {/* 📞 Calling Overlay */}
       {isCalling && (
         <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] animate-in fade-in duration-300">
