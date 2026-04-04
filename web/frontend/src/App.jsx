@@ -112,6 +112,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Home = lazy(() => import("./pages/Home"));
 import Chatbot from "./components/Chatbot";
+import IncomingCallModal from "./components/IncomingCallModal";
 
 /* ================================
    VIDEO (shared)
@@ -741,6 +742,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <Chatbot />
+        <IncomingCallModal />
       </UserProvider>
     </BrowserRouter>
   );
