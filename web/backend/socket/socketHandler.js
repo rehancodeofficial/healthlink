@@ -1,8 +1,11 @@
 // FILE: backend/socket/socketHandler.js
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 // Store active users and their rooms
 const activeUsers = new Map(); // socketId -> { userId, role, name, rooms: Set }
 const roomUsers = new Map(); // roomId -> Set of socketIds
+const callTimeouts = new Map(); // appointmentId -> setTimeout ID
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -41,10 +44,6 @@ module.exports = (io) => {
       }
 
       try {
-        // Import Prisma client (add at top of file if needed)
-        const { PrismaClient } = require("@prisma/client");
-        const prisma = new PrismaClient();
-
         // Validate appointment exists and user has access
         const appointment = await prisma.appointment.findUnique({
           where: { id: appointmentId },
@@ -59,16 +58,13 @@ module.exports = (io) => {
             code: "APPOINTMENT_NOT_FOUND",
             message: "Appointment not found",
           });
-          console.warn(
-            `⚠️ Appointment not found: ${appointmentId} by socket ${socket.id}`,
-          );
+          console.warn(`⚠️ Appointment not found: ${appointmentId} by socket ${socket.id}`);
           return;
         }
 
         // Verify user is authorized (either doctor or patient)
         const isDoctorAuthorized = socket.userId === appointment.doctor.userId;
-        const isPatientAuthorized =
-          socket.userId === appointment.patient.userId;
+        const isPatientAuthorized = socket.userId === appointment.patient.userId;
 
         if (!isDoctorAuthorized && !isPatientAuthorized) {
           socket.emit("error", {
@@ -92,9 +88,7 @@ module.exports = (io) => {
           const existingUser = activeUsers.get(socketId);
           if (existingUser && existingUser.userId === socket.userId) {
             // Same user reconnecting - replace old socket
-            console.log(
-              `🔄 User ${socket.userId} reconnecting, removing old socket ${socketId}`,
-            );
+            console.log(`🔄 User ${socket.userId} reconnecting, removing old socket ${socketId}`);
             io.to(socketId).emit("session_replaced", {
               message: "You've connected from another tab or device",
             });
@@ -114,8 +108,7 @@ module.exports = (io) => {
         if (room.size >= 2) {
           socket.emit("error", {
             code: "ROOM_FULL",
-            message:
-              "This session already has 2 participants (doctor and patient)",
+            message: "This session already has 2 participants (doctor and patient)",
           });
           console.warn(`⚠️ Room full: ${roomId}, rejected socket ${socket.id}`);
           return;
@@ -165,59 +158,165 @@ module.exports = (io) => {
       }
     });
 
-    // Doctor starts session -> Notify patient in the room
+    /* ==========================================================
+       VIDEO CALL SIGNALING (Doctor Initiated with 60s Timeout)
+       ========================================================== */
+
     socket.on(
-      "start_session",
-      ({ roomId, doctorName, patientId, appointmentId }) => {
-        console.log(`📢 Session started in room ${roomId} by ${doctorName}`);
+      "initiate-video-call",
+      async ({ consultationId, patientId, doctorName, roomName }) => {
+        console.log(`🔔 Call initiated for consultation ${consultationId} by ${doctorName}`);
 
-        // Broadcast to room
-        socket.to(roomId).emit("session_started", {
-          doctorName,
-          roomId,
-          appointmentId,
-          patientId,
-        });
+        try {
+          // 1. Update DB Status to RINGING
+          await prisma.videoConsultation.update({
+            where: { id: consultationId },
+            data: { status: "RINGING" },
+          });
 
-        // Also try to notify patient directly if they're online but not in room yet
-        if (patientId) {
+          // 2. Notify Patient
+          let patientNotified = false;
           for (const [socketId, user] of activeUsers.entries()) {
             if (user.userId === patientId && user.role === "PATIENT") {
-              io.to(socketId).emit("session_started", {
+              io.to(socketId).emit("incoming-call", {
+                consultationId,
                 doctorName,
-                roomId,
-                appointmentId,
-                patientId,
+                doctorUserId: socket.userId, // Send doctor's ID to patient
+                roomName,
               });
-              console.log(
-                `🔔 Sent session notification directly to patient ${user.name}`,
-              );
+              patientNotified = true;
             }
           }
+
+          if (!patientNotified) {
+            console.warn(`⚠️ Patient ${patientId} is not online for call ${consultationId}`);
+          }
+
+          // 3. Set 60s Timeout for MISSED status
+          if (callTimeouts.has(consultationId)) {
+            clearTimeout(callTimeouts.get(consultationId));
+          }
+
+          const timeoutId = setTimeout(async () => {
+            try {
+              const current = await prisma.videoConsultation.findUnique({
+                where: { id: consultationId },
+              });
+
+              if (current && current.status === "RINGING") {
+                await prisma.videoConsultation.update({
+                  where: { id: consultationId },
+                  data: { status: "MISSED" },
+                });
+
+                // Notify both sides of timeout
+                io.to(socket.id).emit("call-missed", { consultationId });
+
+                // Notify patient if online
+                for (const [sId, u] of activeUsers.entries()) {
+                  if (u.userId === patientId) {
+                    io.to(sId).emit("call-missed", { consultationId });
+                  }
+                }
+
+                console.log(`⏰ Call ${consultationId} timed out after 60s`);
+              }
+            } catch (err) {
+              console.error("Error handling call timeout:", err);
+            } finally {
+              callTimeouts.delete(consultationId);
+            }
+          }, 60000);
+
+          callTimeouts.set(consultationId, timeoutId);
+        } catch (err) {
+          console.error("❌ Error initiating call:", err);
+          socket.emit("error", { message: "Failed to initiate call" });
         }
-      },
+      }
     );
+
+    socket.on("accept-video-call", async ({ consultationId, doctorUserId }) => {
+      console.log(`✅ Call ${consultationId} accepted by patient`);
+
+      try {
+        // 1. Clear Timeout
+        if (callTimeouts.has(consultationId)) {
+          clearTimeout(callTimeouts.get(consultationId));
+          callTimeouts.delete(consultationId);
+        }
+
+        // 2. Update DB to ACCEPTED
+        await prisma.videoConsultation.update({
+          where: { id: consultationId },
+          data: { status: "ACCEPTED" },
+        });
+
+        // 3. Notify Doctor
+        for (const [socketId, user] of activeUsers.entries()) {
+          if (user.userId === doctorUserId && user.role === "DOCTOR") {
+            io.to(socketId).emit("call-accepted", { consultationId });
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error accepting call:", err);
+      }
+    });
+
+    socket.on("reject-video-call", async ({ consultationId, doctorUserId }) => {
+      console.log(`❌ Call ${consultationId} rejected by patient`);
+
+      try {
+        // 1. Clear Timeout
+        if (callTimeouts.has(consultationId)) {
+          clearTimeout(callTimeouts.get(consultationId));
+          callTimeouts.delete(consultationId);
+        }
+
+        // 2. Update DB to REJECTED
+        await prisma.videoConsultation.update({
+          where: { id: consultationId },
+          data: { status: "REJECTED" },
+        });
+
+        // 3. Notify Doctor
+        for (const [socketId, user] of activeUsers.entries()) {
+          if (user.userId === doctorUserId && user.role === "DOCTOR") {
+            io.to(socketId).emit("call-rejected", { consultationId });
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error rejecting call:", err);
+      }
+    });
+
+    // Doctor starts session (legacy / generic)
+    socket.on("start_session", ({ roomId, doctorName, patientId, appointmentId }) => {
+      console.log(`📢 Session started in room ${roomId} by ${doctorName}`);
+      socket.to(roomId).emit("session_started", { doctorName, roomId, appointmentId, patientId });
+      if (patientId) {
+        for (const [socketId, user] of activeUsers.entries()) {
+          if (user.userId === patientId && user.role === "PATIENT") {
+            io.to(socketId).emit("session_started", {
+              doctorName,
+              roomId,
+              appointmentId,
+              patientId,
+            });
+          }
+        }
+      }
+    });
 
     // User leaving a room
     socket.on("leave_room", (roomId) => {
       socket.leave(roomId);
-
       const user = activeUsers.get(socket.id);
-      if (user) {
-        user.rooms.delete(roomId);
-      }
-
-      // Remove from room tracking
+      if (user) user.rooms.delete(roomId);
       if (roomUsers.has(roomId)) {
         roomUsers.get(roomId).delete(socket.id);
-        if (roomUsers.get(roomId).size === 0) {
-          roomUsers.delete(roomId);
-        }
+        if (roomUsers.get(roomId).size === 0) roomUsers.delete(roomId);
       }
-
-      console.log(`📤 Socket ${socket.id} left room: ${roomId}`);
-
-      // Notify others
       socket.to(roomId).emit("user_left", {
         socketId: socket.id,
         user: user ? { role: user.role, name: user.name } : null,
@@ -228,47 +327,30 @@ module.exports = (io) => {
     socket.on("end_session", ({ roomId }) => {
       console.log(`🛑 Session ended in room ${roomId}`);
       io.to(roomId).emit("session_ended", { roomId });
-
-      // Optional: disconnect all users in the room from socket room
       io.in(roomId).socketsLeave(roomId);
     });
 
     // Handle Disconnect
     socket.on("disconnect", () => {
       const user = activeUsers.get(socket.id);
-
       if (user) {
-        console.log(
-          `❌ User disconnected: ${user.name} (${user.role}) - Socket: ${socket.id}`,
-        );
-
-        // Notify all rooms the user was in
+        console.log(`❌ User disconnected: ${user.name} (${user.role})`);
         for (const roomId of user.rooms) {
-          socket.to(roomId).emit("user_left", {
-            socketId: socket.id,
-            user: { role: user.role, name: user.name },
-          });
-
-          // Clean up room tracking
+          socket
+            .to(roomId)
+            .emit("user_left", { socketId: socket.id, user: { role: user.role, name: user.name } });
           if (roomUsers.has(roomId)) {
             roomUsers.get(roomId).delete(socket.id);
-            if (roomUsers.get(roomId).size === 0) {
-              roomUsers.delete(roomId);
-            }
+            if (roomUsers.get(roomId).size === 0) roomUsers.delete(roomId);
           }
         }
-
-        // Broadcast offline status
         socket.broadcast.emit("user_status", {
           userId: user.userId,
           role: user.role,
           name: user.name,
           status: "offline",
         });
-
         activeUsers.delete(socket.id);
-      } else {
-        console.log(`❌ Socket disconnected: ${socket.id}`);
       }
     });
   });
