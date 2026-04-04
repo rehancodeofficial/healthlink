@@ -72,7 +72,7 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
         if (roomName.startsWith("consult_")) {
           const consultationId = roomName.split("_")[1];
           api
-            .patch(`/doctor/video-consultation/${consultationId}/status`, { status: "ONGOING" })
+            .put(`/videocall/status/${consultationId}`, { status: "ONGOING" })
             .catch((err) => console.error("Failed to update status to ONGOING:", err));
         }
 
@@ -97,7 +97,7 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
         // we just let the component unmount.
       }
     };
-  }, [roomName, userId, userName]);
+  }, [roomName, userId, userName, onClose]);
 
   if (error) {
     return (
