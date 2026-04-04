@@ -56,7 +56,7 @@ function generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, pa
  */
 router.get("/token", verifyToken, (req, res) => {
   try {
-    const { roomId, userId, userName } = req.query;
+    const { roomId, userId } = req.query;
 
     if (!roomId || !userId) {
       return res.status(400).json({ error: "roomId and userId are required" });
@@ -84,22 +84,9 @@ router.get("/token", verifyToken, (req, res) => {
 
     const token = generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload);
 
-    // Build the Kit Token object as a base64 string for the UI Kit
-    // This is what the UI Kit expect in ZegoUIKitPrebuilt.create()
-    const kitTokenObj = {
-      appID: Number(appId),
-      roomID: roomId,
-      userID: userId,
-      userName: userName || "User",
-      token: token,
-    };
-
-    const kitToken = Buffer.from(JSON.stringify(kitTokenObj)).toString("base64");
-
     res.json({
       success: true,
-      token, // Keep for debugging if needed
-      kitToken,
+      token,
       appId: Number(appId),
     });
   } catch (error) {
