@@ -1,6 +1,5 @@
 // FILE: backend/socket/socketHandler.js
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../prisma/prismaClient");
 
 // Store active users and their rooms
 const activeUsers = new Map(); // socketId -> { userId, role, name, rooms: Set }
@@ -190,6 +189,10 @@ module.exports = (io) => {
 
           if (!patientNotified) {
             console.warn(`⚠️ Patient ${patientId} is not online for call ${consultationId}`);
+            socket.emit("call-failed", {
+              consultationId,
+              reason: "Patient is currently offline.",
+            });
           }
 
           // 3. Set 60s Timeout for MISSED status
@@ -280,10 +283,15 @@ module.exports = (io) => {
         });
 
         // 3. Notify Doctor
-        for (const [socketId, user] of activeUsers.entries()) {
-          if (user.userId === doctorUserId && user.role === "DOCTOR") {
-            io.to(socketId).emit("call-rejected", { consultationId });
+        if (doctorUserId) {
+          for (const [socketId, user] of activeUsers.entries()) {
+            if (user.userId === doctorUserId && user.role === "DOCTOR") {
+              io.to(socketId).emit("call-rejected", { consultationId });
+            }
           }
+        } else {
+          // Fallback: Notify everyone in the "room" (if any) or find by consultation metadata
+          console.warn(`⚠️ No doctorUserId provided for reject-video-call ${consultationId}`);
         }
       } catch (err) {
         console.error("❌ Error rejecting call:", err);
