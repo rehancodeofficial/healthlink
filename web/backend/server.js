@@ -42,7 +42,7 @@ const socketAuth = require("./middleware/socketAuth");
 io.use(socketAuth);
 
 // Initialize Socket Handler
-require("./socket/socketHandler")(io);
+require("./socket/socketHandler.cjs")(io);
 
 // ✅ Global Middlewares
 // allowedOrigins is defined above
@@ -209,7 +209,7 @@ app.get("/api/doctor/test", (req, res) => {
 });
 
 // ✅ Global Error Handler (Must be last)
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error("❌ Unhandled Error:", err);
 
   // Custom response for CORS or other well-known errors
