@@ -23,26 +23,28 @@ function generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, pa
   const iv = crypto.randomBytes(16);
 
   // ZEGO expects the secret itself as the key (32 bytes for AES-256)
-  // Ensure the secret is exactly 32 bytes.
   let key = Buffer.from(serverSecret, "utf8");
   if (key.length > 32) {
     key = key.slice(0, 32);
   } else if (key.length < 32) {
-    // Pad with zeros if it's shorter (though it should be 32 in .env)
-    const paddedKey = Buffer.alloc(32, 0);
-    key.copy(paddedKey);
-    key = paddedKey;
+    key = Buffer.concat([key, Buffer.alloc(32 - key.length, 0)]);
   }
 
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  let ciphertext = cipher.update(plaintext, "utf8", "binary");
-  ciphertext += cipher.final("binary");
+  let ciphertext = cipher.update(plaintext, "utf8");
+  ciphertext = Buffer.concat([ciphertext, cipher.final()]);
 
-  // Combine IV and Ciphertext
-  const binData = Buffer.concat([iv, Buffer.from(ciphertext, "binary")]);
+  // Combined binary data: [IV length (2 bytes)] + [IV] + [Ciphertext length (2 bytes)] + [Ciphertext]
+  const ivLen = Buffer.alloc(2);
+  ivLen.writeUInt16BE(iv.length);
+
+  const ciphertextLen = Buffer.alloc(2);
+  ciphertextLen.writeUInt16BE(ciphertext.length);
+
+  const binData = Buffer.concat([ivLen, iv, ciphertextLen, ciphertext]);
 
   // Prepend version (04)
-  const result = Buffer.concat([Buffer.from([0x04]), Buffer.from(binData)]);
+  const result = Buffer.concat([Buffer.from([0x04]), binData]);
 
   return result.toString("base64");
 }
