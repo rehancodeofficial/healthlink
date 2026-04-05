@@ -27,22 +27,14 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
 
         // 1. Fetch token from backend using the authenticated api instance
         const response = await api.get("/zego/token", {
-          params: { roomId: roomName, userId },
+          params: { roomId: roomName, userId, userName },
         });
 
         if (!active) return;
 
-        const { token, appId } = response.data;
+        const { kitToken } = response.data;
 
-        // 2. Initialize ZEGO UI Kit
-        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-          appId,
-          token,
-          roomName,
-          userId,
-          userName
-        );
-
+        // 2. Initialize ZEGO UI Kit using the pre-built kitToken from backend
         const zp = ZegoUIKitPrebuilt.create(kitToken);
         zpRef.current = zp;
 
