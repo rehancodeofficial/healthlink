@@ -88,12 +88,10 @@ app.get("/api/health", (_req, res) => {
 // ----------------------------
 const authRoutes = require("./routes/auth");
 const videocallRoutes = require("./routes/videocall");
-const zegoRoutes = require("./routes/zego");
 const otpRoutes = require("./routes/otp");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/videocall", videocallRoutes);
-app.use("/api/zego", zegoRoutes);
 app.use("/api/otp", otpRoutes);
 
 // ----------------------------
