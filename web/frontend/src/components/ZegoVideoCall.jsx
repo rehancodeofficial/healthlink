@@ -26,15 +26,15 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
         setError(null);
 
         // 1. Fetch kitToken from backend
-        // The backend now constructs the full kitToken (base64 encoded JSON)
+        // The backend returns the raw base64 string
         const response = await api.get("/zego/token", {
           params: { roomId: roomName, userId, userName },
         });
 
         if (!active) return;
 
-        const { kitToken } = response.data;
-        if (!kitToken) {
+        const kitToken = response.data;
+        if (!kitToken || typeof kitToken !== "string") {
           throw new Error("Invalid kitToken received from backend");
         }
 
