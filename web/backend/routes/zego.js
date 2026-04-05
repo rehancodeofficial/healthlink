@@ -22,8 +22,17 @@ function generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, pa
   const plaintext = JSON.stringify(tokenInfo);
   const iv = crypto.randomBytes(16);
 
-  // Hash server secret to get 32 bytes key
-  const key = crypto.createHash("sha256").update(serverSecret).digest();
+  // ZEGO expects the secret itself as the key (32 bytes for AES-256)
+  // Ensure the secret is exactly 32 bytes.
+  let key = Buffer.from(serverSecret, "utf8");
+  if (key.length > 32) {
+    key = key.slice(0, 32);
+  } else if (key.length < 32) {
+    // Pad with zeros if it's shorter (though it should be 32 in .env)
+    const paddedKey = Buffer.alloc(32, 0);
+    key.copy(paddedKey);
+    key = paddedKey;
+  }
 
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
   let ciphertext = cipher.update(plaintext, "utf8", "binary");
@@ -45,7 +54,7 @@ function generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, pa
  */
 router.get("/token", verifyToken, (req, res) => {
   try {
-    const { roomId, userId } = req.query;
+    const { roomId, userId, userName } = req.query;
 
     if (!roomId || !userId) {
       return res.status(400).json({ error: "roomId and userId are required" });
@@ -73,9 +82,22 @@ router.get("/token", verifyToken, (req, res) => {
 
     const token = generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload);
 
+    // Build the Kit Token object as a base64 string for the UI Kit
+    // This is what the UI Kit expect in ZegoUIKitPrebuilt.create()
+    const kitTokenObj = {
+      appID: Number(appId),
+      roomID: roomId,
+      userID: userId,
+      userName: userName || "User",
+      token: token,
+    };
+
+    const kitToken = Buffer.from(JSON.stringify(kitTokenObj)).toString("base64");
+
     res.json({
       success: true,
-      token,
+      token, // Keep for debugging if needed
+      kitToken,
       appId: Number(appId),
     });
   } catch (error) {
