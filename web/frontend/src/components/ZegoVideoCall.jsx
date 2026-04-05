@@ -32,9 +32,23 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
 
         if (!active) return;
 
-        const { kitToken } = response.data;
+        const { token, appId } = response.data;
+        if (!token || !appId) {
+          throw new Error("Invalid token or appId received from backend");
+        }
 
-        // 2. Initialize ZEGO UI Kit using the pre-built kitToken from backend
+        // 2. Initialize ZEGO UI Kit using the token from backend
+        // We use generateKitTokenForProduction because we have the token
+        console.log("[ZEGO] Initializing with token...", { appId, roomName, userId, userName });
+
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
+          appId,
+          token,
+          roomName,
+          userId,
+          userName
+        );
+
         const zp = ZegoUIKitPrebuilt.create(kitToken);
         zpRef.current = zp;
 
