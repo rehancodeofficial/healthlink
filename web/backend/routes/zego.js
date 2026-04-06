@@ -1,53 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const crypto = require("crypto");
 const { verifyToken } = require("../middleware/rbac");
-
-// ZEGO Token Generation Logic (Token04)
-// Based on ZEGO documentation for Node.js implementation
-function generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload) {
-  const createTime = Math.floor(Date.now() / 1000);
-  const expireTime = createTime + effectiveTimeInSeconds;
-  const nonce = crypto.randomInt(100000000, 999999999);
-
-  const tokenInfo = {
-    app_id: Number(appId),
-    user_id: userId,
-    nonce: nonce,
-    ctime: createTime,
-    expire: expireTime,
-    payload: payload || "",
-  };
-
-  const plaintext = JSON.stringify(tokenInfo);
-  const iv = crypto.randomBytes(16);
-
-  // ZEGO expects the secret itself as the key (32 bytes for AES-256)
-  let key = Buffer.from(serverSecret, "utf8");
-  if (key.length > 32) {
-    key = key.slice(0, 32);
-  } else if (key.length < 32) {
-    key = Buffer.concat([key, Buffer.alloc(32 - key.length, 0)]);
-  }
-
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  let ciphertext = cipher.update(plaintext, "utf8");
-  ciphertext = Buffer.concat([ciphertext, cipher.final()]);
-
-  // Combined binary data: [IV length (2 bytes)] + [IV] + [Ciphertext length (2 bytes)] + [Ciphertext]
-  const ivLen = Buffer.alloc(2);
-  ivLen.writeUInt16BE(iv.length);
-
-  const ciphertextLen = Buffer.alloc(2);
-  ciphertextLen.writeUInt16BE(ciphertext.length);
-
-  const binData = Buffer.concat([ivLen, iv, ciphertextLen, ciphertext]);
-
-  // Prepend version (04)
-  const result = Buffer.concat([Buffer.from([0x04]), binData]);
-
-  return result.toString("base64");
-}
+const { generateToken04 } = require("../utils/zegoServerAssistant");
 
 /**
  * @route   GET /api/zego/token
@@ -62,7 +16,7 @@ router.get("/token", verifyToken, (req, res) => {
       return res.status(400).json({ error: "roomId and userId are required" });
     }
 
-    const appId = process.env.ZEGO_APP_ID;
+    const appId = Number(process.env.ZEGO_APP_ID);
     const serverSecret = process.env.ZEGO_SERVER_SECRET;
 
     if (!appId || !serverSecret) {
@@ -73,7 +27,7 @@ router.get("/token", verifyToken, (req, res) => {
     // Token validity: 1 hour (3600 seconds)
     const effectiveTimeInSeconds = 3600;
 
-    // Optional payload (can include room permissions if needed)
+    // Optional payload
     const payload = JSON.stringify({
       room_id: roomId,
       privilege: {
@@ -82,12 +36,13 @@ router.get("/token", verifyToken, (req, res) => {
       },
     });
 
+    // Generate standard token using official library
     const token = generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload);
 
     res.json({
       success: true,
       token,
-      appId: Number(appId),
+      appId,
     });
   } catch (error) {
     console.error("Error generating ZEGO token:", error);
