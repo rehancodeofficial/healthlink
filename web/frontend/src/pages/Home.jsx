@@ -97,21 +97,21 @@ export default function Home() {
             <a
               href="#features"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)] transition-all flex items-center border border-transparent hover:border-[var(--border)]"
+              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest bg-white text-black shadow-lg flex items-center justify-center border border-[var(--border)]"
             >
               Features
             </a>
             <a
               href="#about"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-blue)] transition-all flex items-center border border-transparent hover:border-[var(--border)]"
+              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest bg-white text-black shadow-lg flex items-center justify-center border border-[var(--border)]"
             >
               About
             </a>
             <a
               href="#contact"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-orange)] transition-all flex items-center border border-transparent hover:border-[var(--border)]"
+              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest bg-white text-black shadow-lg flex items-center justify-center border border-[var(--border)]"
             >
               Contact
             </a>
@@ -121,7 +121,7 @@ export default function Home() {
                 navigate("/login");
                 setIsMobileMenuOpen(false);
               }}
-              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[var(--text-soft)] hover:bg-[var(--bg-main)] hover:text-[var(--brand-green)] transition-all flex items-center w-full text-left"
+              className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest bg-white text-black shadow-lg flex items-center justify-center w-full"
             >
               Sign In
             </button>
