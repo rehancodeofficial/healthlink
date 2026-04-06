@@ -10,7 +10,7 @@ const { generateToken04 } = require("../utils/zegoServerAssistant");
  */
 router.get("/token", verifyToken, (req, res) => {
   try {
-    const { roomId, userId } = req.query;
+    const { roomId, userId, userName } = req.query;
 
     if (!roomId || !userId) {
       return res.status(400).json({ error: "roomId and userId are required" });
@@ -39,10 +39,21 @@ router.get("/token", verifyToken, (req, res) => {
     // Generate standard token using official library
     const token = generateToken04(appId, userId, serverSecret, effectiveTimeInSeconds, payload);
 
+    // Construct Kit Token JSON
+    const kitTokenObj = {
+      appID: appId,
+      userID: userId,
+      userName: userName || "User",
+      roomID: roomId,
+      token: token,
+    };
+
+    // Encode as Base64
+    const kitToken = Buffer.from(JSON.stringify(kitTokenObj)).toString("base64");
+
     res.json({
       success: true,
-      token,
-      appId,
+      kitToken,
     });
   } catch (error) {
     console.error("Error generating ZEGO token:", error);
