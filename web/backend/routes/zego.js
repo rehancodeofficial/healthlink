@@ -51,10 +51,8 @@ router.get("/token", verifyToken, (req, res) => {
     // Encode as Base64
     const kitToken = Buffer.from(JSON.stringify(kitTokenObj)).toString("base64");
 
-    res.json({
-      success: true,
-      kitToken,
-    });
+    // Return plain string as requested
+    res.send(kitToken);
   } catch (error) {
     console.error("Error generating ZEGO token:", error);
     res.status(500).json({ error: "Failed to generate token" });
