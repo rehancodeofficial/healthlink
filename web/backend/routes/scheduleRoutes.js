@@ -163,12 +163,10 @@ router.get("/slots", async (req, res) => {
 
     const doctorTz = doctorProfile.timezone || "UTC";
 
-    // 1. Get Day of Week in DOCTOR'S timezone
-    // We want to know what day of the week the requested 'date' is in the doctor's local time.
-    // 'date' is YYYY-MM-DD. We interpret it as starting at 00:00 in doctor's timezone.
-    const localDateStr = `${date}T00:00:00`;
-    const doctorDate = toDate(localDateStr, { timeZone: doctorTz });
-    const dayOfWeek = doctorDate.getDay();
+    // 1. Get Day of Week in DOCTOR'S timezone (Literal)
+    // We interpret 'date' (YYYY-MM-DD) as a literal time.
+    const doctorDate = parseAsLocal(date);
+    const dayOfWeek = doctorDate.getUTCDay();
 
     // Get Rules for this day
     const rules = await prisma.doctorSchedule.findMany({
@@ -203,12 +201,8 @@ router.get("/slots", async (req, res) => {
     let slots = [];
     for (const rule of rules) {
       // rule.startTime/endTime are "HH:MM" (doctor's local time)
-      const startLocal = toDate(`${date}T${rule.startTime}:00`, {
-        timeZone: doctorTz,
-      });
-      const endLocal = toDate(`${date}T${rule.endTime}:00`, {
-        timeZone: doctorTz,
-      });
+      const startLocal = parseAsLocal(`${date}T${rule.startTime}`);
+      const endLocal = parseAsLocal(`${date}T${rule.endTime}`);
 
       let current = startLocal;
       while (current < endLocal) {
