@@ -3,6 +3,7 @@ const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
 const prisma = require("../prisma/prismaClient");
 const emailService = require("../services/emailService");
+const { parseAsLocal } = require("../utils/timeUtils");
 const router = express.Router();
 
 // Apply RBAC to all doctor routes
@@ -16,8 +17,7 @@ router.use(requireRole(["DOCTOR", "SUPERADMIN", "ADMIN"]));
 router.get("/waiting-patients", async (req, res) => {
   try {
     const doctorUserId = req.query.doctorId || req.user?.id;
-    if (!doctorUserId)
-      return res.status(400).json({ error: "doctorId is required" });
+    if (!doctorUserId) return res.status(400).json({ error: "doctorId is required" });
 
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorUserId },
@@ -235,9 +235,7 @@ router.put("/profile", async (req, res) => {
         yearsOfExperience: yearsOfExperience ?? 0,
         consultationFee: consultationFee ?? 0,
         availability:
-          typeof availability === "string"
-            ? availability
-            : JSON.stringify(availability || {}),
+          typeof availability === "string" ? availability : JSON.stringify(availability || {}),
         timezone: timezone ?? "UTC",
         bio: bio ?? "",
         languages: Array.isArray(languages)
@@ -252,15 +250,12 @@ router.put("/profile", async (req, res) => {
         specialization: specialization ?? "General Medicine",
         customProfession: customProfession || null,
         qualifications: qualifications ?? "MBBS",
-        licenseNumber:
-          licenseNumber || `LIC-${userId.slice(0, 8).toUpperCase()}`,
+        licenseNumber: licenseNumber || `LIC-${userId.slice(0, 8).toUpperCase()}`,
         hospitalAffiliation: hospitalAffiliation ?? "",
         yearsOfExperience: yearsOfExperience ?? 0,
         consultationFee: consultationFee ?? 0,
         availability:
-          typeof availability === "string"
-            ? availability
-            : JSON.stringify(availability || {}),
+          typeof availability === "string" ? availability : JSON.stringify(availability || {}),
         timezone: timezone ?? "UTC",
         bio: bio ?? "",
         languages: Array.isArray(languages)
@@ -279,9 +274,7 @@ router.put("/profile", async (req, res) => {
     if (userForEmail) {
       emailService
         .sendProfileUpdateConfirmation(userForEmail, "Doctor")
-        .catch((err) =>
-          console.error("Failed to send profile update email:", err),
-        );
+        .catch((err) => console.error("Failed to send profile update email:", err));
     }
 
     return res.json({ data: updated });
@@ -397,9 +390,7 @@ router.get("/my-patients", async (req, res) => {
     // Shape a simple list for the table
     const result = patients.map((p) => ({
       id: p.id, // PatientProfile.id
-      name:
-        `${p.user?.firstName || ""} ${p.user?.lastName || ""}`.trim() ||
-        "Unknown",
+      name: `${p.user?.firstName || ""} ${p.user?.lastName || ""}`.trim() || "Unknown",
       email: p.user?.email || "",
       gender: p.user?.gender || null,
       dateOfBirth: p.user?.dateOfBirth || null,
@@ -411,9 +402,7 @@ router.get("/my-patients", async (req, res) => {
     return res.json(result);
   } catch (err) {
     console.error("❌ /api/doctor/my-patients error:", err);
-    return res
-      .status(500)
-      .json({ error: err.message, details: err.toString() });
+    return res.status(500).json({ error: err.message, details: err.toString() });
   }
 });
 
@@ -476,11 +465,18 @@ router.post("/appointments", async (req, res) => {
       return res.status(404).json({ error: "Patient profile not found" });
     }
 
+    console.log("DEBUG: Creating appointment", { doctorId, patientId, appointmentDate });
+    const localDate = parseAsLocal(appointmentDate);
+    console.log("DEBUG: Parsed appointmentDate", {
+      input: appointmentDate,
+      stored: localDate.toISOString(),
+    });
+
     const newAppointment = await prisma.appointment.create({
       data: {
         doctorId: doctorProfile.id,
         patientId: patientProfile.id,
-        appointmentDate: new Date(appointmentDate),
+        appointmentDate: localDate,
         reason,
       },
     });
@@ -504,11 +500,9 @@ router.post("/appointments", async (req, res) => {
         .sendAppointmentBookingConfirmation(
           finalAppointment,
           finalAppointment.patient.user,
-          finalAppointment.doctor.user,
+          finalAppointment.doctor.user
         )
-        .catch((err) =>
-          console.error("Failed to send appointment emails:", err),
-        );
+        .catch((err) => console.error("Failed to send appointment emails:", err));
     }
 
     res.status(201).json(newAppointment);
@@ -529,7 +523,7 @@ router.patch("/appointments/:id", async (req, res) => {
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: {
-        ...(appointmentDate && { appointmentDate: new Date(appointmentDate) }),
+        ...(appointmentDate && { appointmentDate: parseAsLocal(appointmentDate) }),
         ...(reason && { reason }),
         ...(status && { status }),
       },
@@ -539,21 +533,15 @@ router.patch("/appointments/:id", async (req, res) => {
       },
     });
 
-    if (
-      status &&
-      updatedAppointment.patient?.user &&
-      updatedAppointment.doctor?.user
-    ) {
+    if (status && updatedAppointment.patient?.user && updatedAppointment.doctor?.user) {
       emailService
         .sendAppointmentStatusChange(
           updatedAppointment,
           updatedAppointment.patient.user,
           updatedAppointment.doctor.user,
-          status,
+          status
         )
-        .catch((err) =>
-          console.error("Failed to send appointment status email:", err),
-        );
+        .catch((err) => console.error("Failed to send appointment status email:", err));
     }
 
     res.json(updatedAppointment);
@@ -575,8 +563,7 @@ router.get("/appointments", async (req, res) => {
     resolvedDoctorId: doctorId,
   });
 
-  if (!doctorId)
-    return res.status(400).json({ error: "doctorId (User ID) is required" });
+  if (!doctorId) return res.status(400).json({ error: "doctorId (User ID) is required" });
 
   try {
     // ✅ Find DoctorProfile using userId
@@ -584,8 +571,7 @@ router.get("/appointments", async (req, res) => {
       where: { userId: doctorId },
     });
 
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     // ✅ Fetch all appointments for this doctor
     const appointments = await prisma.appointment.findMany({
@@ -651,8 +637,7 @@ router.get("/prescriptions", async (req, res) => {
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     const prescriptions = await prisma.prescription.findMany({
       where: { doctorId: doctorProfile.id },
@@ -687,14 +672,7 @@ router.post("/prescriptions", async (req, res) => {
     } = req.body || {};
 
     // basic validation
-    if (
-      !doctorId ||
-      !patientId ||
-      !medication ||
-      !dosage ||
-      !frequency ||
-      !duration
-    ) {
+    if (!doctorId || !patientId || !medication || !dosage || !frequency || !duration) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -795,9 +773,7 @@ router.delete("/prescriptions/:id", async (req, res) => {
       prescription.doctor.userId !== doctorUserId &&
       !["SUPERADMIN", "ADMIN"].includes(req.user?.role)
     ) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to delete this prescription" });
+      return res.status(403).json({ error: "Not authorized to delete this prescription" });
     }
 
     await prisma.prescription.delete({ where: { id } });
@@ -815,8 +791,7 @@ router.patch("/prescriptions/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const doctorUserId = req.user?.id;
-    const { medication, dosage, frequency, duration, notes, patientId } =
-      req.body;
+    const { medication, dosage, frequency, duration, notes, patientId } = req.body;
 
     // Verify ownership
     const prescription = await prisma.prescription.findUnique({
@@ -833,9 +808,7 @@ router.patch("/prescriptions/:id", async (req, res) => {
       prescription.doctor.userId !== doctorUserId &&
       !["SUPERADMIN", "ADMIN"].includes(req.user?.role)
     ) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to edit this prescription" });
+      return res.status(403).json({ error: "Not authorized to edit this prescription" });
     }
 
     const updated = await prisma.prescription.update({
@@ -867,8 +840,7 @@ router.get("/messages/inbox", async (req, res) => {
       where: { id: doctorUserId },
       select: { id: true },
     });
-    if (!doctorUser)
-      return res.status(404).json({ error: "Doctor user not found" });
+    if (!doctorUser) return res.status(404).json({ error: "Doctor user not found" });
 
     const messages = await prisma.message.findMany({
       where: { receiverId: doctorUserId },
@@ -903,8 +875,7 @@ router.patch("/messages/read/:id", async (req, res) => {
       select: { id: true, receiverId: true },
     });
     if (!found) return res.status(404).json({ error: "Message not found" });
-    if (found.receiverId !== userId)
-      return res.status(403).json({ error: "Not allowed" });
+    if (found.receiverId !== userId) return res.status(403).json({ error: "Not allowed" });
 
     const updated = await prisma.message.update({
       where: { id },
@@ -956,9 +927,7 @@ router.post("/messages/send", async (req, res) => {
   try {
     const { senderId, receiverId, content } = req.body || {};
     if (!senderId || !receiverId || !content) {
-      return res
-        .status(400)
-        .json({ error: "senderId, receiverId and content are required" });
+      return res.status(400).json({ error: "senderId, receiverId and content are required" });
     }
 
     // Verify both users exist (helps catch wrong id issues)
@@ -1067,8 +1036,7 @@ router.get("/prescriptions", async (req, res) => {
       where: { userId: doctorId },
     });
 
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     const prescriptions = await prisma.prescription.findMany({
       where: { doctorId: doctorProfile.id },
@@ -1087,23 +1055,14 @@ router.get("/prescriptions", async (req, res) => {
 
 // ✅ Create new prescription
 router.post("/prescriptions", async (req, res) => {
-  const {
-    doctorId,
-    patientId,
-    medication,
-    dosage,
-    frequency,
-    duration,
-    notes,
-  } = req.body;
+  const { doctorId, patientId, medication, dosage, frequency, duration, notes } = req.body;
 
   try {
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
 
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     const newPrescription = await prisma.prescription.create({
       data: {
@@ -1169,8 +1128,7 @@ router.get("/prescriptions", async (req, res) => {
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     const prescriptions = await prisma.prescription.findMany({
       where: { doctorId: doctorProfile.id },
@@ -1196,15 +1154,7 @@ router.get("/prescriptions", async (req, res) => {
 // ✅ Create new prescription (safe)
 router.post("/prescriptions", async (req, res) => {
   try {
-    let {
-      doctorId,
-      patientId,
-      medication,
-      dosage,
-      frequency,
-      duration,
-      notes,
-    } = req.body;
+    let { doctorId, patientId, medication, dosage, frequency, duration, notes } = req.body;
 
     if (!doctorId || !patientId || !medication)
       return res.status(400).json({ message: "Missing required fields" });
@@ -1217,8 +1167,7 @@ router.post("/prescriptions", async (req, res) => {
       doctorProfile = await prisma.doctorProfile.findUnique({
         where: { userId: doctorId },
       });
-    if (!doctorProfile)
-      return res.status(404).json({ message: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ message: "Doctor profile not found" });
     doctorId = doctorProfile.id;
 
     // Patient profile
@@ -1229,8 +1178,7 @@ router.post("/prescriptions", async (req, res) => {
       patientProfile = await prisma.patientProfile.findUnique({
         where: { userId: patientId },
       });
-    if (!patientProfile)
-      return res.status(404).json({ message: "Patient profile not found" });
+    if (!patientProfile) return res.status(404).json({ message: "Patient profile not found" });
     patientId = patientProfile.id;
 
     const newPrescription = await prisma.prescription.create({
