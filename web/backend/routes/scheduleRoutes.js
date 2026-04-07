@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const prisma = require("../prisma/prismaClient");
 const { verifyToken, requireRole } = require("../middleware/rbac");
+const { parseAsLocal } = require("../utils/timeUtils");
 
 // Middleware
 router.use(verifyToken);
@@ -43,8 +44,7 @@ router.get("/", async (req, res) => {
     // If we can't find a doctor profile, return empty array instead of erroring,
     // because maybe the user is a doctor but hasn't set up a profile yet?
     // Stick to 404 if not found to be explicit.
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     const schedules = await prisma.doctorSchedule.findMany({
       where: { doctorId: doctorProfile.id },
@@ -74,8 +74,7 @@ router.post("/", async (req, res) => {
       doctorProfile = await prisma.doctorProfile.findUnique({
         where: { id: doctorId },
       });
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
 
     // Check conflicts
     const existing = await prisma.doctorSchedule.findMany({
@@ -151,8 +150,7 @@ const { parseISO, addMinutes, startOfDay, endOfDay } = require("date-fns");
 router.get("/slots", async (req, res) => {
   try {
     const { doctorId, date } = req.query; // date is YYYY-MM-DD
-    if (!doctorId || !date)
-      return res.status(400).json({ error: "Missing params" });
+    if (!doctorId || !date) return res.status(400).json({ error: "Missing params" });
 
     let doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
@@ -161,8 +159,7 @@ router.get("/slots", async (req, res) => {
       doctorProfile = await prisma.doctorProfile.findUnique({
         where: { id: doctorId },
       });
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor not found" });
 
     const doctorTz = doctorProfile.timezone || "UTC";
 
@@ -200,9 +197,7 @@ router.get("/slots", async (req, res) => {
       },
     });
 
-    const bookedSet = new Set(
-      existingAppointments.map((a) => a.appointmentDate.toISOString()),
-    );
+    const bookedSet = new Set(existingAppointments.map((a) => a.appointmentDate.toISOString()));
 
     // Generate Slots
     let slots = [];
@@ -259,8 +254,7 @@ router.post("/book", async (req, res) => {
       doctorProfile = await prisma.doctorProfile.findUnique({
         where: { id: doctorId },
       });
-    if (!doctorProfile)
-      return res.status(404).json({ error: "Doctor not found" });
+    if (!doctorProfile) return res.status(404).json({ error: "Doctor not found" });
 
     let patientProfile = await prisma.patientProfile.findUnique({
       where: { userId: patientId },
@@ -269,10 +263,9 @@ router.post("/book", async (req, res) => {
       patientProfile = await prisma.patientProfile.findUnique({
         where: { id: patientId },
       });
-    if (!patientProfile)
-      return res.status(404).json({ error: "Patient profile not found" });
+    if (!patientProfile) return res.status(404).json({ error: "Patient profile not found" });
 
-    const startDate = new Date(startTime);
+    const startDate = parseAsLocal(startTime);
 
     // Check if slot is still available (concurrency check)
     const conflict = await prisma.appointment.findFirst({
