@@ -25,22 +25,27 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
         setLoading(true);
         setError(null);
 
-        // 1. Fetch kitToken from backend
-        // The backend returns the raw base64 string
-        const response = await api.get("/zego/token", {
-          params: { roomId: roomName, userId, userName },
-        });
+        // 1. Generate kitToken client-side (Standard "Kit-based" flow)
+        const appId = Number(import.meta.env.VITE_ZEGO_APP_ID);
+        const serverSecret = import.meta.env.VITE_ZEGO_SERVER_SECRET;
+
+        if (!appId || !serverSecret) {
+          throw new Error("ZEGO APP_ID or SERVER_SECRET is missing in frontend .env");
+        }
+
+        console.log("[ZEGO] Initializing with standard kit-based flow...");
+
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+          appId,
+          serverSecret,
+          roomName,
+          userId,
+          userName
+        );
 
         if (!active) return;
 
-        const kitToken = response.data;
-        if (!kitToken || typeof kitToken !== "string") {
-          throw new Error("Invalid kitToken received from backend");
-        }
-
-        // 2. Initialize ZEGO UI Kit using the backend-provided kitToken
-        console.log("[ZEGO] Initializing with backend-generated kitToken...");
-
+        // 2. Initialize ZEGO UI Kit
         const zp = ZegoUIKitPrebuilt.create(kitToken);
         zpRef.current = zp;
 
