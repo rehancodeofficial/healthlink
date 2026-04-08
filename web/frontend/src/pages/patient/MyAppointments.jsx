@@ -142,7 +142,7 @@ export default function MyAppointments() {
     loadDoctors().then(() => setBookOpen(true));
   };
 
-  const handleBookSubmit = async (e) => {
+  const handleInitializeBooking = async (e) => {
     e.preventDefault();
 
     if (!form.selectedSlotId) {
@@ -503,7 +503,7 @@ export default function MyAppointments() {
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
               {rescheduleId ? "Reschedule Appointment" : "Book Appointment"}
             </h2>
-            <form onSubmit={handleBookSubmit} className="space-y-4">
+            <form onSubmit={handleInitializeBooking} className="space-y-4">
               {/* Doctor Selection */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
