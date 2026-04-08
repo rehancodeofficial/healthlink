@@ -1,5 +1,5 @@
 // FILE: src/pages/patient/BookAppointment.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import api from "../../Lib/api";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
@@ -20,6 +20,7 @@ const BookAppointment = () => {
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const patientId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName");
+  const autoBookingTimerRef = useRef(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -36,6 +37,10 @@ const BookAppointment = () => {
     };
 
     fetchDoctors();
+
+    return () => {
+      if (autoBookingTimerRef.current) clearTimeout(autoBookingTimerRef.current);
+    };
   }, []);
 
   const handleDoctorChange = (doctorId) => {
@@ -51,10 +56,22 @@ const BookAppointment = () => {
 
   const handleSlotSelect = (slot) => {
     setFormData((prev) => ({ ...prev, selectedSlotId: slot.id }));
+
+    // Start 2-minute auto-booking timer
+    if (autoBookingTimerRef.current) clearTimeout(autoBookingTimerRef.current);
+    autoBookingTimerRef.current = setTimeout(() => {
+      handleInitializeBooking();
+    }, 120000); // 2 minutes
   };
 
   const handleInitializeBooking = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // Clear auto-booking timer if manual click
+    if (autoBookingTimerRef.current) {
+      clearTimeout(autoBookingTimerRef.current);
+      autoBookingTimerRef.current = null;
+    }
 
     if (!formData.selectedSlotId) {
       toast.error("Please select an available time slot");
