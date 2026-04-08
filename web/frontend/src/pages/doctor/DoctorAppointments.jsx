@@ -16,6 +16,12 @@ import {
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  formatLiteralTime,
+  formatLiteralDate,
+  formatLiteralDateTime,
+  toLocalInputString,
+} from "../../Lib/timeUtils";
 
 const StatusPill = ({ status }) => {
   const s = (status || "").toUpperCase();
@@ -187,9 +193,7 @@ export default function DoctorAppointments() {
     setViewMode(false);
     setForm({
       patientId: appt?.patientId || "",
-      appointmentDate: appt?.appointmentDate
-        ? new Date(appt.appointmentDate).toISOString().slice(0, 16)
-        : "",
+      appointmentDate: appt?.appointmentDate ? toLocalInputString(appt.appointmentDate) : "",
       reason: appt?.reason || "",
       status: appt?.status || "PENDING",
     });
@@ -404,19 +408,11 @@ export default function DoctorAppointments() {
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-[var(--text-main)] flex items-center gap-2">
                             <FaCalendarAlt className="text-[var(--brand-green)] text-[10px]" />
-                            {a?.appointmentDate
-                              ? new Date(a.appointmentDate).toLocaleDateString()
-                              : "—"}
+                            {formatLiteralDate(a?.appointmentDate)}
                           </span>
                           <span className="text-[10px] font-mono text-[var(--brand-blue)] flex items-center gap-2">
                             <FaClock className="text-[10px]" />
-                            {a?.appointmentDate
-                              ? new Date(a.appointmentDate).toLocaleTimeString("en-GB", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: false,
-                                })
-                              : "—"}
+                            {formatLiteralTime(a?.appointmentDate)}
                           </span>
                         </div>
                       </td>
@@ -488,16 +484,7 @@ export default function DoctorAppointments() {
                       Protocol Date
                     </p>
                     <p className="text-[var(--text-main)]">
-                      {selectedAppointment?.appointmentDate
-                        ? new Date(selectedAppointment.appointmentDate).toLocaleString("en-GB", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          })
-                        : "—"}
+                      {formatLiteralDateTime(selectedAppointment?.appointmentDate)}
                     </p>
                   </div>
                 </div>
