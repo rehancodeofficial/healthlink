@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../Lib/api";
 import { toast } from "react-toastify";
+import { formatLiteralTime } from "../Lib/timeUtils";
 
 export default function BookingSlots({ doctorId, date, onSlotSelect }) {
   const [slots, setSlots] = useState([]);
@@ -48,10 +49,7 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
       {slots.map((slot) => {
-        const startTime = new Date(slot.startTime).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        const startTime = formatLiteralTime(slot.startTime);
         const isAvailable = slot.status === "AVAILABLE";
         const isSelected = selectedSlotId === slot.id;
 
