@@ -6,6 +6,7 @@ import api from "../../Lib/api";
 import { FaPlusCircle, FaTrash, FaVideo, FaEdit, FaPhoneAlt, FaSpinner } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { formatLiteralDateTime } from "../../Lib/timeUtils";
 
 // Use the same component as BookAppointment for consistent slot logic
 import BookingSlots from "../../components/BookingSlots";
@@ -430,19 +431,22 @@ export default function MyAppointments() {
                         {a.appointmentDate ? (
                           <div className="space-y-0.5">
                             <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                              {new Date(a.appointmentDate).toLocaleDateString("en-US", {
-                                weekday: "long",
-                              })}
+                              {new Date(a.appointmentDate).getUTCDay() === 0
+                                ? "Sunday"
+                                : new Date(a.appointmentDate).getUTCDay() === 1
+                                  ? "Monday"
+                                  : new Date(a.appointmentDate).getUTCDay() === 2
+                                    ? "Tuesday"
+                                    : new Date(a.appointmentDate).getUTCDay() === 3
+                                      ? "Wednesday"
+                                      : new Date(a.appointmentDate).getUTCDay() === 4
+                                        ? "Thursday"
+                                        : new Date(a.appointmentDate).getUTCDay() === 5
+                                          ? "Friday"
+                                          : "Saturday"}
                             </div>
                             <div className="text-xs font-mono font-bold text-[var(--brand-blue)]">
-                              {new Date(a.appointmentDate).toLocaleString("en-GB", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              })}
+                              {formatLiteralDateTime(a.appointmentDate)}
                             </div>
                           </div>
                         ) : (
