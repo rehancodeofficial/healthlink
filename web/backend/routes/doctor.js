@@ -4,6 +4,7 @@ const { verifyToken, requireRole } = require("../middleware/rbac.js");
 const prisma = require("../prisma/prismaClient");
 const emailService = require("../services/emailService");
 const { parseAsLocal } = require("../utils/timeUtils");
+const { ensureDefaultProfile } = require("../lib/provisionProfile.js");
 const router = express.Router();
 
 // Apply RBAC to all doctor routes
@@ -716,22 +717,21 @@ router.post("/prescriptions", async (req, res) => {
     });
 
     // after `created` prescription is saved:
-    // Check for selected pharmacy using the new Many-to-Many relation
+    // 1) Logic for Patient's Selected Pharmacy (Auto-dispatch)
     const selectedMapping = await prisma.selectedPharmacy.findFirst({
       where: { patientId: patientProfile.id },
-      orderBy: [
-        { preferred: "desc" }, // Preferred ones first
-        { createdAt: "desc" }, // Then most recent
-      ],
+      orderBy: [{ preferred: "desc" }, { createdAt: "desc" }],
     });
 
     let finalPrescription = created;
+    let targetPharmacyId =
+      req.body.pharmacyId || (selectedMapping ? selectedMapping.pharmacyId : null);
 
-    if (selectedMapping) {
+    if (targetPharmacyId) {
       finalPrescription = await prisma.prescription.update({
         where: { id: created.id },
         data: {
-          pharmacyId: selectedMapping.pharmacyId,
+          pharmacyId: targetPharmacyId,
           dispatchStatus: "SENT",
           dispatchedAt: new Date(),
         },
@@ -741,6 +741,18 @@ router.post("/prescriptions", async (req, res) => {
           pharmacy: { include: { user: true } },
         },
       });
+
+      // Notify Pharmacy
+      if (finalPrescription.pharmacy?.user?.email) {
+        emailService
+          .sendNewPrescriptionNotification(
+            finalPrescription,
+            finalPrescription.patient.user,
+            finalPrescription.doctor.user,
+            finalPrescription.pharmacy
+          )
+          .catch((err) => console.error("Failed to notify pharmacy of new prescription:", err));
+      }
     }
 
     return res.status(201).json(finalPrescription);
@@ -1020,260 +1032,7 @@ router.post("/messages/send", async (req, res) => {
 
 // Redundant /patients routes removed
 
-/**
- * ===========================================
- *  PRESCRIPTIONS — CRUD for Doctor
- * ===========================================
- */
-
-// ✅ Get all prescriptions for a doctor
-router.get("/prescriptions", async (req, res) => {
-  const { doctorId } = req.query;
-  if (!doctorId) return res.status(400).json({ error: "Doctor ID required" });
-
-  try {
-    const doctorProfile = await prisma.doctorProfile.findUnique({
-      where: { userId: doctorId },
-    });
-
-    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
-
-    const prescriptions = await prisma.prescription.findMany({
-      where: { doctorId: doctorProfile.id },
-      include: {
-        patient: { include: { user: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    res.json(prescriptions);
-  } catch (err) {
-    console.error("❌ Error fetching prescriptions:", err);
-    res.status(500).json({ error: "Failed to fetch prescriptions" });
-  }
-});
-
-// ✅ Create new prescription
-router.post("/prescriptions", async (req, res) => {
-  const { doctorId, patientId, medication, dosage, frequency, duration, notes } = req.body;
-
-  try {
-    const doctorProfile = await prisma.doctorProfile.findUnique({
-      where: { userId: doctorId },
-    });
-
-    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
-
-    const newPrescription = await prisma.prescription.create({
-      data: {
-        doctorId: doctorProfile.id,
-        patientId,
-        medication,
-        dosage,
-        frequency,
-        duration,
-        notes,
-      },
-    });
-
-    res.json(newPrescription);
-  } catch (err) {
-    console.error("❌ Error creating prescription:", err);
-    res.status(500).json({ error: "Failed to create prescription" });
-  }
-});
-
-// ✅ Update existing prescription
-router.patch("/prescriptions/:id", async (req, res) => {
-  const { id } = req.params;
-  const { medication, dosage, frequency, duration, notes } = req.body;
-
-  try {
-    const updated = await prisma.prescription.update({
-      where: { id },
-      data: { medication, dosage, frequency, duration, notes },
-    });
-    res.json(updated);
-  } catch (err) {
-    console.error("❌ Error updating prescription:", err);
-    res.status(500).json({ error: "Failed to update prescription" });
-  }
-});
-
-// ✅ Delete prescription
-router.delete("/prescriptions/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await prisma.prescription.delete({ where: { id } });
-    res.json({ message: "Prescription deleted successfully" });
-  } catch (err) {
-    console.error("❌ Error deleting prescription:", err);
-    res.status(500).json({ error: "Failed to delete prescription" });
-  }
-});
-
-/**
- * ===========================================
- *  GET /api/doctor/prescriptions
- *  Fetch all prescriptions by doctor
- * ===========================================
- */
-router.get("/prescriptions", async (req, res) => {
-  try {
-    const { doctorId } = req.query;
-    if (!doctorId) return res.status(400).json({ error: "Doctor ID required" });
-
-    // Find doctor profile by userId
-    const doctorProfile = await prisma.doctorProfile.findUnique({
-      where: { userId: doctorId },
-    });
-    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
-
-    const prescriptions = await prisma.prescription.findMany({
-      where: { doctorId: doctorProfile.id },
-      include: {
-        patient: { include: { user: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    res.json(prescriptions);
-  } catch (err) {
-    console.error("❌ Error fetching prescriptions:", err);
-    res.status(500).json({ error: "Failed to fetch prescriptions" });
-  }
-});
-
-/**
- * ===========================================
- *  POST /api/doctor/prescriptions
- *  Create a new prescription
- * ===========================================
- */
-// ✅ Create new prescription (safe)
-router.post("/prescriptions", async (req, res) => {
-  try {
-    let { doctorId, patientId, medication, dosage, frequency, duration, notes } = req.body;
-
-    if (!doctorId || !patientId || !medication)
-      return res.status(400).json({ message: "Missing required fields" });
-
-    // Doctor profile
-    let doctorProfile = await prisma.doctorProfile.findUnique({
-      where: { id: doctorId },
-    });
-    if (!doctorProfile)
-      doctorProfile = await prisma.doctorProfile.findUnique({
-        where: { userId: doctorId },
-      });
-    if (!doctorProfile) return res.status(404).json({ message: "Doctor profile not found" });
-    doctorId = doctorProfile.id;
-
-    // Patient profile
-    let patientProfile = await prisma.patientProfile.findUnique({
-      where: { id: patientId },
-    });
-    if (!patientProfile)
-      patientProfile = await prisma.patientProfile.findUnique({
-        where: { userId: patientId },
-      });
-    if (!patientProfile) return res.status(404).json({ message: "Patient profile not found" });
-    patientId = patientProfile.id;
-
-    const newPrescription = await prisma.prescription.create({
-      data: {
-        doctorId,
-        patientId,
-        medication,
-        dosage,
-        frequency,
-        duration,
-        notes,
-      },
-      include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-      },
-    });
-
-    // Inside POST /api/doctor/prescriptions (after you resolved doctorProfileId + patientProfileId)
-    const created = await prisma.prescription.create({
-      data: {
-        doctorId: doctorProfile.id,
-        patientId: patientProfile.id,
-        medication,
-        dosage,
-        frequency,
-        duration,
-        notes: notes || null,
-        // pharmacy fields set right after create (once we know patient's selection)
-      },
-      include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-      },
-    });
-
-    // ✅ Attach pharmacy if patient selected one
-    if (patientProfile.selectedPharmacyId) {
-      await prisma.prescription.update({
-        where: { id: created.id },
-        data: {
-          pharmacyId: patientProfile.selectedPharmacyId,
-          dispatchStatus: "SENT",
-          dispatchedAt: new Date(),
-        },
-      });
-    }
-
-    // (Optional) enqueue a notification/email to pharmacy here
-    return res.status(201).json(created);
-
-    res.status(201).json(newPrescription);
-  } catch (error) {
-    console.error("❌ Error creating prescription:", error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-/**
- * ===========================================
- *  PATCH /api/doctor/prescriptions/:id
- * ===========================================
- */
-router.patch("/prescriptions/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { medication, dosage, frequency, duration, notes } = req.body;
-
-    const updated = await prisma.prescription.update({
-      where: { id },
-      data: { medication, dosage, frequency, duration, notes },
-    });
-
-    res.json(updated);
-  } catch (err) {
-    console.error("❌ Error updating prescription:", err);
-    res.status(500).json({ error: "Failed to update prescription" });
-  }
-});
-
-/**
- * ===========================================
- *  DELETE /api/doctor/prescriptions/:id
- * ===========================================
- */
-router.delete("/prescriptions/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.prescription.delete({ where: { id } });
-    res.json({ message: "Prescription deleted successfully" });
-  } catch (err) {
-    console.error("❌ Error deleting prescription:", err);
-    res.status(500).json({ error: "Failed to delete prescription" });
-  }
-});
+// End of Prescription CRUD (Duplicate code removed)
 
 // ---------------------------------------------
 // GET /api/doctors — List all doctors
