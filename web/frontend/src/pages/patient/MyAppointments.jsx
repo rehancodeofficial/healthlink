@@ -28,6 +28,7 @@ export default function MyAppointments() {
 
   // Track previous callStatus to detect transitions
   const prevCallStatuses = useRef({});
+  const autoBookingTimerRef = useRef(null);
 
   // Updated state for slot-based booking
   const [form, setForm] = useState({
@@ -128,6 +129,12 @@ export default function MyAppointments() {
   // Handle slot selection from BookingSlots component
   const handleSlotSelect = (slot) => {
     setForm((prev) => ({ ...prev, selectedSlotId: slot.id }));
+
+    // Start 2-minute auto-booking timer
+    if (autoBookingTimerRef.current) clearTimeout(autoBookingTimerRef.current);
+    autoBookingTimerRef.current = setTimeout(() => {
+      handleInitializeBooking();
+    }, 120000); // 2 minutes
   };
 
   const handleUpdate = (appt) => {
@@ -143,7 +150,13 @@ export default function MyAppointments() {
   };
 
   const handleInitializeBooking = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // Clear auto-booking timer if manual click
+    if (autoBookingTimerRef.current) {
+      clearTimeout(autoBookingTimerRef.current);
+      autoBookingTimerRef.current = null;
+    }
 
     if (!form.selectedSlotId) {
       toast.error("Please select an available time slot");
@@ -593,6 +606,7 @@ export default function MyAppointments() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (autoBookingTimerRef.current) clearTimeout(autoBookingTimerRef.current);
                     setBookOpen(false);
                     setRescheduleId(null);
                     setForm({ doctorId: "", appointmentDate: "", selectedSlotId: "", reason: "" });
