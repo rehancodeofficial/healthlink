@@ -102,15 +102,15 @@ export default function EditProfileModal({ isOpen, onClose, profile, onProfileUp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-2xl rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ">
+      <div className="bg-white  w-full max-w-2xl rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
         <div className="p-6 md:p-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+          <div className="flex items-center justify-between border-b border-gray-100 ">
             <div>
-              <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+              <h2 className="text-2xl font-black tracking-tight text-gray-900">
                 Edit Profile
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              <p className="text-sm text-gray-500 font-medium">
                 Update your personal and medical information
               </p>
             </div>
