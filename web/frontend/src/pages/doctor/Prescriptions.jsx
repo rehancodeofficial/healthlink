@@ -1,7 +1,7 @@
 // FILE: src/pages/doctor/Prescriptions.jsx
-import { useState, useEffect, useCallback } from 'react';
-import DashboardLayout from '../../layouts/DashboardLayout';
-import api from '../../Lib/api';
+import { useState, useEffect, useCallback } from "react";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import api from "../../Lib/api";
 import {
   FaPlus,
   FaEye,
@@ -9,36 +9,35 @@ import {
   FaTrash,
   FaFileMedical,
   FaPrescriptionBottleAlt,
-} from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+} from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DoctorPrescriptions() {
   const [prescriptions, setPrescriptions] = useState([]);
   const [patients, setPatients] = useState([]);
   const [form, setForm] = useState({
-    patientId: '',
-    medication: '',
-    dosage: '',
-    frequency: '',
-    duration: '',
-    notes: '',
+    patientId: "",
+    medication: "",
+    dosage: "",
+    frequency: "",
+    duration: "",
+    notes: "",
+    pharmacyId: "",
   });
+  const [pharmacies, setPharmacies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModal, setViewModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  const doctorUserId = localStorage.getItem('userId');
-  const userName =
-    localStorage.getItem('userName') ||
-    localStorage.getItem('name') ||
-    'Doctor';
+  const doctorUserId = localStorage.getItem("userId");
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
 
   const fetchPrescriptions = useCallback(async () => {
     try {
@@ -47,9 +46,9 @@ export default function DoctorPrescriptions() {
         params: { doctorId: doctorUserId },
       });
       setPrescriptions(res.data || []);
-      setError('');
+      setError("");
     } catch (err) {
-      setError('Failed to sync clinical scripts.');
+      setError("Failed to sync clinical scripts.");
     } finally {
       setLoading(false);
     }
@@ -57,40 +56,51 @@ export default function DoctorPrescriptions() {
 
   const fetchMyPatients = useCallback(async () => {
     try {
-      const res = await api.get('/doctor/my-patients', {
+      const res = await api.get("/doctor/my-patients", {
         params: { doctorId: doctorUserId },
       });
       setPatients(res.data?.data || res.data || []);
     } catch (err) {
-      console.error('Error loading registry.');
+      console.error("Error loading registry.");
     }
   }, [doctorUserId]);
+
+  const fetchPharmacies = useCallback(async () => {
+    try {
+      const res = await api.get("/pharmacy/list");
+      setPharmacies(res.data?.data?.items || res.data?.items || []);
+    } catch (err) {
+      console.error("Error loading pharmacy list.");
+    }
+  }, []);
 
   useEffect(() => {
     fetchPrescriptions();
     fetchMyPatients();
-  }, [fetchPrescriptions, fetchMyPatients]);
+    fetchPharmacies();
+  }, [fetchPrescriptions, fetchMyPatients, fetchPharmacies]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/doctor/prescriptions', {
+      await api.post("/doctor/prescriptions", {
         ...form,
         doctorId: doctorUserId,
       });
-      toast.success('Protocol Registered.');
+      toast.success("Protocol Registered.");
       setModalOpen(false);
       setForm({
-        patientId: '',
-        medication: '',
-        dosage: '',
-        frequency: '',
-        duration: '',
-        notes: '',
+        patientId: "",
+        medication: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        notes: "",
+        pharmacyId: "",
       });
       fetchPrescriptions();
     } catch (err) {
-      toast.error(err?.response?.data?.error || 'Sync Failed.');
+      toast.error(err?.response?.data?.error || "Sync Failed.");
     }
   };
 
@@ -100,11 +110,11 @@ export default function DoctorPrescriptions() {
       await api.patch(`/doctor/prescriptions/${selectedPrescription.id}`, {
         ...form,
       });
-      toast.success('Protocol Refined.');
+      toast.success("Protocol Refined.");
       setEditModal(false);
       fetchPrescriptions();
     } catch (err) {
-      toast.error('Refinement Failed.');
+      toast.error("Refinement Failed.");
     }
   };
 
@@ -112,11 +122,11 @@ export default function DoctorPrescriptions() {
     try {
       setConfirmLoading(true);
       await api.delete(`/doctor/prescriptions/${pendingDeleteId}`);
-      toast.success('Identity Purged.');
+      toast.success("Identity Purged.");
       setConfirmOpen(false);
       fetchPrescriptions();
     } catch (err) {
-      toast.error('Purge Aborted.');
+      toast.error("Purge Aborted.");
     } finally {
       setConfirmLoading(false);
     }
@@ -145,9 +155,7 @@ export default function DoctorPrescriptions() {
 
         {error && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
-            <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">
-              {error}
-            </p>
+            <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">{error}</p>
           </div>
         )}
 
@@ -170,6 +178,9 @@ export default function DoctorPrescriptions() {
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
                     Auth Date
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                    Dispatch
                   </th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] text-center">
                     Protocol Actions
@@ -197,12 +208,9 @@ export default function DoctorPrescriptions() {
                   </tr>
                 ) : (
                   prescriptions.map((p) => (
-                    <tr
-                      key={p.id}
-                      className="hover:bg-[var(--bg-main)]/30 transition-colors"
-                    >
+                    <tr key={p.id} className="hover:bg-[var(--bg-main)]/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-black text-[var(--text-main)]">
-                        {p.patient?.user?.name || 'IDENTITY_REDACTED'}
+                        {p.patient?.user?.name || "IDENTITY_REDACTED"}
                       </td>
                       <td className="px-6 py-4 text-xs font-bold text-[var(--text-soft)]">
                         {p.medication}
@@ -214,9 +222,25 @@ export default function DoctorPrescriptions() {
                         {p.frequency} / {p.duration}
                       </td>
                       <td className="px-6 py-4 text-[10px] font-bold text-[var(--text-muted)]">
-                        {p.createdAt
-                          ? new Date(p.createdAt).toLocaleDateString()
-                          : '—'}
+                        {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md w-fit ${
+                              p.dispatchStatus === "SENT"
+                                ? "bg-green-500/20 text-green-500"
+                                : "bg-yellow-500/20 text-yellow-500"
+                            }`}
+                          >
+                            {p.dispatchStatus || "PENDING"}
+                          </span>
+                          {p.pharmacy && (
+                            <span className="text-[8px] font-bold text-[var(--text-soft)] truncate max-w-[100px]">
+                              {p.pharmacy.displayName || p.pharmacy.name || "Pharmacy"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-center gap-3">
@@ -261,13 +285,10 @@ export default function DoctorPrescriptions() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            onClick={() => setModalOpen(false)}
-          ></div>
+          <div onClick={() => setModalOpen(false)}></div>
           <div className="animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
-              <FaPrescriptionBottleAlt className="text-[var(--brand-blue)]" />{' '}
-              Authorize Protocol
+              <FaPrescriptionBottleAlt className="text-[var(--brand-blue)]" /> Authorize Protocol
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
@@ -277,9 +298,7 @@ export default function DoctorPrescriptions() {
                 <select
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-black"
                   value={form.patientId}
-                  onChange={(e) =>
-                    setForm({ ...form, patientId: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, patientId: e.target.value })}
                   required
                 >
                   <option value="">-- Choose Patient --</option>
@@ -298,11 +317,26 @@ export default function DoctorPrescriptions() {
                   type="text"
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                   value={form.medication}
-                  onChange={(e) =>
-                    setForm({ ...form, medication: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, medication: e.target.value })}
                   required
                 />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                  Fulfillment Pharmacy (Optional)
+                </label>
+                <select
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-black"
+                  value={form.pharmacyId}
+                  onChange={(e) => setForm({ ...form, pharmacyId: e.target.value })}
+                >
+                  <option value="">-- Let Patient Choose / Use Default --</option>
+                  {pharmacies.map((ph) => (
+                    <option key={ph.id} value={ph.id}>
+                      {ph.name || ph.displayName}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -313,9 +347,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.dosage}
-                    onChange={(e) =>
-                      setForm({ ...form, dosage: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, dosage: e.target.value })}
                     required
                   />
                 </div>
@@ -327,9 +359,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.frequency}
-                    onChange={(e) =>
-                      setForm({ ...form, frequency: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
                     required
                   />
                 </div>
@@ -343,9 +373,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.duration}
-                    onChange={(e) =>
-                      setForm({ ...form, duration: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
                     required
                   />
                 </div>
@@ -357,9 +385,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.notes}
-                    onChange={(e) =>
-                      setForm({ ...form, notes: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   />
                 </div>
               </div>
@@ -382,9 +408,7 @@ export default function DoctorPrescriptions() {
 
       {editModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            onClick={() => setEditModal(false)}
-          ></div>
+          <div onClick={() => setEditModal(false)}></div>
           <div className="animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
               Refine Protocol
@@ -398,9 +422,7 @@ export default function DoctorPrescriptions() {
                   type="text"
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                   value={form.medication}
-                  onChange={(e) =>
-                    setForm({ ...form, medication: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, medication: e.target.value })}
                   required
                 />
               </div>
@@ -414,9 +436,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.dosage}
-                    onChange={(e) =>
-                      setForm({ ...form, dosage: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, dosage: e.target.value })}
                     required
                   />
                 </div>
@@ -428,9 +448,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.frequency}
-                    onChange={(e) =>
-                      setForm({ ...form, frequency: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
                     required
                   />
                 </div>
@@ -444,9 +462,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.duration}
-                    onChange={(e) =>
-                      setForm({ ...form, duration: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
                     required
                   />
                 </div>
@@ -458,9 +474,7 @@ export default function DoctorPrescriptions() {
                     type="text"
                     className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-blue)] outline-none text-[var(--text-main)]"
                     value={form.notes}
-                    onChange={(e) =>
-                      setForm({ ...form, notes: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   />
                 </div>
               </div>
@@ -483,13 +497,10 @@ export default function DoctorPrescriptions() {
 
       {viewModal && selectedPrescription && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            onClick={() => setViewModal(false)}
-          ></div>
+          <div onClick={() => setViewModal(false)}></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
-              <FaFileMedical className="text-[var(--brand-green)]" /> Protocol
-              Identity
+              <FaFileMedical className="text-[var(--brand-green)]" /> Protocol Identity
             </h2>
             <div className="space-y-6 text-[var(--text-main)] text-xs font-bold">
               <div className="grid grid-cols-2 gap-4">
@@ -498,8 +509,7 @@ export default function DoctorPrescriptions() {
                     Subject ID
                   </p>
                   <p className="text-[var(--text-main)]">
-                    {selectedPrescription.patient?.user?.name ||
-                      'IDENTITY_REDACTED'}
+                    {selectedPrescription.patient?.user?.name || "IDENTITY_REDACTED"}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -516,17 +526,13 @@ export default function DoctorPrescriptions() {
                   <p className="text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest">
                     Medication
                   </p>
-                  <p className="text-[var(--brand-blue)]">
-                    {selectedPrescription.medication}
-                  </p>
+                  <p className="text-[var(--brand-blue)]">{selectedPrescription.medication}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest">
                     Dosage Protocol
                   </p>
-                  <p className="text-[var(--text-main)]">
-                    {selectedPrescription.dosage}
-                  </p>
+                  <p className="text-[var(--text-main)]">{selectedPrescription.dosage}</p>
                 </div>
               </div>
               <div className="space-y-1">
@@ -534,8 +540,7 @@ export default function DoctorPrescriptions() {
                   Clinical Notes
                 </p>
                 <p className="text-[var(--text-soft)] bg-[var(--bg-main)]/50 p-4 rounded-xl border border-[var(--border)] leading-relaxed">
-                  {selectedPrescription.notes ||
-                    'No special instructions logged.'}
+                  {selectedPrescription.notes || "No special instructions logged."}
                 </p>
               </div>
               <button
@@ -570,7 +575,7 @@ export default function DoctorPrescriptions() {
                 className="btn bg-red-500 text-[var(--text-main)] flex-[2] hover:bg-red-600 disabled:opacity-50"
                 disabled={confirmLoading}
               >
-                {confirmLoading ? 'Purging...' : 'Confirm Deletion'}
+                {confirmLoading ? "Purging..." : "Confirm Deletion"}
               </button>
             </div>
           </div>
