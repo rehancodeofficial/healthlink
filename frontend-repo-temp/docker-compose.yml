@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root_password
+      POSTGRES_DB: curevirtual_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./web/backend
+    restart: always
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+    env_file:
+      - ./web/backend/.env
+    environment:
+      - PORT=5001
+    volumes:
+      - ./web/backend:/app
+      - /app/node_modules
+      - /app/prisma
+
+  frontend:
+    build: ./web/frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./web/frontend/.env
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5001/api
+      - VITE_CHATBOT_URL=http://localhost:5002/chat
+    volumes:
+      - ./web/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+      - python-chatbot
+
+  python-chatbot:
+    build: ./web/python_backend
+    restart: always
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./web/python_backend/.env
+    volumes:
+      - ./web/python_backend:/app
+
+volumes:
+  db_data:
