@@ -1,0 +1,694 @@
+// FILE: src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+/* ================================
+   SUPERADMIN
+================================ */
+import SuperadminDashboard from './pages/superadmin/SuperadminDashboard';
+import ManageAdmins from './pages/superadmin/ManageAdmins';
+import SystemReports from './pages/superadmin/SystemReports';
+import Settings from './pages/superadmin/Settings';
+import SuperSubscribersStats from './pages/superadmin/subscribers/Stats';
+import SuperSubscribedDoctors from './pages/superadmin/subscribers/Doctor';
+import SuperSubscribedPatients from './pages/superadmin/subscribers/Patients';
+import SuperadminSubscribedPharmacy from './pages/superadmin/subscribers/Pharmacy';
+import SuperadminInbox from './pages/superadmin/SuperadminInbox';
+import SuperadminSendMessage from './pages/superadmin/SuperadminSendMessage';
+import SuperadminActivityLogs from './pages/superadmin/ActivityLogs';
+
+/* ================================
+   ADMIN
+================================ */
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ManageUsers from './pages/admin/ManageUsers';
+import Reports from './pages/admin/Reports'; // keep your original pathing
+import Inbox from './pages/admin/messages/Inbox';
+import SendMessage from './pages/admin/messages/SendMessage';
+import AdminList from './pages/admin/AdminList';
+import UsersList from './pages/admin/UsersList';
+import SubscriptionSettings from './pages/admin/SubscriptionSettings';
+import AdminSubscribersStats from './pages/admin/subscribers/Stats';
+import AdminSubscribedDoctors from './pages/admin/subscribers/Doctor';
+import AdminSubscribedPatients from './pages/admin/subscribers/Patients';
+import AdminSubscribedPharmacy from './pages/admin/subscribers/Pharmacy';
+
+/* ================================
+   DOCTOR
+================================ */
+import DoctorDashboard from './pages/doctor/DoctorDashboard';
+import DoctorAppointments from './pages/doctor/DoctorAppointments';
+import DoctorPrescriptions from './pages/doctor/Prescriptions';
+import DoctorInbox from './pages/doctor/messages/inbox';
+import DoctorSendMessage from './pages/doctor/messages/SendMessage';
+import DoctorSubscription from './pages/doctor/DoctorSubscription';
+import PatientList from './pages/doctor/PatientList';
+import DoctorViewProfile from './pages/doctor/ViewProfile';
+import DoctorProfile from './pages/doctor/Profile';
+import MyPatientList from './pages/doctor/MyPatientList';
+import DoctorVideoConsultation from './pages/doctor/VideoConsultation';
+
+/* ================================
+   PATIENT
+================================ */
+import PatientDashboard from './pages/patient/PatientDashboard';
+import BookAppointment from './pages/patient/BookAppointment';
+import MyAppointments from './pages/patient/MyAppointments';
+import PatientPrescriptions from './pages/patient/Prescriptions';
+import PatientVideoConsultation from './pages/patient/VideoConsultation';
+import PatientInbox from './pages/patient/messages/Inbox.jsx';
+import PatientSendMessage from './pages/patient/messages/SendMessage.jsx';
+import MyTickets from './pages/patient/support/MyTickets';
+import TicketDetails from './pages/patient/support/TicketDetail';
+import PatientUpdateProfile from './pages/patient/Profile.jsx';
+import PatientViewProfile from './pages/patient/ViewProfile.jsx';
+import PatientSubscription from './pages/patient/PatientSubscription.jsx';
+import DoctorsList from './pages/patient/DoctorsList';
+import MyDoctors from './pages/patient/MyDoctors';
+
+/**=====================================
+ * PHARMACY
+ *======================================*/
+
+import PharmacyDashboard from './pages/pharmacy/Dashboard';
+import PharmacyProfile from './pages/pharmacy/Profile';
+import PharmacyPrescriptions from './pages/pharmacy/Prescriptions';
+// Patient: choose pharmacy
+import PatientSelectPharmacy from './pages/patient/SelectPharmacy';
+import PharmacyList from './pages/patient/pharmacy/PharmacyList';
+import MyPharmacy from './pages/patient/pharmacy/MyPharmacy';
+import PharmacySubscription from './pages/pharmacy/PharmacySubscription';
+import PharmacyViewProfile from './pages/pharmacy/ViewProfile';
+import PharmacyInbox from './pages/pharmacy/messages/Inbox';
+import PharmacySendMessage from './pages/pharmacy/messages/SendMessage';
+
+/* ================================
+   SUPPORT
+================================ */
+import SupportDashboard from './pages/support/SupportDashboard';
+import SupportTickets from './pages/support/SupportTickets';
+import SupportLiveChat from './pages/support/SupportLiveChat';
+import SupportSubscribedDoctors from './pages/support/subscribers/Doctor';
+import SupportSubscribedPatients from './pages/support/subscribers/Patients';
+import SupportSubscribedPharmacy from './pages/support/subscribers/Pharmacy';
+import UserProfile from './pages/shared/UserProfile';
+
+/* ================================
+   AUTH / HOME
+================================ */
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+
+/* ================================
+   VIDEO (shared)
+================================ */
+import VideoLobby from './pages/video/VideoLobby';
+import VideoRoom from './pages/video/VideoRoom';
+
+/* ================================
+   Tiny role guard (localStorage)
+================================ */
+const RequireRole = ({ role, children }) => {
+  const currentRole =
+    localStorage.getItem('role') || localStorage.getItem('userRole') || '';
+  if (!role || currentRole === role) return children;
+  return <Navigate to="/" replace />;
+};
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Video shared */}
+        <Route path="/video/lobby" element={<VideoLobby />} />
+        <Route path="/video/room/:roomName" element={<VideoRoom />} />
+
+        {/* ================= SUPERADMIN ================= */}
+        <Route
+          path="/superadmin/dashboard"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperadminDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/manage-admins"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <ManageAdmins />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/system-reports"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SystemReports />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/settings"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <Settings />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/messages/inbox"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperadminInbox />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/messages/send"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperadminSendMessage />
+            </RequireRole>
+          }
+        />
+
+        {/* Subscribers */}
+        <Route
+          path="/superadmin/subscribers"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperSubscribersStats />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/subscribers/doctors"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperSubscribedDoctors />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/subscribers/patients"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperSubscribedPatients />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/superadmin/subscribers/pharmacy"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <SuperSubscribedPharmacy />
+            </RequireRole>
+          }
+        />
+
+        <Route
+          path="/superadmin/profile"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <UserProfile />
+            </RequireRole>
+          }
+        />
+        {/* ================= ADMIN ================= */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <RequireRole role="ADMIN">
+              <AdminDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/manage-users"
+          element={
+            <RequireRole role="ADMIN">
+              <ManageUsers />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <RequireRole role="ADMIN">
+              <Reports />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/messages/inbox"
+          element={
+            <RequireRole role="ADMIN">
+              <Inbox />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/messages/send"
+          element={
+            <RequireRole role="ADMIN">
+              <SendMessage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/admin-list"
+          element={
+            <RequireRole role="SUPERADMIN">
+              <AdminList />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/users-list"
+          element={
+            <RequireRole role="ADMIN">
+              <UsersList />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/subscription"
+          element={
+            <RequireRole role="ADMIN">
+              <SubscriptionSettings />
+            </RequireRole>
+          }
+        />
+
+        {/* Admin Subscribers */}
+        <Route
+          path="/admin/subscribers"
+          element={
+            <RequireRole role="ADMIN">
+              <AdminSubscribersStats />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/subscribers/doctors"
+          element={
+            <RequireRole role="ADMIN">
+              <AdminSubscribedDoctors />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/subscribers/patients"
+          element={
+            <RequireRole role="ADMIN">
+              <AdminSubscribedPatients />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/subscribers/pharmacy"
+          element={
+            <RequireRole role="ADMIN">
+              <AdminSubscribedPharmacy />
+            </RequireRole>
+          }
+        />
+
+        <Route
+          path="/admin/profile"
+          element={
+            <RequireRole role="ADMIN">
+              <UserProfile />
+            </RequireRole>
+          }
+        />
+        {/* ================= DOCTOR ================= */}
+        <Route
+          path="/doctor/dashboard"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/appointments"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorAppointments />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/prescriptions"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorPrescriptions />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/messages/inbox"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorInbox />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/messages/send"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorSendMessage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/subscription"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorSubscription />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/patients"
+          element={
+            <RequireRole role="DOCTOR">
+              <PatientList />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/view-profile"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorViewProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/profile"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/my-patients"
+          element={
+            <RequireRole role="DOCTOR">
+              <MyPatientList />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/doctor/video-consultation"
+          element={
+            <RequireRole role="DOCTOR">
+              <DoctorVideoConsultation />
+            </RequireRole>
+          }
+        />
+
+        {/* ================= PATIENT ================= */}
+        <Route
+          path="/patient/dashboard"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/book-appointment"
+          element={
+            <RequireRole role="PATIENT">
+              <BookAppointment />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/my-appointments"
+          element={
+            <RequireRole role="PATIENT">
+              <MyAppointments />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/prescriptions"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientPrescriptions />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/video-consultation"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientVideoConsultation />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/messages"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientInbox />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/messages/send"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientSendMessage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/support"
+          element={
+            <RequireRole role="PATIENT">
+              <MyTickets />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/support/tickets/:id"
+          element={
+            <RequireRole role="PATIENT">
+              <TicketDetails />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/profile"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientUpdateProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/profile/view-profile"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientViewProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/subscription"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientSubscription />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/doctors/list"
+          element={
+            <RequireRole role="PATIENT">
+              <DoctorsList />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/patient/doctors/my"
+          element={
+            <RequireRole role="PATIENT">
+              <MyDoctors />
+            </RequireRole>
+          }
+        />
+
+        {/*================== PHARMACY ==================*/}
+        <Route
+          path="/pharmacy/dashboard"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacyDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/pharmacy/profile"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacyProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/pharmacy/prescriptions"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacyPrescriptions />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/pharmacy/view-profile"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacyViewProfile />
+            </RequireRole>
+          }
+        />
+
+        {/* Patient: select pharmacy */}
+        <Route
+          path="/patient/select-pharmacy"
+          element={
+            <RequireRole role="PATIENT">
+              <PatientSelectPharmacy />
+            </RequireRole>
+          }
+        />
+        {/* Patient: Pharmacy List (Sidebar link) */}
+        <Route
+          path="/patient/pharmacy/list"
+          element={
+            <RequireRole role="PATIENT">
+              <PharmacyList />
+            </RequireRole>
+          }
+        />
+        {/* Patient: My Pharmacy */}
+        <Route
+          path="/patient/my-pharmacy"
+          element={
+            <RequireRole role="PATIENT">
+              <MyPharmacy />
+            </RequireRole>
+          }
+        />
+
+        <Route
+          path="/pharmacy/subscription"
+          element={
+            <RequireRole role="PHARMACY">
+              {' '}
+              <PharmacySubscription />{' '}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/pharmacy/messages/inbox"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacyInbox />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/pharmacy/messages/send"
+          element={
+            <RequireRole role="PHARMACY">
+              <PharmacySendMessage />
+            </RequireRole>
+          }
+        />
+
+        {/* ================= SUPPORT ================= */}
+        <Route
+          path="/support/dashboard"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/tickets"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportTickets />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/live-chat"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportLiveChat />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/tickets/:id"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportTickets />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/subscribers/doctors"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportSubscribedDoctors />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/subscribers/patients"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportSubscribedPatients />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/support/subscribers/pharmacy"
+          element={
+            <RequireRole role="SUPPORT">
+              <SupportSubscribedPharmacy />
+            </RequireRole>
+          }
+        />
+
+        <Route
+          path="/support/profile"
+          element={
+            <RequireRole role="SUPPORT">
+              <UserProfile />
+            </RequireRole>
+          }
+        />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
