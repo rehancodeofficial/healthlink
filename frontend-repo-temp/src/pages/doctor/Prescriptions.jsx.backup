@@ -1,0 +1,956 @@
+// FILE: src/pages/doctor/Prescriptions.jsx
+import { useState, useEffect, useCallback } from "react";
+import Sidebar from "../../components/Sidebar";
+import Topbar from "../../components/Topbar";
+import api from "../../Lib/api";
+import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+
+const PLACEHOLDER_LOGO = "/images/logo/Asset2.png";
+
+/* ------------------- Tiny toast (success/error) ------------------- */
+function Toast({ text, onClose }) {
+  if (!text) return null;
+  return (
+    <div
+      className="fixed top-6 right-6 bg-[#027906] text-white px-5 py-3 rounded-lg shadow-lg z-50"
+      style={{ animation: "fadeInOut 3s ease forwards" }}
+      onAnimationEnd={onClose}
+    >
+      {text}
+    </div>
+  );
+}
+
+/* -- Inject keyframes once (safe no-op if already added) ----------- */
+if (typeof document !== "undefined" && !document.getElementById("cv-fade-styles")) {
+  const style = document.createElement("style");
+  style.id = "cv-fade-styles";
+  style.innerHTML = `
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+  }`;
+  document.head.appendChild(style);
+}
+
+/* -- ✅ Inject select text-color fix (scoped to patient dropdown) -- */
+if (typeof document !== "undefined" && !document.getElementById("cv-modal-select-style")) {
+  const style = document.createElement("style");
+  style.id = "cv-modal-select-style";
+  style.innerHTML = `
+  /* Force readable black-on-white for native selects in dark modals */
+  .cv-patient-select,
+  .cv-patient-select option {
+    color: #111 !important;
+    background: #fff !important;
+  }
+  /* Improve readability for some Firefox states */
+  .cv-patient-select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #111;
+  }`;
+  document.head.appendChild(style);
+}
+
+/* ------------------- Confirm Dialog ---------------------- */
+function ConfirmDialog({ open, title, message, confirmText = "Confirm", cancelText = "Cancel", onConfirm, onCancel, loading }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]">
+      <div className="bg-[#1a1a2e] text-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-gray-200 mb-6">{message}</p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 rounded border border-white/20 hover:bg-white/10 disabled:opacity-50"
+            disabled={loading}
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function DoctorPrescriptions() {
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [form, setForm] = useState({
+    patientId: "",
+    medication: "",
+    dosage: "",
+    frequency: "",
+    duration: "",
+    notes: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [viewModal, setViewModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [error, setError] = useState("");
+  const [toastText, setToastText] = useState("");
+  
+  // Delete confirmation
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const doctorUserId = localStorage.getItem("userId");
+  const userName =
+    localStorage.getItem("userName") ||
+    localStorage.getItem("name") ||
+    "Doctor";
+
+  // ----------------------------------------------------------
+  // Fetch prescriptions for this doctor (pass doctor User.id)
+  // ----------------------------------------------------------
+  const fetchPrescriptions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/doctor/prescriptions`, {
+        params: { doctorId: doctorUserId },
+      });
+      setPrescriptions(res.data || []);
+      setError("");
+    } catch (err) {
+      console.error("Error fetching prescriptions:", err);
+      setError("Failed to fetch prescriptions");
+    } finally {
+      setLoading(false);
+    }
+  }, [doctorUserId]);
+
+  // ----------------------------------------------------------
+  // Fetch *my* patients (linked to this doctor)
+  // ----------------------------------------------------------
+  const fetchMyPatients = useCallback(async () => {
+    try {
+      const res = await api.get("/doctor/my-patients", {
+        params: { doctorId: doctorUserId },
+      });
+      const list = res.data?.data || res.data || [];
+      const safe = Array.isArray(list) ? list.filter((p) => !!p?.id) : [];
+      setPatients(safe);
+    } catch (err) {
+      console.error("Error fetching my patients:", err);
+    }
+  }, [doctorUserId]);
+
+  useEffect(() => {
+    fetchPrescriptions();
+    fetchMyPatients();
+  }, [fetchPrescriptions, fetchMyPatients]);
+
+  // ----------------------------------------------------------
+  // Create a new prescription
+  // ----------------------------------------------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/doctor/prescriptions", {
+        doctorId: doctorUserId,
+        patientId: form.patientId,
+        medication: form.medication,
+        dosage: form.dosage,
+        frequency: form.frequency,
+        duration: form.duration,
+        notes: form.notes || null,
+      });
+
+      setToastText("✅ Prescription added successfully!");
+      setModalOpen(false);
+      setForm({
+        patientId: "",
+        medication: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        notes: "",
+      });
+      fetchPrescriptions();
+    } catch (err) {
+      console.error("Error saving prescription:", err);
+      setToastText(err?.response?.data?.error || "❌ Failed to save prescription");
+    }
+  };
+
+  // ----------------------------------------------------------
+  // Edit prescription
+  // ----------------------------------------------------------
+  const handleEdit = (p) => {
+    setSelectedPrescription(p);
+    setForm({
+      patientId: p.patientId,
+      medication: p.medication,
+      dosage: p.dosage,
+      frequency: p.frequency,
+      duration: p.duration,
+      notes: p.notes || "",
+    });
+    setEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.patch(`/doctor/prescriptions/${selectedPrescription.id}`, {
+        medication: form.medication,
+        dosage: form.dosage,
+        frequency: form.frequency,
+        duration: form.duration,
+        notes: form.notes || null,
+      });
+
+      setToastText("✅ Prescription updated successfully!");
+      setEditModal(false);
+      setSelectedPrescription(null);
+      setForm({
+        patientId: "",
+        medication: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        notes: "",
+      });
+      fetchPrescriptions();
+    } catch (err) {
+      console.error("Error updating prescription:", err);
+      setToastText(err?.response?.data?.error || "❌ Failed to update prescription");
+    }
+  };
+
+  // ----------------------------------------------------------
+  // Delete prescription
+  // ----------------------------------------------------------
+  const requestDelete = (id) => {
+    setPendingDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      setConfirmLoading(true);
+      await api.delete(`/doctor/prescriptions/${pendingDeleteId}`);
+      setToastText("🗑️ Prescription deleted");
+      setConfirmOpen(false);
+      setPendingDeleteId(null);
+      fetchPrescriptions();
+    } catch (err) {
+      console.error("Error deleting prescription:", err);
+      setToastText("❌ Failed to delete prescription");
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const cancelConfirmDialog = () => {
+    if (confirmLoading) return;
+    setConfirmOpen(false);
+    setPendingDeleteId(null);
+  };
+
+  const handleView = (p) => {
+    setSelectedPrescription(p);
+    setViewModal(true);
+  };
+
+  const hasPatients = patients.length > 0;
+
+  return (
+    <div className="flex bg-[#05050c]/90 text-white min-h-screen">
+      <Sidebar role="DOCTOR" />
+
+      <div className="flex-1 min-h-screen">
+        <Topbar userName={userName} />
+
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+            <h1 className="text-3xl font-bold tracking-wide text-[#daf5db]">
+              Prescriptions
+            </h1>
+            <button
+              onClick={() => setModalOpen(true)}
+              disabled={!hasPatients}
+              title={!hasPatients ? "You have no linked patients yet" : "New prescription"}
+              className="bg-[#027906] disabled:opacity-60 text-white px-5 py-2 rounded-lg flex items-center gap-2 hover:bg-[#190366] transition"
+            >
+              <FaPlus /> New Prescription
+            </button>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-600/20 text-red-200 border border-red-400/30 rounded">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <p className="text-gray-300">Loading prescriptions...</p>
+          ) : (
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-lg overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-white/20">
+                    <th className="p-3">Patient</th>
+                    <th className="p-3">Medication</th>
+                    <th className="p-3">Dosage</th>
+                    <th className="p-3">Frequency</th>
+                    <th className="p-3">Duration</th>
+                    <th className="p-3">Date</th>
+                    <th className="p-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(prescriptions) && prescriptions.length > 0 ? (
+                    prescriptions.map((p) => (
+                      <tr
+                        key={p.id}
+                        className="border-b border-white/10 hover:bg-white/10 transition"
+                      >
+                        <td className="p-3">{p.patient?.user?.name || "N/A"}</td>
+                        <td className="p-3">{p.medication}</td>
+                        <td className="p-3">{p.dosage}</td>
+                        <td className="p-3">{p.frequency}</td>
+                        <td className="p-3">{p.duration}</td>
+                        <td className="p-3">
+                          {p.createdAt ? new Date(p.createdAt).toLocaleString() : "—"}
+                        </td>
+                        <td className="p-3 flex justify-center gap-3">
+                          <button
+                            onClick={() => handleView(p)}
+                            title="View"
+                            className="hover:scale-110 transition"
+                          >
+                            <FaEye className="text-[#FFFFFF]" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(p)}
+                            title="Edit"
+                            className="hover:scale-110 transition"
+                          >
+                            <FaEdit className="text-blue-400" />
+                          </button>
+                          <button
+                            onClick={() => requestDelete(p.id)}
+                            title="Delete"
+                            className="hover:scale-110 transition"
+                          >
+                            <FaTrash className="text-red-400" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center p-6 text-gray-400">
+                        No prescriptions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ✅ Toast */}
+      <Toast text={toastText} onClose={() => setToastText("")} />
+
+      {/* ✅ Delete Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Prescription?"
+        message="This action cannot be undone. The prescription will be permanently deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelConfirmDialog}
+        loading={confirmLoading}
+      />
+
+      {/* =======================
+          ADD PRESCRIPTION MODAL
+      ======================== */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a2e] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute top-3 right-4 text-gray-300 text-xl"
+            >
+              ✖
+            </button>
+
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+
+            <h2 className="text-2xl font-semibold mb-6 text-[#daf5db]">
+              Add Prescription
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Patient */}
+              <div className="prescription-field">
+                <label className="block mb-1 text-gray-300">Patient</label>
+                <div>
+                  <select
+                    className="cv-patient-select w-full p-2 rounded bg-white border border-white/20 text-black"
+                    style={{ color: "#000" }}
+                    value={form.patientId}
+                    onChange={(e) => setForm({ ...form, patientId: e.target.value })}
+                    required
+                  >
+                    <option value="" style={{ color: "#000" }}>
+                      -- Select Patient --
+                    </option>
+                    {patients.map((p) => {
+                      const label = p.name || p.user?.name || p.email || p.user?.email || "Unnamed Patient";
+                      return (
+                        <option key={p.id} value={p.id} style={{ color: "#000" }}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+
+              {/* Medication */}
+              <div>
+                <label className="block mb-2 text-gray-200">Medication</label>
+                <input
+                  type="text"
+                  value={form.medication}
+                  onChange={(e) => setForm({ ...form, medication: e.target.value })}
+                  required
+                  className="w-full p-3 rounded bg-white text-black"
+                />
+              </div>
+
+              {/* Dosage + Frequency */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Dosage</label>
+                  <input
+                    type="text"
+                    value={form.dosage}
+                    onChange={(e) => setForm({ ...form, dosage: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-gray-200">Frequency</label>
+                  <input
+                    type="text"
+                    value={form.frequency}
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              {/* Duration + Notes */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Duration</label>
+                  <input
+                    type="text"
+                    value={form.duration}
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-gray-200">Notes (optional)</label>
+                  <input
+                    type="text"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="submit"
+                  className="bg-[#027906] hover:bg-[#190366] text-white px-6 py-2 rounded-lg"
+                >
+                  Save Prescription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =======================
+          EDIT PRESCRIPTION MODAL
+      ======================== */}
+      {editModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a2e] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
+            <button
+              onClick={() => {
+                setEditModal(false);
+                setSelectedPrescription(null);
+              }}
+              className="absolute top-3 right-4 text-gray-300 text-xl"
+            >
+              ✖
+            </button>
+
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+
+            <h2 className="text-2xl font-semibold mb-6 text-[#daf5db]">
+              Edit Prescription
+            </h2>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              {/* Medication */}
+              <div>
+                <label className="block mb-2 text-gray-200">Medication</label>
+                <input
+                  type="text"
+                  value={form.medication}
+                  onChange={(e) => setForm({ ...form, medication: e.target.value })}
+                  required
+                  className="w-full p-3 rounded bg-white text-black"
+                />
+              </div>
+
+              {/* Dosage + Frequency */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Dosage</label>
+                  <input
+                    type="text"
+                    value={form.dosage}
+                    onChange={(e) => setForm({ ...form, dosage: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-gray-200">Frequency</label>
+                  <input
+                    type="text"
+                    value={form.frequency}
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              {/* Duration + Notes */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Duration</label>
+                  <input
+                    type="text"
+                    value={form.duration}
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-gray-200">Notes (optional)</label>
+                  <input
+                    type="text"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditModal(false);
+                    setSelectedPrescription(null);
+                  }}
+                  className="px-6 py-2 rounded border border-white/20 hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#027906] hover:bg-[#190366] text-white px-6 py-2 rounded-lg"
+                >
+                  Update Prescription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =======================
+          VIEW PRESCRIPTION MODAL
+      ======================== */}
+      {viewModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a2e] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
+            <button
+              onClick={() => setViewModal(false)}
+              className="absolute top-3 right-4 text-gray-300 text-xl"
+            >
+              ✖
+            </button>
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+            <h2 className="text-2xl font-semibold mb-6 text-[#daf5db]">
+              Prescription Details
+            </h2>
+
+            <div className="space-y-3 text-gray-200">
+              <p>
+                <strong>Patient:</strong>{" "}
+                {selectedPrescription?.patient?.user?.name || "N/A"}
+              </p>
+              <p>
+                <strong>Medication:</strong> {selectedPrescription?.medication}
+              </p>
+              <p>
+                <strong>Dosage:</strong> {selectedPrescription?.dosage}
+              </p>
+              <p>
+                <strong>Frequency:</strong> {selectedPrescription?.frequency}
+              </p>
+              <p>
+                <strong>Duration:</strong> {selectedPrescription?.duration}
+              </p>
+              <p>
+                <strong>Notes:</strong> {selectedPrescription?.notes || "—"}
+              </p>
+              <p>
+                <strong>Issued:</strong>{" "}
+                {selectedPrescription?.createdAt
+                  ? new Date(selectedPrescription.createdAt).toLocaleString()
+                  : "—"}
+              </p>
+            </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+    <div className="flex bg-[#05050c]/90 text-white min-h-screen">
+      <Sidebar role="DOCTOR" />
+
+      <div className="flex-1 min-h-screen">
+        <Topbar userName={userName} />
+
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+            <h1 className="text-3xl font-bold tracking-wide text-[#daf5db]">
+              Prescriptions
+            </h1>
+            <button
+              onClick={() => setModalOpen(true)}
+              disabled={!hasPatients}
+              title={!hasPatients ? "You have no linked patients yet" : "New prescription"}
+              className="bg-[#027906] disabled:opacity-60 text-white px-5 py-2 rounded-lg flex items-center gap-2 hover:bg-[#190366] transition"
+            >
+              <FaPlus /> New Prescription
+            </button>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-600/20 text-red-200 border border-red-400/30 rounded">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <p className="text-gray-300">Loading prescriptions...</p>
+          ) : (
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-lg overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-white/20">
+                    <th className="p-3">Patient</th>
+                    <th className="p-3">Medication</th>
+                    <th className="p-3">Dosage</th>
+                    <th className="p-3">Frequency</th>
+                    <th className="p-3">Duration</th>
+                    <th className="p-3">Date</th>
+                    <th className="p-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(prescriptions) && prescriptions.length > 0 ? (
+                    prescriptions.map((p) => (
+                      <tr
+                        key={p.id}
+                        className="border-b border-white/10 hover:bg-white/10 transition"
+                      >
+                        <td className="p-3">{p.patient?.user?.name || "N/A"}</td>
+                        <td className="p-3">{p.medication}</td>
+                        <td className="p-3">{p.dosage}</td>
+                        <td className="p-3">{p.frequency}</td>
+                        <td className="p-3">{p.duration}</td>
+                        <td className="p-3">
+                          {p.createdAt ? new Date(p.createdAt).toLocaleString() : "—"}
+                        </td>
+                        <td className="p-3 flex justify-center gap-3">
+                          <button
+                            onClick={() => handleView(p)}
+                            title="View"
+                            className="hover:scale-110 transition"
+                          >
+                            <FaEye className="text-[#FFFFFF]" />
+                          </button>
+                          <FaEdit className="text-gray-400 opacity-50 cursor-not-allowed" />
+                          <FaTrash className="text-gray-400 opacity-50 cursor-not-allowed" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center p-6 text-gray-400">
+                        No prescriptions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ✅ Toast */}
+      <Toast text={toastText} onClose={() => setToastText("")} />
+
+      {/* =======================
+          ADD PRESCRIPTION MODAL
+      ======================== */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a2e] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute top-3 right-4 text-gray-300 text-xl"
+            >
+              ✖
+            </button>
+
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+
+            <h2 className="text-2xl font-semibold mb-6 text-[#daf5db]">
+              Add Prescription
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Patient */}
+              <div className="prescription-field">
+                <label className="block mb-1 text-gray-300">Patient</label>
+                <div>
+                  <select
+                    className="cv-patient-select w-full p-2 rounded bg-white border border-white/20 text-black"
+                    style={{ color: "#000" }}
+                    value={form.patientId}
+                    onChange={(e) => setForm({ ...form, patientId: e.target.value })}
+                    required
+                  >
+                    <option value="" style={{ color: "#000" }}>
+                      -- Select Patient --
+                    </option>
+                    {patients.map((p) => {
+                      const label = p.name || p.user?.name || p.email || p.user?.email || "Unnamed Patient";
+                      return (
+                        <option key={p.id} value={p.id} style={{ color: "#000" }}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+
+              {/* Medication */}
+              <div>
+                <label className="block mb-2 text-gray-200">Medication</label>
+                <input
+                  type="text"
+                  value={form.medication}
+                  onChange={(e) => setForm({ ...form, medication: e.target.value })}
+                  required
+                  className="w-full p-3 rounded bg-white text-black"
+                />
+              </div>
+
+              {/* Dosage + Frequency */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Dosage</label>
+                  <input
+                    type="text"
+                    value={form.dosage}
+                    onChange={(e) => setForm({ ...form, dosage: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-gray-200">Frequency</label>
+                  <input
+                    type="text"
+                    value={form.frequency}
+                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              {/* Duration + Notes */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-gray-200">Duration</label>
+                  <input
+                    type="text"
+                    value={form.duration}
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    required
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-gray-200">Notes (optional)</label>
+                  <input
+                    type="text"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="w-full p-3 rounded bg-white text-black"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="submit"
+                  className="bg-[#027906] hover:bg-[#190366] text-white px-6 py-2 rounded-lg"
+                >
+                  Save Prescription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =======================
+          VIEW PRESCRIPTION MODAL
+      ======================== */}
+      {viewModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1a1a2e] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
+            <button
+              onClick={() => setViewModal(false)}
+              className="absolute top-3 right-4 text-gray-300 text-xl"
+            >
+              ✖
+            </button>
+            <img
+              src="/images/logo/Asset2.png"
+              alt="CureVirtual"
+              style={{ width: 120, height: "auto" }}
+              onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }}
+            />
+            <h2 className="text-2xl font-semibold mb-6 text-[#daf5db]">
+              Prescription Details
+            </h2>
+
+            <div className="space-y-3 text-gray-200">
+              <p>
+                <strong>Patient:</strong>{" "}
+                {selectedPrescription?.patient?.user?.name || "N/A"}
+              </p>
+              <p>
+                <strong>Medication:</strong> {selectedPrescription?.medication}
+              </p>
+              <p>
+                <strong>Dosage:</strong> {selectedPrescription?.dosage}
+              </p>
+              <p>
+                <strong>Frequency:</strong> {selectedPrescription?.frequency}
+              </p>
+              <p>
+                <strong>Duration:</strong> {selectedPrescription?.duration}
+              </p>
+              <p>
+                <strong>Notes:</strong> {selectedPrescription?.notes || "—"}
+              </p>
+              <p>
+                <strong>Issued:</strong>{" "}
+                {selectedPrescription?.createdAt
+                  ? new Date(selectedPrescription.createdAt).toLocaleString()
+                  : "—"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
