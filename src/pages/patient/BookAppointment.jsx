@@ -123,7 +123,7 @@ const BookAppointment = () => {
               </div>
 
               {/* Reason */}
-              {formData.selectedSlotId && (
+              {formData.doctorId && (
                 <div>
                   <label className="block font-medium mb-2 text-[var(--text-main)]">
                     Reason for Visit
