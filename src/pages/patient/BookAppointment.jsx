@@ -1,4 +1,3 @@
-// FILE: src/pages/patient/BookAppointment.jsx
 import React, { useState, useEffect } from "react";
 import api from "../../Lib/api";
 import Sidebar from "../../components/Sidebar";
@@ -53,7 +52,7 @@ const BookAppointment = () => {
     setFormData((prev) => ({ ...prev, selectedSlotId: slot.id }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleInitializeBooking = async (e) => {
     e.preventDefault();
 
     if (!formData.selectedSlotId) {
@@ -92,7 +91,7 @@ const BookAppointment = () => {
           </h1>
 
           <div className="max-w-2xl mx-auto bg-[var(--bg-glass)] p-8 rounded-xl shadow-lg border border-[var(--border)]">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleInitializeBooking} className="space-y-5">
               {/* Doctor Selection */}
               <div>
                 <label className="block font-medium mb-2 text-[var(--text-main)]">
@@ -186,7 +185,7 @@ const BookAppointment = () => {
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
               >
-                {loading ? "Booking..." : "Book Appointment"}
+                {loading ? "Booking..." : "Initialize Booking"}
               </button>
             </form>
 
