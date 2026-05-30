@@ -56,6 +56,7 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
         return (
           <button
             key={slot.id}
+            type="button"
             onClick={() => handleSelect(slot)}
             disabled={!isAvailable}
             className={`
