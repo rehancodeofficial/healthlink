@@ -286,7 +286,7 @@ export default function DoctorPrescriptions() {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white">
           <div onClick={() => setModalOpen(false)}></div>
           <div className="animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
