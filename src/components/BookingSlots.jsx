@@ -29,7 +29,9 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
     }
   }, [doctorId, date, fetchSlots]);
 
-  const handleSelect = (slot) => {
+  const handleSelect = (e, slot) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (slot.status !== "AVAILABLE") return;
     setSelectedSlotId(slot.id);
     onSlotSelect(slot);
@@ -56,7 +58,8 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
         return (
           <button
             key={slot.id}
-            onClick={() => handleSelect(slot)}
+            type="button"
+            onClick={(e) => handleSelect(e, slot)}
             disabled={!isAvailable}
             className={`
               relative px-2 py-3 rounded-lg text-sm font-semibold transition-all border
