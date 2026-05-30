@@ -286,9 +286,9 @@ export default function DoctorPrescriptions() {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div onClick={() => setModalOpen(false)}></div>
-          <div className="animate-in zoom-in-95 duration-300">
+          <div className="animate-in zoom-in-95 duration-300  bg-white">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
               <FaPrescriptionBottleAlt className="text-[var(--brand-blue)]" /> Authorize Protocol
             </h2>
