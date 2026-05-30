@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FaRobot, FaPaperPlane, FaTimes, FaUserMd, FaCommentMedical } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
+import api from "../Lib/api";
 
 export default function Chatbot() {
   const { theme } = useTheme();
@@ -32,28 +33,8 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      // Direct call to Python backend
-      // Note: We are using fetch here to avoid needing to import axios if it's not already imported,
-      // but let's stick to the plan and standard practice.
-      // Actually, let's use the existing 'api' if we can, but 'api' likely has a baseURL set to the Node backend.
-      // So detailed fetch is safer.
-      const chatbotUrl = import.meta.env.DEV
-        ? "https://curevirtual-2-production-ee33.up.railway.app/api/chatbot/chat"
-        : import.meta.env.VITE_CHATBOT_URL ||
-          "https://curevirtual-2-production-ee33.up.railway.app/api/chatbot/chat";
-      const response = await fetch(chatbotUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: userMsg.text }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await api.post("/chatbot/chat", { message: userMsg.text });
+      const data = response.data;
 
       const botMsg = {
         sender: "bot",
@@ -84,7 +65,7 @@ export default function Chatbot() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
       {/* Chat Window */}
       <div
-        className={`pointer-events-auto w-[350px] sm:w-[380px] h-[500px] rounded-2xl overflow-hidden flex flex-col transition-all duration-300 origin-bottom-right mb-4 ${
+        className={`pointer-events-auto w-[calc(100vw-3rem)] sm:w-[380px] h-[calc(100vh-8rem)] sm:h-[500px] max-h-[600px] rounded-2xl overflow-hidden flex flex-col transition-all duration-300 origin-bottom-right mb-4 ${
           theme === "dark"
             ? "bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]"
             : "bg-white border border-gray-200 shadow-2xl"
