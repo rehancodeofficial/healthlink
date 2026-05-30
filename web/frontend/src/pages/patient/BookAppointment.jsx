@@ -123,6 +123,22 @@ const BookAppointment = () => {
                 </select>
               </div>
 
+              {/* Reason */}
+              {formData.doctorId && (
+                <div>
+                  <label className="block font-medium mb-2 text-[var(--text-main)]">
+                    Reason for Visit
+                  </label>
+                  <textarea
+                    value={formData.reason}
+                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                    rows="3"
+                    placeholder="Briefly describe your reason..."
+                    className="w-full bg-transparent border border-[var(--border)] rounded-lg p-3 text-[var(--text-main)] focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
               {/* Date Selection */}
               {formData.doctorId && (
                 <div>
@@ -156,22 +172,6 @@ const BookAppointment = () => {
                     doctorId={formData.doctorId}
                     date={new Date(formData.appointmentDate)}
                     onSlotSelect={handleSlotSelect}
-                  />
-                </div>
-              )}
-
-              {/* Reason */}
-              {formData.selectedSlotId && (
-                <div>
-                  <label className="block font-medium mb-2 text-[var(--text-main)]">
-                    Reason for Visit
-                  </label>
-                  <textarea
-                    value={formData.reason}
-                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                    rows="3"
-                    placeholder="Briefly describe your reason..."
-                    className="w-full bg-transparent border border-[var(--border)] rounded-lg p-3 text-[var(--text-main)] focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               )}
