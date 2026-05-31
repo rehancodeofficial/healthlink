@@ -24,7 +24,7 @@ const BookAppointment = () => {
     const fetchDoctors = async () => {
       try {
         setLoadingDoctors(true);
-        const res = await api.get("/api/doctor/list");
+        const res = await api.get("/doctor/list");
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
         setDoctors(data);
       } catch {
