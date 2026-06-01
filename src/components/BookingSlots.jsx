@@ -11,8 +11,7 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
   const fetchSlots = useCallback(async () => {
     setLoading(true);
     try {
-      // API expects YYYY-MM-DD
-      const dateStr = date.toISOString().split("T")[0];
+      const dateStr = typeof date === "string" ? date : date.toISOString().split("T")[0];
       const res = await api.get(`/schedule/slots?doctorId=${doctorId}&date=${dateStr}`);
       setSlots(res.data.data || []);
     } catch (err) {
