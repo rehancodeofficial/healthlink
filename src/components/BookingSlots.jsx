@@ -12,10 +12,12 @@ export default function BookingSlots({ doctorId, date, onSlotSelect }) {
     setLoading(true);
     try {
       const dateStr = typeof date === "string" ? date : date.toISOString().split("T")[0];
+      console.log("[BookingSlots] Fetching slots for doctorId:", doctorId, "date:", dateStr);
       const res = await api.get(`/schedule/slots?doctorId=${doctorId}&date=${dateStr}`);
+      console.log("[BookingSlots] API response:", res.data);
       setSlots(res.data.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("[BookingSlots] Error:", err.response?.data || err.message);
       toast.error("Failed to load slots");
     } finally {
       setLoading(false);
