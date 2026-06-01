@@ -170,7 +170,7 @@ const BookAppointment = () => {
                   </label>
                   <BookingSlots
                     doctorId={formData.doctorId}
-                    date={new Date(formData.appointmentDate)}
+                    date={formData.appointmentDate}
                     onSlotSelect={handleSlotSelect}
                   />
                 </div>
