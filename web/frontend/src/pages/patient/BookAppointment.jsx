@@ -119,7 +119,7 @@ const BookAppointment = () => {
                           className="bg-[var(--bg-card)] text-[var(--text-main)]"
                         >
                           {doc.user?.firstName} {doc.user?.lastName} —{" "}
-                          {doc.specialization || "General Medicine"}
+                          {doc.specialization || "General"}
                         </option>
                       ))
                     : !loadingDoctors && <option disabled>No doctors available</option>}
@@ -130,13 +130,13 @@ const BookAppointment = () => {
               {formData.doctorId && (
                 <div>
                   <label className="block font-medium mb-2 text-[var(--text-main)]">
-                    Reason for Visit
+                    Why are you visiting?
                   </label>
                   <textarea
                     value={formData.reason}
                     onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                     rows="3"
-                    placeholder="Briefly describe your reason..."
+                    placeholder="Tell us why you need to see a doctor..."
                     className="w-full bg-transparent border border-[var(--border)] rounded-lg p-3 text-[var(--text-main)] focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -179,7 +179,7 @@ const BookAppointment = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Book Button */}
               <button
                 type="submit"
                 disabled={loading || !formData.selectedSlotId}
@@ -189,7 +189,7 @@ const BookAppointment = () => {
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
               >
-                {loading ? "Booking..." : "Initialize Booking"}
+                {loading ? "Booking..." : "Book Now"}
               </button>
             </form>
 
