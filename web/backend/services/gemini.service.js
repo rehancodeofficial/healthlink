@@ -13,8 +13,8 @@ exports.generateAIResponse = async (userMessage) => {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
 
-    // Using gemini-1.5-flash as it is supported in v1
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Using gemini-2.5-flash as it is supported in v1
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       You are a smart medical assistant for "CureVirtual".
