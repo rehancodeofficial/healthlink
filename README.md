@@ -124,7 +124,7 @@ Key variables required in `.env` files:
 ### Messaging
 
 - `GET /api/messages/inbox` - Retrieve user inbox.
-- `POST /api/messages/send` - Send a message or broadcast.
+- `POST /api/messages/send` - Send a message or Send Message to All.
 
 ## Deployment
 
