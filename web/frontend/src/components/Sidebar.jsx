@@ -222,7 +222,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 isOpen={openSubscribers}
                 onClick={() => setOpenSubscribers(!openSubscribers)}
               >
-                <SubItem to="/superadmin/subscribers" label="Statistics" icon={<FaChartBar />} />
+                <SubItem to="/superadmin/subscribers" label="Stats" icon={<FaChartBar />} />
                 <SubItem to="/superadmin/subscribers/doctors" label="Doctors" icon={<FaUserMd />} />
                 <SubItem
                   to="/superadmin/subscribers/patients"
@@ -235,9 +235,9 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                   icon={<FaIdCard />}
                 />
               </DropdownItem>
-              <NavItem to="/superadmin/system-reports" icon={<FaChartBar />} label="System Audit" />
-              <NavItem to="/superadmin/settings" icon={<FaCogs />} label="Global Config" />
-              <NavItem to="/superadmin/activity-logs" icon={<FaListUl />} label="Security Flux" />
+              <NavItem to="/superadmin/system-reports" icon={<FaChartBar />} label="Reports" />
+              <NavItem to="/superadmin/settings" icon={<FaCogs />} label="Settings" />
+              <NavItem to="/superadmin/activity-logs" icon={<FaListUl />} label="Activity Logs" />
               <DropdownItem
                 icon={<FaEnvelope />}
                 label="Messages"
@@ -246,7 +246,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 badge={unreadCount}
               >
                 <SubItem to="/superadmin/messages/inbox" label="Inbox" icon={<FaInbox />} />
-                <SubItem to="/superadmin/messages/send" label="Compose" icon={<FaPaperPlane />} />
+                <SubItem to="/superadmin/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
             </>
           )}
@@ -254,20 +254,20 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
           {/* ADMIN */}
           {role === "ADMIN" && (
             <>
-              <NavItem to="/admin/dashboard" icon={<FaChartBar />} label="Overview" />
+              <NavItem to="/admin/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <DropdownItem
                 icon={<FaUsers />}
-                label="Identity Hub"
+                label="Manage Users"
                 isOpen={openManageUsers}
                 onClick={() => setOpenManageUsers(!openManageUsers)}
               >
-                <SubItem to="/admin/users-list" label="User Registry" icon={<FaListUl />} />
+                <SubItem to="/admin/users-list" label="All Users" icon={<FaListUl />} />
                 <SubItem
                   to="/admin/manage-users"
-                  label="Provision Identity"
+                  label="Add User"
                   icon={<FaUserShield />}
                 />
-                <SubItem to="/admin/reports" label="Operational Audit" icon={<FaChartBar />} />
+                <SubItem to="/admin/reports" label="Reports" icon={<FaChartBar />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaUsers />}
@@ -275,24 +275,24 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 isOpen={openSubscribers}
                 onClick={() => setOpenSubscribers(!openSubscribers)}
               >
-                <SubItem to="/admin/subscribers" label="Market Stats" icon={<FaChartBar />} />
+                <SubItem to="/admin/subscribers" label="Stats" icon={<FaChartBar />} />
                 <SubItem
                   to="/admin/subscribers/doctors"
-                  label="Medical Staff"
+                  label="Doctors"
                   icon={<FaUserMd />}
                 />
                 <SubItem to="/admin/subscribers/patients" label="Patients" icon={<FaUsers />} />
               </DropdownItem>
-              <NavItem to="/admin/subscription" icon={<FaCogs />} label="Billing" />
+              <NavItem to="/admin/subscription" icon={<FaCogs />} label="Subscription" />
               <DropdownItem
                 icon={<FaEnvelope />}
-                label="Mailbox"
+                label="Messages"
                 isOpen={openMessages}
                 onClick={() => setOpenMessages(!openMessages)}
                 badge={unreadCount}
               >
-                <SubItem to="/admin/messages/inbox" label="Incoming" icon={<FaInbox />} />
-                <SubItem to="/admin/messages/send" label="New Message" icon={<FaPaperPlane />} />
+                <SubItem to="/admin/messages/inbox" label="Inbox" icon={<FaInbox />} />
+                <SubItem to="/admin/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
             </>
           )}
@@ -300,42 +300,42 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
           {/* DOCTOR */}
           {role === "DOCTOR" && (
             <>
-              <NavItem to="/doctor/dashboard" icon={<FaChartBar />} label="Clinical Desk" />
+              <NavItem to="/doctor/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <NavItem to="/doctor/appointments" icon={<FaCalendarAlt />} label="Appointments" />
               <NavItem to="/doctor/schedule" icon={<FaCalendarAlt />} label="My Schedule" />
               <NavItem
                 to="/doctor/prescriptions"
                 icon={<FaClipboardList />}
-                label="Medical Audit"
+                label="Prescriptions"
               />
-              <NavItem to="/doctor/patients" icon={<FaUsers />} label="Patient Pool" />
-              <NavItem to="/doctor/video-consultation" icon={<FaVideo />} label="Virtual Room" />
-              <NavItem to="/doctor/subscription" icon={<FaCogs />} label="Packages" />
+              <NavItem to="/doctor/patients" icon={<FaUsers />} label="My Patients" />
+              <NavItem to="/doctor/video-consultation" icon={<FaVideo />} label="Video Call" />
+              <NavItem to="/doctor/subscription" icon={<FaCogs />} label="My Plan" />
               <DropdownItem
                 icon={<FaEnvelope />}
-                label="Communications"
+                label="Messages"
                 isOpen={openMessages}
                 onClick={() => setOpenMessages(!openMessages)}
                 badge={unreadCount}
               >
                 <SubItem to="/doctor/messages/inbox" label="Inbox" icon={<FaInbox />} />
-                <SubItem to="/doctor/messages/send" label="Broadcast" icon={<FaPaperPlane />} />
+                <SubItem to="/doctor/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
-              <NavItem to="/doctor/view-profile" icon={<FaIdCard />} label="Public Profile" />
+              <NavItem to="/doctor/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
           {/* PATIENT */}
           {role === "PATIENT" && (
             <>
-              <NavItem to="/patient/dashboard" icon={<FaChartBar />} label="Wellness Hub" />
-              <NavItem to="/patient/my-appointments" icon={<FaCalendarAlt />} label="My Visits" />
+              <NavItem to="/patient/dashboard" icon={<FaChartBar />} label="Dashboard" />
+              <NavItem to="/patient/my-appointments" icon={<FaCalendarAlt />} label="My Appointments" />
               <NavItem
                 to="/patient/prescriptions"
                 icon={<FaClipboardList />}
-                label="Health Records"
+                label="Prescriptions"
               />
-              <NavItem to="/patient/video-consultation" icon={<FaVideo />} label="Join Room" />
+              <NavItem to="/patient/video-consultation" icon={<FaVideo />} label="Video Call" />
               <DropdownItem
                 icon={<FaUserMd />}
                 label="Doctors"
@@ -343,7 +343,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 onClick={() => setShowPatientDoctors(!showPatientDoctors)}
               >
                 <SubItem to="/patient/doctors/list" label="Find Doctors" icon={<FaListUl />} />
-                <SubItem to="/patient/doctors/my" label="My Specialists" icon={<FaUsers />} />
+                <SubItem to="/patient/doctors/my" label="My Doctors" icon={<FaUsers />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaPills />}
@@ -351,51 +351,51 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 isOpen={openPharmacy}
                 onClick={() => setOpenPharmacy(!openPharmacy)}
               >
-                <SubItem to="/patient/pharmacy/list" label="Local Pharmacies" icon={<FaListUl />} />
-                <SubItem to="/patient/my-pharmacy" label="Preferred" icon={<FaPills />} />
+                <SubItem to="/patient/pharmacy/list" label="Find a Pharmacy" icon={<FaListUl />} />
+                <SubItem to="/patient/my-pharmacy" label="My Pharmacy" icon={<FaPills />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaEnvelope />}
-                label="Support Mail"
+                label="Messages"
                 isOpen={showPatientMsg}
                 onClick={() => setShowPatientMsg(!showPatientMsg)}
                 badge={patientMsgCount}
               >
-                <SubItem to="/patient/messages" label="Replies" icon={<FaInbox />} />
-                <SubItem to="/patient/messages/send" label="Ask Doctor" icon={<FaPaperPlane />} />
+                <SubItem to="/patient/messages" label="Inbox" icon={<FaInbox />} />
+                <SubItem to="/patient/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
-              <NavItem to="/patient/subscription" icon={<FaCogs />} label="Membership" />
-              <NavItem to="/patient/profile/view-profile" icon={<FaIdCard />} label="My Account" />
+              <NavItem to="/patient/subscription" icon={<FaCogs />} label="My Plan" />
+              <NavItem to="/patient/profile/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
           {/* PHARMACY */}
           {role === "PHARMACY" && (
             <>
-              <NavItem to="/pharmacy/dashboard" icon={<FaChartBar />} label="Inventory Desk" />
+              <NavItem to="/pharmacy/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <NavItem to="/pharmacy/prescriptions" icon={<FaClipboardList />} label="Orders" />
-              <NavItem to="/pharmacist/subscription" icon={<FaCogs />} label="Store Plan" />
+              <NavItem to="/pharmacist/subscription" icon={<FaCogs />} label="My Plan" />
               <DropdownItem
                 icon={<FaEnvelope />}
-                label="Chat"
+                label="Messages"
                 isOpen={openMessages}
                 onClick={() => setOpenMessages(!openMessages)}
                 badge={unreadCount}
               >
-                <SubItem to="/pharmacy/messages/inbox" label="Inquiries" icon={<FaInbox />} />
-                <SubItem to="/pharmacy/messages/send" label="Respond" icon={<FaPaperPlane />} />
+                <SubItem to="/pharmacy/messages/inbox" label="Inbox" icon={<FaInbox />} />
+                <SubItem to="/pharmacy/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
-              <NavItem to="/pharmacy/view-profile" icon={<FaIdCard />} label="Store Profile" />
+              <NavItem to="/pharmacy/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
           {/* SUPPORT */}
           {role === "SUPPORT" && (
             <>
-              <NavItem to="/support/dashboard" icon={<FaChartBar />} label="Help Center" />
+              <NavItem to="/support/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <DropdownItem
                 icon={<FaUsers />}
-                label="Directory"
+                label="Users"
                 isOpen={openSubscribers}
                 onClick={() => setOpenSubscribers(!openSubscribers)}
               >
@@ -408,7 +408,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 />
               </DropdownItem>
               <NavItem to="/support/tickets" icon={<FaTicketAlt />} label="Tickets" />
-              <NavItem to="/support/live-chat" icon={<FaComments />} label="Live Support" />
+              <NavItem to="/support/live-chat" icon={<FaComments />} label="Live Chat" />
             </>
           )}
         </nav>
