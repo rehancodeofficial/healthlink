@@ -75,7 +75,7 @@ export default function Login() {
           if (verifyError) throw verifyError;
 
           if (!data.user) {
-            throw new Error("Invalid OTP. Please try again.");
+            throw new Error("Wrong code. Please try again.");
           }
 
           // Sync with backend
@@ -109,7 +109,7 @@ export default function Login() {
     localStorage.setItem("type", user.type || "USER");
     localStorage.setItem("email", user.email || userEmail);
 
-    toast.success("Login successful! Redirecting...");
+    toast.success("Logged in! Taking you to your dashboard...");
 
     setTimeout(() => {
       switch (user.role) {
@@ -187,7 +187,7 @@ export default function Login() {
           <div className="z-10 flex items-center gap-4">
             <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Secure Login
+              Safe Login
             </p>
           </div>
         </div>
@@ -211,8 +211,8 @@ export default function Login() {
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
               {loginMode === "password"
-                ? "Enter your credentials to access your dashboard."
-                : "Enter your email to receive a login OTP."}
+                ? "Enter your email and password to log in."
+                : "Enter your email. We'll send you a code to log in."}
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export default function Login() {
                   disabled={otpSent}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
-                  placeholder="operator@curevirtual.io"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
@@ -245,10 +245,10 @@ export default function Login() {
                   </label>
                   <Link
                     to="/forgot-password"
-                    title="Recover Password"
+                    title="Forgot Password"
                     className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
                   >
-                    Recovery?
+                    Forgot password?
                   </Link>
                 </div>
                 <div className="relative group">
@@ -330,19 +330,19 @@ export default function Login() {
               className="w-full text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-widest hover:underline text-center"
             >
               {loginMode === "password"
-                ? "Login with OTP instead?"
-                : "Login with Password instead?"}
+                ? "Log in with a code instead?"
+                : "Log in with a password instead?"}
             </button>
           </form>
 
           <div className="mt-12 text-center pt-8 border-t border-[var(--border)]">
             <p className="text-xs font-bold text-[var(--text-soft)] uppercase tracking-widest">
-              New User?{" "}
+              Don't have an account?{" "}
               <Link
                 to="/register"
                 className="text-[var(--brand-blue)] font-black hover:underline cursor-pointer ml-1"
               >
-                Register
+                Sign Up
               </Link>
             </p>
           </div>
