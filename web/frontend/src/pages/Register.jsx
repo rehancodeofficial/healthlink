@@ -145,7 +145,7 @@ export default function Register() {
                   Secure Data
                 </p>
                 <p className="text-[9px] font-bold text-[var(--text-main)]/40 uppercase tracking-widest">
-                  Medical Grade Security
+                  Your data is safe with us
                 </p>
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function Register() {
                   value={form.email}
                   onChange={handleChange}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                  placeholder="address@meta"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
@@ -357,7 +357,7 @@ export default function Register() {
             {form.role === "DOCTOR" && (
               <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
                 <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                  Medical Specialization
+                  Your Specialization
                 </label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--brand-green)]">
