@@ -47,7 +47,7 @@ export default function PatientDashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-[10px] font-black text-[var(--brand-orange)] uppercase tracking-[0.3em] mb-1">
-              Wellness Hub
+              Dashboard
             </h2>
             <h1 className="text-3xl lg:text-4xl font-black text-[var(--text-main)] tracking-tighter leading-none">
               Hello, {userName.split(" ")[0]}
@@ -56,7 +56,7 @@ export default function PatientDashboard() {
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl glass border-orange-500/20 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-[var(--text-soft)]">
               <FaHeartbeat className="text-[var(--brand-orange)]" />
-              Vitals Nominal
+              Health is Good
             </div>
           </div>
         </div>
@@ -64,35 +64,35 @@ export default function PatientDashboard() {
         {/* Dense Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Scheduled Visits"
+            title="Upcoming Appointments"
             value={stats.totalAppointments}
             icon={<FaCalendarAlt />}
             color="--brand-green"
-            subtext="Track sessions"
+            subtext="View all"
             onClick={() => navigate("/patient/my-appointments")}
           />
           <StatCard
-            title="Active Scripts"
+            title="Current Prescriptions"
             value={stats.totalPrescriptions}
             icon={<FaPrescription />}
             color="--brand-blue"
-            subtext="Records"
+            subtext="My records"
             onClick={() => navigate("/patient/prescriptions")}
           />
           <StatCard
-            title="Video Sessions"
+            title="Video Calls"
             value={stats.totalConsultations}
             icon={<FaVideo />}
             color="--brand-orange"
-            subtext="History"
+            subtext="My history"
             onClick={() => navigate("/patient/video-consultation")}
           />
           <StatCard
-            title="Medical Team"
+            title="My Doctors"
             value={stats.totalDoctors}
             icon={<FaUserMd />}
             color="--brand-green"
-            subtext="Active"
+            subtext="Active now"
             onClick={() => navigate("/patient/doctors/my")}
           />
         </div>
@@ -102,19 +102,19 @@ export default function PatientDashboard() {
           <div className="lg:col-span-8 card !p-6">
             <h3 className="text-sm font-black text-[var(--text-main)] mb-6 flex items-center gap-3 uppercase tracking-widest">
               <div className="h-1.5 w-1.5 rounded-full bg-[var(--brand-green)]"></div>
-              Intelligent Navigation
+              Quick Links
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <QuickLink
                 icon={<FaUserMd className="text-[var(--brand-green)]" />}
-                title="Find Specialist"
-                desc="Licensed doctors by category"
+                title="Find a Doctor"
+                desc="Search doctors by type"
                 onClick={() => navigate("/patient/doctors/list")}
               />
               <QuickLink
                 icon={<FaVideo className="text-[var(--brand-blue)]" />}
-                title="Join Consult"
-                desc="Encrypted high-speed video"
+                title="Start Video Call"
+                desc="Private high-quality video"
                 onClick={() => navigate("/patient/video-consultation")}
               />
             </div>
@@ -128,7 +128,7 @@ export default function PatientDashboard() {
               <div>
                 <h4 className="font-black text-lg tracking-tight">Premium Care</h4>
                 <p className="text-[var(--text-main)]/70 text-[11px] font-bold leading-relaxed italic">
-                  Systems normalized. Healthcare optimized for efficiency.
+                  Everything is working great. Get the best care here.
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function PatientDashboard() {
               onClick={() => navigate("/patient/support")}
               className="w-full bg-white text-[var(--brand-blue)] font-black uppercase tracking-widest text-[10px] py-4 rounded-2xl hover:bg-gray-100 transition-all shadow-xl mt-6"
             >
-              Help Desk
+              Get Help
             </button>
           </div>
         </div>
