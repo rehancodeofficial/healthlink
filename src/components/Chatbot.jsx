@@ -9,7 +9,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hello! I am your AI Medical Assistant. I can help you find specialists and answer general health questions based on your symptoms. How can I assist you today?",
+      text: "Hi! I'm your health assistant. Tell me your symptoms and I'll help you find the right doctor.",
     },
   ]);
   const [input, setInput] = useState("");
