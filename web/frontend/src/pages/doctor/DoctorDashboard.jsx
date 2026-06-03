@@ -66,7 +66,7 @@ export default function DoctorDashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-[10px] font-black text-[var(--brand-orange)] uppercase tracking-[0.3em] mb-1">
-              Clinical Desk
+              Dashboard
             </h2>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-[var(--text-main)] tracking-tighter leading-none">
               Welcome, Dr. {userName.split(" ")[0]}
@@ -75,13 +75,13 @@ export default function DoctorDashboard() {
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="px-4 py-2 rounded-2xl glass border-green-500/20 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-[var(--text-soft)] h-[48px]">
               <FaCheckCircle className="text-[var(--brand-green)]" />
-              Active Operations
+              Everything is OK
             </div>
             <button
               onClick={() => navigate("/doctor/video-consultation")}
               className="btn btn-primary !py-0 !px-6 h-[48px] shadow-green-500/30 flex items-center gap-2"
             >
-              <FaVideo /> Virtual Room
+              <FaVideo /> Video Call
             </button>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function DoctorDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AlertCard
             icon={<FaClock />}
-            label="Late Starts"
+            label="Late Appointments"
             count={stats.urgentFlags?.lateAppointments}
             color="text-red-500"
             bg="bg-red-500/10"
@@ -98,7 +98,7 @@ export default function DoctorDashboard() {
           />
           <AlertCard
             icon={<FaFileSignature />}
-            label="Unsigned Notes"
+            label="Notes to Finish"
             count={stats.urgentFlags?.unsignedNotes}
             color="text-orange-500"
             bg="bg-orange-500/10"
@@ -106,7 +106,7 @@ export default function DoctorDashboard() {
           />
           <AlertCard
             icon={<FaFlask />}
-            label="Urgent Labs"
+            label="Urgent Lab Tests"
             count={stats.urgentFlags?.urgentLabs}
             color="text-blue-500"
             bg="bg-blue-500/10"
@@ -117,7 +117,7 @@ export default function DoctorDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Total Visits"
+            title="Total Appointments"
             value={stats.totalAppointments}
             icon={<FaCalendarCheck />}
             color="--brand-green"
@@ -129,7 +129,7 @@ export default function DoctorDashboard() {
             value={stats.totalPrescriptions}
             icon={<FaPrescription />}
             color="--brand-blue"
-            subtext="Clinical records"
+            subtext="My records"
             onClick={() => navigate("/doctor/prescriptions")}
           />
           <StatCard
@@ -137,15 +137,15 @@ export default function DoctorDashboard() {
             value={stats.totalMessages}
             icon={<FaEnvelopeOpenText />}
             color="--brand-orange"
-            subtext="Internal comms"
+            subtext="Inbox"
             onClick={() => navigate("/doctor/messages/inbox")}
           />
           <StatCard
-            title="Patient Pool"
+            title="My Patients"
             value={stats.activePatients}
             icon={<FaUserInjured />}
             color="--brand-green"
-            subtext="Active EMRs"
+            subtext="Active patient files"
             onClick={() => navigate("/doctor/patients")}
           />
         </div>
@@ -157,7 +157,7 @@ export default function DoctorDashboard() {
               <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
                 <h3 className="text-sm font-black text-[var(--text-main)] flex items-center gap-3 uppercase tracking-widest">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--brand-green)] animate-pulse"></div>
-                  Patients Waiting Room
+                  Patients Waiting
                 </h3>
                 <span className="text-[10px] font-bold text-[var(--text-soft)] uppercase">
                   Queue: {waitingPatients.length}
@@ -180,7 +180,7 @@ export default function DoctorDashboard() {
                             {apt.patient?.user?.firstName} {apt.patient?.user?.lastName}
                           </p>
                           <p className="text-[10px] font-bold text-[var(--text-soft)]">
-                            {apt.reason || "General Consultation"} • Waiting since{" "}
+                            {apt.reason || "Visit"} • Waiting since{" "}
                             {new Date(apt.appointmentDate).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -194,7 +194,7 @@ export default function DoctorDashboard() {
                         }
                         className="px-4 py-2 rounded-xl bg-[var(--brand-green)] text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
                       >
-                        Start Visit
+                        Start Video Call
                       </button>
                     </div>
                   ))
@@ -220,7 +220,7 @@ export default function DoctorDashboard() {
                 <div>
                   <h4 className="font-black text-lg tracking-tight">Quick Connect</h4>
                   <p className="text-xs font-bold text-white/70 leading-relaxed italic">
-                    "Secure, HIPAA-compliant telehealth bridge active."
+                    "Your private video call is ready."
                   </p>
                 </div>
               </div>
@@ -228,20 +228,20 @@ export default function DoctorDashboard() {
                 onClick={() => navigate("/doctor/video-consultation")}
                 className="w-full bg-white text-[var(--brand-blue)] font-black uppercase tracking-widest text-[10px] py-4 rounded-2xl hover:bg-gray-100 transition-all mt-6 shadow-xl"
               >
-                Join Virtual Lobby
+                Join Call
               </button>
             </div>
 
             <div className="card !p-6 flex-1">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-orange)] mb-4">
-                Clinical Assistant
+                Your Assistant
               </h4>
               <div className="space-y-3">
                 <div className="p-3 rounded-xl bg-[var(--bg-main)]/50 border border-[var(--border)]">
                   <p className="text-xs font-bold text-[var(--text-soft)] leading-relaxed">
                     <FaExclamationTriangle className="inline mr-2 text-[var(--brand-orange)]" />
                     Dr. {userName.split(" ")[0]}, you have {stats.urgentFlags?.unsignedNotes} notes
-                    pending for more than 24 hours. Consider signing them to maintain compliance.
+                    to finish. Please complete them to keep records up to date.
                   </p>
                 </div>
               </div>
