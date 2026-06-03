@@ -148,7 +148,7 @@ export default function Home() {
           <div className="text-center lg:text-left space-y-6 md:space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-[var(--border)] text-[var(--brand-orange)] text-[10px] font-black uppercase tracking-[0.2em] animate-in fade-in slide-in-from-bottom-4 duration-700">
               <span className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-pulse"></span>
-              Redefining Digital Care
+              Online Healthcare
             </div>
 
             <div className="space-y-4 md:space-y-5">
