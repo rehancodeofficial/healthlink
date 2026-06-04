@@ -20,8 +20,8 @@ module.exports = (io) => {
       });
       console.log(`👤 User online: ${name} (${role}) - Socket: ${socket.id}`);
 
-      // Broadcast to all that user is online
-      socket.broadcast.emit("user_status", {
+      // 	Send Message to All to all that user is online
+      socket.	Send Message to All.emit("user_status", {
         userId,
         role,
         name,
@@ -113,7 +113,7 @@ module.exports = (io) => {
           return;
         }
 
-        // Authorization passed - join room
+        // Authorization passed - Video Call
         socket.join(roomId);
 
         const user = activeUsers.get(socket.id);
@@ -152,7 +152,7 @@ module.exports = (io) => {
         console.error(`❌ Error in join_room:`, error);
         socket.emit("error", {
           code: "SERVER_ERROR",
-          message: "Failed to join room",
+          message: "Failed to Video Call",
         });
       }
     });
@@ -352,7 +352,7 @@ module.exports = (io) => {
             if (roomUsers.get(roomId).size === 0) roomUsers.delete(roomId);
           }
         }
-        socket.broadcast.emit("user_status", {
+        socket.	Send Message to All.emit("user_status", {
           userId: user.userId,
           role: user.role,
           name: user.name,
