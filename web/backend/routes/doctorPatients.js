@@ -66,7 +66,7 @@ router.get("/doctor/patients", verifyToken, requireRole(["DOCTOR", "ADMIN", "SUP
     if (!doctorUserId) return res.status(400).json({ error: "doctorUserId is required" });
 
     const doctor = await getDoctorProfileByUserId(doctorUserId);
-    if (!doctor) return res.status(404).json({ error: "Doctor profile not found" });
+    if (!doctor) return res.json({ data: [] });
 
     const where = buildPatientWhere(req.query, doctor.id);
 
