@@ -115,7 +115,7 @@ router.get("/stats", async (req, res) => {
 
     const activePatients = distinctPatients.length;
 
-    // Enhanced stats for Clinical Desk
+    // Enhanced stats for Dashboard
     const [urgentLabs, unsignedNotes, lateAppointments] = await Promise.all([
       prisma.labOrder.count({
         where: { doctorId: dpId, status: "ORDERED" },
