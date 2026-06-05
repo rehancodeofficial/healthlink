@@ -67,13 +67,13 @@ export default function Home() {
               onClick={() => navigate("/login")}
               className="hidden md:block px-4 md:px-5 py-2 font-black text-xs uppercase tracking-widest text-[var(--text-soft)] hover:text-[var(--brand-green)] transition-colors"
             >
-              Log In
+              Sign In
             </button>
             <button
               onClick={() => navigate("/register")}
               className="hidden md:block btn btn-primary !py-2.5 !px-6 text-[10px]"
             >
-              Sign Up
+              Join Portal
             </button>
 
             {/* Mobile Menu Button - Enhanced for touch */}
@@ -123,7 +123,7 @@ export default function Home() {
               }}
               className="px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest bg-white text-black shadow-lg flex items-center justify-center w-full"
             >
-              Log In
+              Sign In
             </button>
             <button
               onClick={() => {
@@ -132,7 +132,7 @@ export default function Home() {
               }}
               className="btn btn-primary !py-4 !text-sm w-full mt-2"
             >
-              Sign Up <FaArrowRight className="ml-2" />
+              Join Portal <FaArrowRight className="ml-2" />
             </button>
           </div>
         </div>
@@ -162,12 +162,13 @@ export default function Home() {
                 <span className="text-gradient">VIRTUAL</span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl font-black text-[var(--brand-orange)] tracking-[0.05em] uppercase italic opacity-90">
-                Healthcare Made Easy
+                Healthcare Simplified to You
               </p>
             </div>
 
             <p className="text-base md:text-lg text-[var(--text-soft)] max-w-xl leading-relaxed font-medium mx-auto lg:mx-0 opacity-80">
-              Book a doctor online and get help from home. Talk to a real doctor on video — fast and easy.
+              Experience medical consultation with zero boundaries. Connect with world-class
+              specialists instantly through our high-performance virtual clinic.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 md:pt-6">
@@ -175,13 +176,13 @@ export default function Home() {
                 onClick={() => navigate("/register")}
                 className="btn btn-primary !py-4 md:!py-5 !px-8 md:!px-12 text-sm shadow-green-500/20 w-full sm:w-auto"
               >
-                Book a Doctor <FaArrowRight />
+                Start Consultation <FaArrowRight />
               </button>
               <button
                 onClick={() => navigate("/login")}
                 className="btn btn-glass !py-4 md:!py-5 !px-8 md:!px-12 text-sm text-[var(--text-main)] w-full sm:w-auto border-2 border-[var(--brand-green)] hover:bg-[var(--brand-green)] hover:text-white"
               >
-                Log In
+                Login to Portal
               </button>
             </div>
 
@@ -214,9 +215,9 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest mb-1">
-                    Video Ready
+                    Active Signal
                   </p>
-                  <p className="font-black text-base">Ready to Connect</p>
+                  <p className="font-black text-base">HD Consult Ready</p>
                 </div>
               </div>
             </div>
@@ -229,29 +230,29 @@ export default function Home() {
         <div className="page-container">
           <div className="text-center mb-12 md:mb-20 space-y-4 md:space-y-6">
             <h2 className="text-xs font-black text-[var(--brand-orange)] uppercase tracking-[0.4em] animate-pulse">
-              What We Offer
+              Our Capabilities
             </h2>
             <h3 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none">
-              All the tools you need.
+              Everything you need <br className="hidden md:block" /> for health.
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <FeatureCard
               icon={<FaClock className="text-[var(--brand-green)]" />}
-              title="Always Available"
-              text="Talk to a doctor any time, day or night."
+              title="24/7 Availability"
+              text="Instant connectivity with licensed medical practitioners around the clock."
               color="green"
             />
             <FeatureCard
               icon={<FaMobileAlt className="text-[var(--brand-blue)]" />}
-              title="Works on Any Device"
-              text="Use it on your phone, tablet, or computer."
+              title="Native Mobility"
+              text="Optimized for every device to ensure care is always within reach."
               color="blue"
             />
             <FeatureCard
               icon={<FaVideo className="text-[var(--brand-orange)]" />}
-              title="Video Calls with Doctors"
-              text="Clear and private video calls with your doctor."
+              title="HD Consult"
+              text="Encrypted, crystal-clear video calls for deep-dive medical sessions."
               color="orange"
             />
           </div>
@@ -266,13 +267,14 @@ export default function Home() {
         <div className="page-container flex flex-col lg:flex-row items-center gap-16 md:gap-24">
           <div className="lg:w-1/2 space-y-8 md:space-y-10 text-center lg:text-left">
             <h2 className="text-gradient font-black text-xs uppercase tracking-[0.3em]">
-              About Us
+              The Ecosystem
             </h2>
             <h3 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tighter">
-              Built for patients.
+              Patient-first <br /> technology.
             </h3>
             <p className="text-lg md:text-xl text-[var(--text-soft)] leading-relaxed font-medium opacity-80">
-              We built CureVirtual to make it easy for patients to get help. It's more than just a video call — it's a full health platform.
+              We've re-engineered the telemedicine workflow from the ground up. CureVirtual isn't
+              just a video tool; it's a complete medical ecosystem.
             </p>
             <div className="grid grid-cols-2 gap-4 md:gap-8">
               <div className="p-6 md:p-8 glass !rounded-[2rem] border-[var(--border)] hover:-translate-y-2 transition-transform duration-500">
@@ -316,7 +318,7 @@ export default function Home() {
               </span>
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] md:ml-4">
-              &copy; 2025 CureVirtual
+              &copy; 2025 ALL SYSTEMS NOMINAL
             </p>
           </div>
 
