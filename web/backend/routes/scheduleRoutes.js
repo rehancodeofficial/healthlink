@@ -41,10 +41,8 @@ router.get("/", async (req, res) => {
         where: { id: doctorId },
       });
 
-    // If we can't find a doctor profile, return empty array instead of erroring,
-    // because maybe the user is a doctor but hasn't set up a profile yet?
-    // Stick to 404 if not found to be explicit.
-    if (!doctorProfile) return res.status(404).json({ error: "Doctor profile not found" });
+    // If we can't find a doctor profile, return empty array gracefully
+    if (!doctorProfile) return res.json({ success: true, data: [] });
 
     const schedules = await prisma.doctorSchedule.findMany({
       where: { doctorId: doctorProfile.id },
