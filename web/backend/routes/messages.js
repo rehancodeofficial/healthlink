@@ -237,16 +237,16 @@ router.get("/:folder/:page", verifyToken, listMessages); // e.g. /api/messages/i
  * Supports multiple formats:
  * 1. Single message to user:  { senderId, receiverId, content }
  * 2. Single message variant:   { senderId, recipient, content }
- * 3. Broadcast to all users:   { senderId, content, broadcast: true }
- * 4. Broadcast variant:        { senderId, recipient: "ALL", content }
+ * 3. 	Send Message to All to all users:   { senderId, content, 	Send Message to All: true }
+ * 4. 	Send Message to All variant:        { senderId, recipient: "ALL", content }
  *
  * Returns:
  * - Single: { data: msg }
- * - Broadcast: { success: true, message: "...", count }
+ * - 	Send Message to All: { success: true, message: "...", count }
  */
 router.post("/send", verifyToken, async (req, res) => {
   try {
-    const { senderId, receiverId, content, recipient, broadcast } =
+    const { senderId, receiverId, content, recipient, 	Send Message to All } =
       req.body || {};
 
     const actualSenderId = senderId || req.user.id;
@@ -258,11 +258,11 @@ router.post("/send", verifyToken, async (req, res) => {
     if (!actualContent)
       return res.status(400).json({ error: "content is required" });
 
-    // Broadcast logic
-    if (broadcast === true || targetRecipient === "ALL") {
+    // 	Send Message to All logic
+    if (	Send Message to All === true || targetRecipient === "ALL") {
       const isAdmin = ["ADMIN", "SUPERADMIN"].includes(req.user.role);
       if (!isAdmin)
-        return res.status(403).json({ error: "Only admins can broadcast" });
+        return res.status(403).json({ error: "Only admins can 	Send Message to All" });
 
       const allUsers = await prisma.user.findMany({
         where: { id: { not: actualSenderId } },
@@ -279,7 +279,7 @@ router.post("/send", verifyToken, async (req, res) => {
 
       return res.json({
         success: true,
-        message: `Broadcast sent to ${allUsers.length} users`,
+        message: `	Send Message to All sent to ${allUsers.length} users`,
       });
     }
 
