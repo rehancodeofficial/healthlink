@@ -1,4 +1,4 @@
-import ZegoVideoCall from "./ZegoVideoCall";
+import JitsiVideoCall from "./JitsiVideoCall";
 
 export default function VideoCallModal({ onClose }) {
   const roomName = localStorage.getItem("videoRoomName") || `cv-${Date.now()}`;
@@ -18,14 +18,9 @@ export default function VideoCallModal({ onClose }) {
         ✖
       </button>
 
-      {/* ZEGO Video */}
+      {/* Jitsi Video */}
       <div className="w-full h-full">
-        <ZegoVideoCall
-          roomName={roomName}
-          userId={localStorage.getItem("userId")}
-          userName={userName}
-          onClose={onClose}
-        />
+        <JitsiVideoCall roomName={roomName} displayName={userName} onClose={onClose} />
       </div>
     </div>
   );
