@@ -55,10 +55,10 @@ export default function AdminDashboard() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
             <h2 className="text-[10px] font-black text-[var(--brand-green)] uppercase tracking-[0.4em] mb-3">
-              Dashboard
+              Facility Operations Hub
             </h2>
             <h1 className="text-4xl lg:text-5xl font-black text-[var(--text-main)] tracking-tighter leading-none">
-              Admin <span className="text-[var(--brand-blue)]">Panel</span>
+              Control <span className="text-[var(--brand-blue)]">Center</span>
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
               onClick={() => navigate('/admin/manage-users')}
               className="btn btn-primary !py-3 !px-6 text-[10px] shadow-green-500/20"
             >
-              <FaUserPlus /> Manage Users
+              <FaUserPlus /> Management
             </button>
             <button
               onClick={() => navigate('/admin/subscription')}
@@ -80,28 +80,28 @@ export default function AdminDashboard() {
         {/* Operational Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <OpCard
-            label="Doctors"
+            label="Clinical Pipeline"
             value={stats.totalDoctors}
             icon={<FaUserMd />}
             color="var(--brand-blue)"
             onClick={() => navigate('/admin/users-list')}
           />
           <OpCard
-            label="Patients"
+            label="Patient Inflow"
             value={stats.totalPatients}
             icon={<FaUsers />}
             color="var(--brand-green)"
             onClick={() => navigate('/admin/users-list')}
           />
           <OpCard
-            label="Support Staff"
+            label="Support Capacity"
             value={stats.totalSupport}
             icon={<FaUserCog />}
             color="var(--brand-orange)"
             onClick={() => navigate('/admin/users-list')}
           />
           <OpCard
-            label="Admins"
+            label="Core Admins"
             value={stats.totalAdmins}
             icon={<FaUserShield />}
             color="var(--brand-blue)"
@@ -116,35 +116,35 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest flex items-center gap-2">
                   <FaChartPie className="text-[var(--brand-green)]" /> Service
-                  Latest Stats
+                  Statistics
                 </h3>
                 <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1">
-                  Everything happening today
+                  Operational throughput for today
                 </p>
               </div>
               <button className="text-[10px] font-black text-[var(--brand-blue)] tracking-[0.2em] uppercase">
-                Get Report
+                Export Audit
               </button>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <ServiceMetric
                 icon={<FaVideo />}
-                label="Total Calls"
+                label="Total Consultations"
                 value={stats.totalConsultations}
               />
               <ServiceMetric
                 icon={<FaClipboardList />}
-                label="Total Prescriptions"
+                label="Prescriptions Issued"
                 value={stats.totalPrescriptions}
               />
               <ServiceMetric
                 icon={<FaTicketAlt />}
-                label="Support Tickets"
+                label="Active Support Tickets"
                 value={stats.totalTickets}
               />
               <ServiceMetric
                 icon={<FaComments />}
-                label="Total Messages"
+                label="Encrypted Comms"
                 value={stats.totalMessages}
               />
             </div>
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
             <div className="card !p-8 !bg-[var(--brand-orange)] text-[var(--text-main)] border-0 shadow-xl shadow-orange-500/20 group cursor-pointer hover:scale-[1.02] transition-all">
               <FaCogs className="text-4xl mb-6 opacity-40 group-hover:rotate-45 transition-transform" />
               <h4 className="text-xl font-black tracking-tight mb-2 uppercase">
-                Manage Billing
+                Billing Management
               </h4>
               <p className="text-[var(--text-main)]/70 text-xs font-bold uppercase tracking-widest italic mb-6">
                 Manage subscription tiers and payments.
@@ -163,17 +163,17 @@ export default function AdminDashboard() {
                 onClick={() => navigate('/admin/subscription')}
                 className="w-full bg-white text-[var(--brand-orange)] font-black uppercase tracking-widest text-[9px] py-4 rounded-2xl shadow-lg"
               >
-                View Billing
+                Enter Billing
               </button>
             </div>
 
             <div className="card !p-8 !bg-[var(--brand-blue)] text-[var(--text-main)] border-0 shadow-xl shadow-blue-500/20 group cursor-pointer hover:scale-[1.02] transition-all">
               <FaUsers className="text-4xl mb-6 opacity-40" />
               <h4 className="text-xl font-black tracking-tight mb-2 uppercase">
-                View All Users
+                User Registry
               </h4>
               <p className="text-[var(--text-main)]/70 text-xs font-bold uppercase tracking-widest italic mb-6">
-                List of everyone in the system.
+                Directory of all ecosystem actors.
               </p>
               <button
                 onClick={() => navigate('/admin/users-list')}
@@ -211,7 +211,7 @@ function OpCard({ label, value, icon, color, onClick }) {
       </div>
       <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
         <span className="text-[9px] font-black uppercase text-[var(--text-soft)] tracking-widest">
-          Open Settings
+          Open Management
         </span>
         <FaArrowRight className="text-[9px] text-[var(--text-muted)] group-hover:translate-x-1 transition-transform" />
       </div>
