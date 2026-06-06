@@ -1,4 +1,3 @@
-// FILE: src/pages/patient/BookAppointment.jsx
 import React, { useState, useEffect } from "react";
 import api from "../../Lib/api";
 import Sidebar from "../../components/Sidebar";
@@ -28,7 +27,7 @@ const BookAppointment = () => {
         // Use the patient-accessible endpoint (no DOCTOR role restriction)
         const res = await api.get("/patient/doctors/all");
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-        console.log("[BookAppointment] Loaded doctors:", data.length);
+        console.log("[BookAppointment] Loaded doctors:", data.length, data.map(d => ({ id: d.id, name: d.user?.firstName })));
         setDoctors(data);
       } catch (err) {
         console.error("[BookAppointment] Failed to load doctors:", err.response?.data || err.message);
@@ -119,7 +118,7 @@ const BookAppointment = () => {
                           className="bg-[var(--bg-card)] text-[var(--text-main)]"
                         >
                           {doc.user?.firstName} {doc.user?.lastName} —{" "}
-                          {doc.specialization || "General"}
+                          {doc.specialization || "General Medicine"}
                         </option>
                       ))
                     : !loadingDoctors && <option disabled>No doctors available</option>}
@@ -130,13 +129,13 @@ const BookAppointment = () => {
               {formData.doctorId && (
                 <div>
                   <label className="block font-medium mb-2 text-[var(--text-main)]">
-                    Why are you visiting?
+                    Reason for Visit
                   </label>
                   <textarea
                     value={formData.reason}
                     onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                     rows="3"
-                    placeholder="Tell us why you need to see a doctor..."
+                    placeholder="Briefly describe your reason..."
                     className="w-full bg-transparent border border-[var(--border)] rounded-lg p-3 text-[var(--text-main)] focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -179,7 +178,7 @@ const BookAppointment = () => {
                 </div>
               )}
 
-              {/* Book Button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading || !formData.selectedSlotId}
@@ -189,7 +188,7 @@ const BookAppointment = () => {
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
               >
-                {loading ? "Booking..." : "Book Now"}
+                {loading ? "Booking..." : "Initialize Booking"}
               </button>
             </form>
 
