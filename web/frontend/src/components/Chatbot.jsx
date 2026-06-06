@@ -49,7 +49,7 @@ export default function Chatbot() {
         ...prev,
         {
           sender: "bot",
-          text: "Sorry, something went wrong. Please try again.",
+          text: "I am sorry, I encountered an error connecting to the AI service. Please try again later.",
         },
       ]);
     } finally {
@@ -121,7 +121,7 @@ export default function Chatbot() {
                   {msg.isEmergency && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-600 p-2 rounded-lg mb-2 flex items-center gap-2 font-bold animate-pulse">
                       <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      ⚠️ This is an emergency!
+                      EMERGENCY WARNING
                     </div>
                   )}
                   {msg.text}
@@ -132,7 +132,7 @@ export default function Chatbot() {
               {msg.doctors && msg.doctors.length > 0 && (
                 <div className="mt-3 space-y-2 w-full max-w-[90%]">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
-                    Suggested Doctors
+                    Recommended Specialists
                   </p>
                   {msg.doctors.map((doc) => (
                     <div
@@ -185,7 +185,7 @@ export default function Chatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="What do you feel?"
+              placeholder="Describe your symptoms..."
               className={`w-full pl-4 pr-12 py-3 rounded-xl border-none focus:ring-2 focus:ring-[var(--brand-blue)]/50 text-sm transition-all shadow-inner ${
                 theme === "dark"
                   ? "bg-gray-800/80 backdrop-blur-md text-white placeholder-gray-400"
