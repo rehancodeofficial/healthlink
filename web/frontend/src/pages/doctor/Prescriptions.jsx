@@ -210,7 +210,9 @@ export default function DoctorPrescriptions() {
                   prescriptions.map((p) => (
                     <tr key={p.id} className="hover:bg-[var(--bg-main)]/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-black text-[var(--text-main)]">
-                        {p.patient?.user?.name || "IDENTITY_REDACTED"}
+                        {[p.patient?.user?.firstName, p.patient?.user?.lastName]
+                          .filter(Boolean)
+                          .join(" ") || "Unknown Patient"}
                       </td>
                       <td className="px-6 py-4 text-xs font-bold text-[var(--text-soft)]">
                         {p.medication}
@@ -286,7 +288,7 @@ export default function DoctorPrescriptions() {
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div onClick={() => setModalOpen(false)}></div>
-          <div className="animate-in zoom-in-95 duration-300">
+          <div className="animate-in zoom-in-95 duration-300  bg-white">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6 flex items-center gap-3">
               <FaPrescriptionBottleAlt className="text-[var(--brand-blue)]" /> Authorize Protocol
             </h2>
@@ -509,7 +511,12 @@ export default function DoctorPrescriptions() {
                     Subject ID
                   </p>
                   <p className="text-[var(--text-main)]">
-                    {selectedPrescription.patient?.user?.name || "IDENTITY_REDACTED"}
+                    {[
+                      selectedPrescription.patient?.user?.firstName,
+                      selectedPrescription.patient?.user?.lastName,
+                    ]
+                      .filter(Boolean)
+                      .join(" ") || "Unknown Patient"}
                   </p>
                 </div>
                 <div className="space-y-1">
