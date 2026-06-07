@@ -1,10 +1,9 @@
 // FILE: src/pages/doctor/VideoConsultation.jsx
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Lib/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import VideoCallModal from "./VideoCallModal";
-import { useSocket } from "../../context/useSocket";
 import { FaPlusCircle, FaVideo, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 
 /* ------------------- Tiny toast (success/error) ------------------- */
@@ -62,14 +61,10 @@ export default function VideoConsultation() {
   const [error, setError] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [callModalOpen, setCallModalOpen] = useState(false);
+  const [selectedConsultation, setSelectedConsultation] = useState(null);
 
   const [toastText, setToastText] = useState("");
-
-  // Signaling state
-  const { socket } = useSocket();
-  const [isCalling, setIsCalling] = useState(false);
-  const [countdown, setCountdown] = useState(60);
-  const [activeCallId, setActiveCallId] = useState(null);
 
   // Confirm cancel dialog
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -115,77 +110,6 @@ export default function VideoConsultation() {
     fetchConsultations();
     loadMyPatients();
   }, [fetchConsultations, loadMyPatients]);
-
-  // Keep a ref of consultations for access inside signaling listeners without re-binding
-  const consultationsRef = useRef(consultations);
-  useEffect(() => {
-    consultationsRef.current = consultations;
-  }, [consultations]);
-
-  // Signaling listeners
-  useEffect(() => {
-    if (!socket) return;
-
-    const onAccepted = ({ consultationId }) => {
-      // Use ref to get latest activeCallId if needed, but here we can just use the closure's activeCallId
-      // since it's in the dependency array (which is okay as it only changes when a call starts/ends)
-      if (consultationId === activeCallId) {
-        setIsCalling(false);
-        setToastText("✅ Patient joined! Starting call...");
-        const consultation = consultationsRef.current.find((c) => c.id === consultationId);
-        if (consultation) {
-          handleJoinStable(consultation, true);
-        }
-      }
-    };
-
-    const onRejected = ({ consultationId }) => {
-      if (consultationId === activeCallId) {
-        setIsCalling(false);
-        setToastText("❌ Patient is busy or declined the call.");
-        setActiveCallId(null);
-      }
-    };
-
-    const onMissed = ({ consultationId }) => {
-      if (consultationId === activeCallId) {
-        setIsCalling(false);
-        setToastText("⏰ Patient did not respond.");
-        setActiveCallId(null);
-      }
-    };
-
-    const onFailed = ({ reason }) => {
-      setIsCalling(false);
-      setToastText(`⚠️ Call Failed: ${reason}`);
-      setActiveCallId(null);
-    };
-
-    socket.on("call-accepted", onAccepted);
-    socket.on("call-rejected", onRejected);
-    socket.on("call-missed", onMissed);
-    socket.on("call-failed", onFailed);
-
-    return () => {
-      socket.off("call-accepted", onAccepted);
-      socket.off("call-rejected", onRejected);
-      socket.off("call-missed", onMissed);
-      socket.off("call-failed", onFailed);
-    };
-  }, [socket, activeCallId, handleJoinStable]);
-
-  // Countdown timer
-  useEffect(() => {
-    let timer;
-    if (isCalling && countdown > 0) {
-      timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
-    } else if (isCalling && countdown === 0) {
-      setIsCalling(false);
-      setToastText("⏰ Call timed out.");
-      setActiveCallId(null);
-    }
-    return () => clearInterval(timer);
-  }, [isCalling, countdown]);
 
   /* ---------------------- Schedule new consultation ---------------------- */
   const handleSchedule = async (e) => {
@@ -245,36 +169,12 @@ export default function VideoConsultation() {
   };
 
   /* ---------------------- Join consultation ------------------------------ */
-  const handleJoinStable = useCallback(
-    (consultation, direct = false) => {
-      const roomId = `consult_${consultation.id}`;
+  const handleJoin = (consultation) => {
+    const roomId = `consult_${consultation.id}`;
 
-      if (direct) {
-        navigate(`/video/room/${roomId}`);
-        return;
-      }
-
-      // New Flow: Initiate Call Signaling
-      if (socket) {
-        setIsCalling(true);
-        setCountdown(60);
-        setActiveCallId(consultation.id);
-
-        socket.emit("initiate-video-call", {
-          consultationId: consultation.id,
-          patientId: consultation.patient?.userId,
-          doctorName: userName,
-          roomName: roomId,
-        });
-      } else {
-        setToastText("⚠️ Not connected to signaling server. Direct join...");
-        navigate(`/video/room/${roomId}`);
-      }
-    },
-    [socket, navigate, userName]
-  );
-
-  const handleJoin = (consultation) => handleJoinStable(consultation, false);
+    // Navigate to video room
+    navigate(`/video/room/${roomId}`);
+  };
 
   return (
     <DashboardLayout role={role} user={{ name: userName }}>
@@ -285,6 +185,11 @@ export default function VideoConsultation() {
               src="/images/logo/Asset3.png"
               alt="CureVirtual"
               style={{ width: 60, height: "auto" }}
+              onError={(e) => {
+                try {
+                  e.currentTarget.src = PLACEHOLDER_LOGO;
+                } catch {}
+              }}
             />
             <h1 className="text-3xl font-black text-[var(--text-main)] flex items-center gap-2 uppercase tracking-tighter">
               <FaVideo className="text-[var(--brand-green)]" /> Video Consultations
@@ -508,37 +413,12 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* 📞 Calling Overlay */}
-      {isCalling && (
-        <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] animate-in fade-in duration-300">
-          <div className="relative">
-            <div className="w-48 h-48 rounded-full border-4 border-green-500/20 flex items-center justify-center animate-pulse">
-              <div className="w-40 h-40 rounded-full border-4 border-green-500/50 flex items-center justify-center animate-ping">
-                <FaVideo className="text-5xl text-green-500" />
-              </div>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <FaVideo className="text-5xl text-green-500 animate-bounce" />
-            </div>
-          </div>
-
-          <h2 className="mt-8 text-3xl font-black text-white uppercase tracking-tighter">
-            Calling Patient...
-          </h2>
-          <p className="mt-2 text-gray-400 font-bold uppercase tracking-widest text-xs">
-            Waiting for response — {countdown}s remaining
-          </p>
-
-          <button
-            onClick={() => {
-              setIsCalling(false);
-              setToastText("Call cancelled.");
-            }}
-            className="mt-12 px-10 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl transition-transform hover:scale-105"
-          >
-            Cancel Call
-          </button>
-        </div>
+      {/* 🎥 Jitsi Video Call Modal */}
+      {callModalOpen && selectedConsultation && (
+        <VideoCallModal
+          consultation={selectedConsultation}
+          onClose={() => setCallModalOpen(false)}
+        />
       )}
     </DashboardLayout>
   );
