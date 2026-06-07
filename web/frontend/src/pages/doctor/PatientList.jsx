@@ -55,7 +55,7 @@ export default function PatientList() {
               Clinical Registry
             </h2>
             <h1 className="text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase">
-              Patient Pool
+              My Patients
             </h1>
           </div>
           <div className="relative group min-w-[300px]">
