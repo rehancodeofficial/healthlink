@@ -1,6 +1,5 @@
 // FILE: src/pages/superadmin/SuperadminDashboard.jsx
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { getSuperadminStats } from '../../Lib/api';
 import {
@@ -26,7 +25,6 @@ export default function SuperadminDashboard() {
     id: localStorage.getItem('userId'),
     name: localStorage.getItem('name'),
   };
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,21 +45,21 @@ export default function SuperadminDashboard() {
         <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 overflow-hidden">
           <div className="space-y-2">
             <h2 className="text-[10px] font-black text-[var(--brand-orange)] uppercase tracking-[0.4em] mb-2 animate-in fade-in slide-in-from-left-4 duration-500">
-              System Status
+              Global Command intelligence
             </h2>
             <h1 className="text-4xl lg:text-6xl font-black text-[var(--text-main)] tracking-tighter leading-none animate-in fade-in slide-in-from-left-4 duration-700">
-              Main <span className="text-gradient">Dashboard</span>
+              System <span className="text-gradient">Integrity</span>
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-3 animate-in fade-in slide-in-from-right-4 duration-700">
             <StatusBadge
               icon={<FaServer />}
-              label="System: OK"
+              label="Core: Operational"
               color="var(--brand-green)"
             />
             <StatusBadge
               icon={<FaGlobe />}
-              label="Active Now"
+              label="Nodes: Active"
               color="var(--brand-blue)"
             />
             <div className="px-5 py-2.5 rounded-2xl glass border-[var(--border)] text-[10px] font-black uppercase tracking-widest text-[var(--text-soft)]">
@@ -73,36 +71,36 @@ export default function SuperadminDashboard() {
         {/* Intelligence Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <AdminCard
-            label="Total Users"
+            label="User Ecosystem"
             value={stats.totalUsers}
             icon={<FaUsers />}
             trend="+12%"
             color="var(--brand-blue)"
-            subtext="All accounts"
+            subtext="Total unique identities"
           />
           <AdminCard
-            label="Doctors"
+            label="Clinical Force"
             value={stats.totalDoctors}
             icon={<FaUserMd />}
             trend="+5%"
             color="var(--brand-green)"
-            subtext="Licensed doctors"
+            subtext="Verified medical experts"
           />
           <AdminCard
-            label="Patients"
+            label="Patient Base"
             value={stats.totalPatients}
             icon={<FaUser />}
             trend="+18%"
             color="var(--brand-orange)"
-            subtext="Registered patients"
+            subtext="Active healthcare seekers"
           />
           <AdminCard
-            label="Total Calls"
+            label="Traffic Volume"
             value={stats.totalConsultations}
             icon={<FaVideo />}
             trend="+24%"
             color="var(--brand-blue)"
-            subtext="Calls today"
+            subtext="Virtual sessions today"
           />
         </div>
 
@@ -111,11 +109,11 @@ export default function SuperadminDashboard() {
           <div className="xl:col-span-2 card !p-8 border-l-[8px] border-[var(--brand-blue)]">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-black text-[var(--text-main)] tracking-tight uppercase flex items-center gap-3">
-                <FaChartLine className="text-[var(--brand-blue)]" /> Latest
-                Activities
+                <FaChartLine className="text-[var(--brand-blue)]" /> Ecosystem
+                Audit Trail
               </h3>
               <button className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-blue)] hover:underline">
-                View More
+                Full Analytics
               </button>
             </div>
             <div className="grid sm:grid-cols-2 gap-8">
@@ -125,17 +123,17 @@ export default function SuperadminDashboard() {
                 icon={<FaChartLine />}
               />
               <MetricItem
-                label="Tickets"
+                label="System Tickets"
                 value={stats.totalTickets}
                 icon={<FaTicketAlt />}
               />
               <MetricItem
-                label="Messages"
+                label="Encrypted Messages"
                 value={stats.totalMessages}
                 icon={<FaComments />}
               />
               <MetricItem
-                label="Prescriptions"
+                label="Prescription Pool"
                 value={stats.totalPrescriptions}
                 icon={<FaClipboardList />}
               />
@@ -150,10 +148,10 @@ export default function SuperadminDashboard() {
               </div>
               <div>
                 <h4 className="text-2xl font-black tracking-tight leading-none mb-3 uppercase">
-                  Admin <br /> Settings
+                  Security <br /> Protocol
                 </h4>
                 <p className="text-[var(--text-main)]/40 text-[11px] font-bold uppercase tracking-widest leading-relaxed italic">
-                  Manage users and settings from here.
+                  Manual override and role escalation systems are active.
                 </p>
               </div>
             </div>
@@ -161,7 +159,7 @@ export default function SuperadminDashboard() {
               onClick={() => navigate('/superadmin/manage-admins')}
               className="w-full bg-[var(--brand-orange)] text-[var(--text-main)] font-black uppercase tracking-[0.2em] text-[10px] py-5 rounded-[2rem] hover:bg-orange-600 transition-all mt-10 shadow-xl shadow-orange-500/20 relative z-10"
             >
-              Manage Admins
+              Admin Console
             </button>
           </div>
         </div>
