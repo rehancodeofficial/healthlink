@@ -207,7 +207,7 @@ export default function ActivityLogs() {
               Security Intelligence
             </h2>
             <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase flex items-center gap-4">
-              <FaTerminal className="text-[var(--brand-blue)]" /> Security Flux
+              <FaTerminal className="text-[var(--brand-blue)]" /> Activity Logs
             </h1>
             <div className="flex items-center gap-4 mt-2">
               <div className="flex items-center gap-2">
