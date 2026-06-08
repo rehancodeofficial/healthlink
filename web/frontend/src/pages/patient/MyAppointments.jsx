@@ -531,6 +531,21 @@ export default function MyAppointments() {
                 </select>
               </div>
 
+              {/* Reason for Consultation */}
+              {form.doctorId && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
+                    Reason for consultation
+                  </label>
+                  <textarea
+                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24 text-[var(--text-main)]"
+                    value={form.reason}
+                    onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                    placeholder="Describe your symptoms..."
+                  />
+                </div>
+              )}
+
               {/* Date Selection */}
               {form.doctorId && (
                 <div className="space-y-1.5">
@@ -571,21 +586,6 @@ export default function MyAppointments() {
                       ✓ Slot selected
                     </p>
                   )}
-                </div>
-              )}
-
-              {/* Reason */}
-              {form.selectedSlotId && (
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">
-                    Reason for consultation
-                  </label>
-                  <textarea
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none h-24 text-[var(--text-main)]"
-                    value={form.reason}
-                    onChange={(e) => setForm({ ...form, reason: e.target.value })}
-                    placeholder="Describe your symptoms..."
-                  />
                 </div>
               )}
 
