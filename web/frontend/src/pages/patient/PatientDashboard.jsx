@@ -56,7 +56,7 @@ export default function PatientDashboard() {
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl glass border-orange-500/20 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-[var(--text-soft)]">
               <FaHeartbeat className="text-[var(--brand-orange)]" />
-              Health is Good
+              Vitals Nominal
             </div>
           </div>
         </div>
@@ -64,35 +64,35 @@ export default function PatientDashboard() {
         {/* Dense Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Upcoming Appointments"
+            title="Scheduled Visits"
             value={stats.totalAppointments}
             icon={<FaCalendarAlt />}
             color="--brand-green"
-            subtext="View all"
+            subtext="Track sessions"
             onClick={() => navigate("/patient/my-appointments")}
           />
           <StatCard
-            title="Current Prescriptions"
+            title="Active Scripts"
             value={stats.totalPrescriptions}
             icon={<FaPrescription />}
             color="--brand-blue"
-            subtext="My records"
+            subtext="Records"
             onClick={() => navigate("/patient/prescriptions")}
           />
           <StatCard
-            title="Video Calls"
+            title="Video Sessions"
             value={stats.totalConsultations}
             icon={<FaVideo />}
             color="--brand-orange"
-            subtext="My history"
+            subtext="History"
             onClick={() => navigate("/patient/video-consultation")}
           />
           <StatCard
-            title="My Doctors"
+            title="Medical Team"
             value={stats.totalDoctors}
             icon={<FaUserMd />}
             color="--brand-green"
-            subtext="Active now"
+            subtext="Active"
             onClick={() => navigate("/patient/doctors/my")}
           />
         </div>
@@ -102,19 +102,19 @@ export default function PatientDashboard() {
           <div className="lg:col-span-8 card !p-6">
             <h3 className="text-sm font-black text-[var(--text-main)] mb-6 flex items-center gap-3 uppercase tracking-widest">
               <div className="h-1.5 w-1.5 rounded-full bg-[var(--brand-green)]"></div>
-              Quick Links
+              Intelligent Navigation
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <QuickLink
                 icon={<FaUserMd className="text-[var(--brand-green)]" />}
-                title="Find a Doctor"
-                desc="Search doctors by type"
+                title="Find Specialist"
+                desc="Licensed doctors by category"
                 onClick={() => navigate("/patient/doctors/list")}
               />
               <QuickLink
                 icon={<FaVideo className="text-[var(--brand-blue)]" />}
-                title="Start Video Call"
-                desc="Private high-quality video"
+                title="Join Consult"
+                desc="Encrypted high-speed video"
                 onClick={() => navigate("/patient/video-consultation")}
               />
             </div>
@@ -128,7 +128,7 @@ export default function PatientDashboard() {
               <div>
                 <h4 className="font-black text-lg tracking-tight">Premium Care</h4>
                 <p className="text-[var(--text-main)]/70 text-[11px] font-bold leading-relaxed italic">
-                  Everything is working great. Get the best care here.
+                  Systems normalized. Healthcare optimized for efficiency.
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function PatientDashboard() {
               onClick={() => navigate("/patient/support")}
               className="w-full bg-white text-[var(--brand-blue)] font-black uppercase tracking-widest text-[10px] py-4 rounded-2xl hover:bg-gray-100 transition-all shadow-xl mt-6"
             >
-              Get Help
+              Help Desk
             </button>
           </div>
         </div>
