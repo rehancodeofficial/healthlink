@@ -42,11 +42,17 @@ function ViewModal({ open, onClose, item }) {
         </h2>
         <div className="space-y-3 text-[var(--text-soft)]">
           <p>
-            <strong>Patient:</strong> {item?.patient?.user?.name}{" "}
+            <strong>Patient:</strong>{" "}
+            {[item?.patient?.user?.firstName, item?.patient?.user?.lastName]
+              .filter(Boolean)
+              .join(" ") || "Unknown"}{" "}
             <span className="text-xs opacity-50">({item?.patient?.user?.email})</span>
           </p>
           <p>
-            <strong>Doctor:</strong> {item?.doctor?.user?.name}
+            <strong>Doctor:</strong>{" "}
+            {[item?.doctor?.user?.firstName, item?.doctor?.user?.lastName]
+              .filter(Boolean)
+              .join(" ") || "Unknown"}
           </p>
           <hr className="border-[var(--border)] my-2" />
           <p>
@@ -483,9 +489,17 @@ export default function PharmacyPrescriptions() {
                       key={p.id}
                       className="border-b border-[var(--border)] hover:bg-[var(--bg-glass)] transition"
                     >
-                      <td className="p-3">{p.patient?.user?.name || "Unknown"}</td>
+                      <td className="p-3">
+                        {[p.patient?.user?.firstName, p.patient?.user?.lastName]
+                          .filter(Boolean)
+                          .join(" ") || "Unknown"}
+                      </td>
                       <td className="p-3">{p.medication}</td>
-                      <td className="p-3">{p.doctor?.user?.name || "Unknown"}</td>
+                      <td className="p-3">
+                        {[p.doctor?.user?.firstName, p.doctor?.user?.lastName]
+                          .filter(Boolean)
+                          .join(" ") || "Unknown"}
+                      </td>
                       <td className="p-3">
                         <span
                           className={`px-2 py-1 rounded text-xs font-semibold ${
