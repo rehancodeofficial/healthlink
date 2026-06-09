@@ -116,7 +116,8 @@ export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIs
         {/* Clock - Hidden on tablets and mobile */}
         <div className="hidden xl:flex flex-col items-end pr-6 border-r border-white/20">
           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-200">
-            Current Time
+            {time.toLocaleDateString([], { weekday: "long" })} &bull;{" "}
+            {time.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}
           </span>
           <div className="flex items-center gap-2 text-sm font-bold text-white">
             <FaClock className="text-emerald-300" />
