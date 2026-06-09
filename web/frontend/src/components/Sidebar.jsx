@@ -294,7 +294,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
             <>
               <NavItem to="/doctor/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <NavItem to="/doctor/appointments" icon={<FaCalendarAlt />} label="Appointments" />
-              <NavItem to="/doctor/schedule" icon={<FaCalendarAlt />} label="My Schedule" />
+              <NavItem to="/doctor/schedule" icon={<FaCalendarAlt />} label="My Timetable" />
               <NavItem
                 to="/doctor/prescriptions"
                 icon={<FaClipboardList />}
@@ -302,7 +302,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
               />
               <NavItem to="/doctor/patients" icon={<FaUsers />} label="My Patients" />
               <NavItem to="/doctor/video-consultation" icon={<FaVideo />} label="Video Call" />
-              <NavItem to="/doctor/subscription" icon={<FaCogs />} label="Packages" />
+              <NavItem to="/doctor/subscription" icon={<FaCogs />} label="My Plans" />
               <DropdownItem
                 icon={<FaEnvelope />}
                 label="Messages"
@@ -313,11 +313,11 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 <SubItem to="/doctor/messages/inbox" label="Inbox" icon={<FaInbox />} />
                 <SubItem
                   to="/doctor/messages/send"
-                  label="	Send Message to All"
+                  label="Send to All"
                   icon={<FaPaperPlane />}
                 />
               </DropdownItem>
-              <NavItem to="/doctor/view-profile" icon={<FaIdCard />} label="Public Profile" />
+              <NavItem to="/doctor/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
@@ -325,11 +325,11 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
           {role === "PATIENT" && (
             <>
               <NavItem to="/patient/dashboard" icon={<FaChartBar />} label="Dashboard" />
-              <NavItem to="/patient/my-appointments" icon={<FaCalendarAlt />} label="My Visits" />
+              <NavItem to="/patient/my-appointments" icon={<FaCalendarAlt />} label="My Appointments" />
               <NavItem
                 to="/patient/prescriptions"
                 icon={<FaClipboardList />}
-                label="Health Records"
+                label="My Prescriptions"
               />
               <NavItem to="/patient/video-consultation" icon={<FaVideo />} label="Video Call" />
               <DropdownItem
@@ -339,7 +339,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 onClick={() => setShowPatientDoctors(!showPatientDoctors)}
               >
                 <SubItem to="/patient/doctors/list" label="Find Doctors" icon={<FaListUl />} />
-                <SubItem to="/patient/doctors/my" label="	My Doctors" icon={<FaUsers />} />
+                <SubItem to="/patient/doctors/my" label="My Doctors" icon={<FaUsers />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaPills />}
@@ -348,7 +348,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 onClick={() => setOpenPharmacy(!openPharmacy)}
               >
                 <SubItem to="/patient/pharmacy/list" label="Find a Pharmacy" icon={<FaListUl />} />
-                <SubItem to="/patient/my-pharmacy" label="Preferred" icon={<FaPills />} />
+                <SubItem to="/patient/my-pharmacy" label="My Pharmacy" icon={<FaPills />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaEnvelope />}
@@ -357,11 +357,11 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 onClick={() => setShowPatientMsg(!showPatientMsg)}
                 badge={patientMsgCount}
               >
-                <SubItem to="/patient/messages" label="Replies" icon={<FaInbox />} />
-                <SubItem to="/patient/messages/send" label="Ask Doctor" icon={<FaPaperPlane />} />
+                <SubItem to="/patient/messages" label="Inbox" icon={<FaInbox />} />
+                <SubItem to="/patient/messages/send" label="Send Message" icon={<FaPaperPlane />} />
               </DropdownItem>
-              <NavItem to="/patient/subscription" icon={<FaCogs />} label="Membership" />
-              <NavItem to="/patient/profile/view-profile" icon={<FaIdCard />} label="My Account" />
+              <NavItem to="/patient/subscription" icon={<FaCogs />} label="My Plan" />
+              <NavItem to="/patient/profile/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
@@ -370,18 +370,18 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
             <>
               <NavItem to="/pharmacy/dashboard" icon={<FaChartBar />} label="Dashboard" />
               <NavItem to="/pharmacy/prescriptions" icon={<FaClipboardList />} label="Orders" />
-              <NavItem to="/pharmacist/subscription" icon={<FaCogs />} label="Store Plan" />
+              <NavItem to="/pharmacist/subscription" icon={<FaCogs />} label="My Plan" />
               <DropdownItem
                 icon={<FaEnvelope />}
-                label="Chat"
+                label="Messages"
                 isOpen={openMessages}
                 onClick={() => setOpenMessages(!openMessages)}
                 badge={unreadCount}
               >
-                <SubItem to="/pharmacy/messages/inbox" label="Inquiries" icon={<FaInbox />} />
-                <SubItem to="/pharmacy/messages/send" label="Respond" icon={<FaPaperPlane />} />
+                <SubItem to="/pharmacy/messages/inbox" label="Inbox" icon={<FaInbox />} />
+                <SubItem to="/pharmacy/messages/send" label="Reply" icon={<FaPaperPlane />} />
               </DropdownItem>
-              <NavItem to="/pharmacy/view-profile" icon={<FaIdCard />} label="Store Profile" />
+              <NavItem to="/pharmacy/view-profile" icon={<FaIdCard />} label="My Profile" />
             </>
           )}
 
