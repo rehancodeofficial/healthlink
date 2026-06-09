@@ -8,7 +8,7 @@ import {
   FaPaperPlane,
   FaUserFriends,
   FaTerminal,
-  Fa	Send Message to AllTower,
+  FaBroadcastTower,
 } from 'react-icons/fa';
 
 export default function SuperadminSendMessage() {
@@ -47,7 +47,7 @@ export default function SuperadminSendMessage() {
       const payload = {
         recipient,
         content: message,
-        	Send Message to All: recipient === 'ALL',
+        sendToAll: recipient === 'ALL',
       };
 
       await api.post('/messages/send', payload);
@@ -81,7 +81,7 @@ export default function SuperadminSendMessage() {
           <div className="lg:col-span-2 space-y-6">
             <div className="card glass !p-10 space-y-8 border-[var(--border)] overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                <Fa	Send Message to AllTower size={150} />
+                <FaBroadcastTower size={150} />
               </div>
 
               <div className="space-y-4 relative z-10">
@@ -97,7 +97,7 @@ export default function SuperadminSendMessage() {
                     disabled={loading}
                   >
                     <option value="">Select Identity Node</option>
-                    <option value="ALL">📢 Global 	Send Message to All (All Nodes)</option>
+                    <option value="ALL">📢 Global Broadcast (All Nodes)</option>
                     {users.map((u) => (
                       <option key={`${u.type}-${u.id}`} value={u.id}>
                         {u.name} [{u.role}]
@@ -164,7 +164,7 @@ export default function SuperadminSendMessage() {
                 <FaTerminal size={12} />
               </div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] leading-relaxed italic">
-                Manual override for systemic 	Send Message to Alls is operational. Ensure
+                Manual override for systemic broadcasts is operational. Ensure
                 data veracity.
               </p>
             </div>
