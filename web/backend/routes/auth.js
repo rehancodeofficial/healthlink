@@ -13,50 +13,52 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 router.post("/register-success", async (req, res) => {
   try {
-    const {
-      supabaseId,
-      firstName,
-      lastName,
-      email,
-      phone,
-      role,
-      dateOfBirth,
-      gender,
-      specialization,
-    } = req.body || {};
+      const {
+        supabaseId,
+        firstName,
+        lastName,
+        email,
+        phone,
+        nic,
+        role,
+        dateOfBirth,
+        gender,
+        specialization,
+      } = req.body || {};
 
-    if (!supabaseId || !email) {
-      return res
-        .status(400)
-        .json({ error: "Missing required fields: supabaseId, email" });
-    }
+      if (!supabaseId || !email) {
+        return res
+          .status(400)
+          .json({ error: "Missing required fields: supabaseId, email" });
+      }
 
-    const normedEmail = String(email).trim().toLowerCase();
+      const normedEmail = String(email).trim().toLowerCase();
 
-    // Check if user already exists
-    let existingUser = await prisma.user.findUnique({
-      where: { email: normedEmail },
-    });
+      // Check if user already exists
+      let existingUser = await prisma.user.findUnique({
+        where: { email: normedEmail },
+      });
 
-    // If not, create them
-    if (!existingUser) {
-      try {
-        existingUser = await prisma.user.create({
-          data: {
-            id: supabaseId, // Use Supabase ID as primary key
-            firstName: firstName || "First",
-            lastName: lastName || "Last",
-            email: normedEmail,
-            phone: phone || null,
-            password: null, // Supabase manages passwords
-            role: role || "PATIENT",
-            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-            gender: gender || "PREFER_NOT_TO_SAY",
-            // Organization can be created separately if needed
-          },
-        });
+      // If not, create them
+      if (!existingUser) {
+        try {
+          existingUser = await prisma.user.create({
+            data: {
+              id: supabaseId, // Use Supabase ID as primary key
+              firstName: firstName || "First",
+              lastName: lastName || "Last",
+              email: normedEmail,
+              phone: phone || null,
+              nic: nic || null,
+              password: null, // Supabase manages passwords
+              role: role || "PATIENT",
+              dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+              gender: gender || "PREFER_NOT_TO_SAY",
+              // Organization can be created separately if needed
+            },
+          });
 
-        console.log("✅ User created successfully:", existingUser.id);
+          console.log("✅ User created successfully:", existingUser.id);
 
         // Provision default profile
         try {
@@ -105,11 +107,37 @@ router.post("/register-success", async (req, res) => {
 });
 
 // -------------------------
+// Lookup Email by NIC (for NIC Login)
+// -------------------------
+router.post("/lookup-by-nic", async (req, res) => {
+  try {
+    const { nic } = req.body;
+    if (!nic) {
+      return res.status(400).json({ error: "Missing NIC" });
+    }
+
+    const account = await prisma.user.findUnique({
+      where: { nic: nic.trim() },
+      select: { email: true }
+    });
+
+    if (!account) {
+      return res.status(404).json({ error: "No account found with this NIC." });
+    }
+
+    return res.json({ email: account.email });
+  } catch (err) {
+    console.error("NIC lookup error:", err);
+    return res.status(500).json({ error: "Server error during NIC lookup" });
+  }
+});
+
+// -------------------------
 // Login Sync (Validate Supabase JWT & Sync)
 // -------------------------
 router.post("/login-sync", async (req, res) => {
   try {
-    const { email, supabaseId, supabaseAccessToken } = req.body || {};
+    const { email, supabaseAccessToken } = req.body || {};
 
     if (!email) {
       return res.status(400).json({ error: "Missing email" });
@@ -136,9 +164,15 @@ router.post("/login-sync", async (req, res) => {
       }
     }
 
-    // Find User in our DB
-    let account = await prisma.user.findUnique({
-      where: { email: normedEmail },
+    // Find User in our DB by email OR nic (in case the frontend sends NIC as the identifier to sync)
+    // For syncing, email is guaranteed from Supabase. We just find the user by email here.
+    let account = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: normedEmail },
+          { nic: normedEmail } // In case the frontend passes NIC in the 'email' field for sync
+        ]
+      },
     });
 
     if (!account) {
