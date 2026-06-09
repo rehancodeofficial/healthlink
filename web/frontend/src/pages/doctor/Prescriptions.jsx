@@ -400,7 +400,8 @@ export default function DoctorPrescriptions() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary flex-[2]">
-                  Establish Auth
+                  Hi! I'm your health assistant. Tell me your symptoms and I'll help you find the
+                  right doctor.
                 </button>
               </div>
             </form>
