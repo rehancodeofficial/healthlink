@@ -9,7 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Can be email OR NIC
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [loginMode, setLoginMode] = useState("password"); // 'password' or 'otp'
@@ -25,10 +25,28 @@ export default function Login() {
     setError("");
 
     try {
+      const trimmedInput = identifier.trim().toLowerCase();
+      let emailForAuth = trimmedInput;
+      
+      // Check if input looks like a NIC (13 digits without hyphens)
+      const isNic = /^\d{13}$/.test(trimmedInput.replace(/-/g, ""));
+      
+      if (isNic) {
+        try {
+          // Resolve NIC to email using our newly created backend route
+          const nicRes = await api.post("/auth/lookup-by-nic", { 
+            nic: trimmedInput.replace(/-/g, "") 
+          });
+          emailForAuth = nicRes.data.email;
+        } catch {
+          throw new Error("No account found with this National ID.");
+        }
+      }
+
       if (loginMode === "password") {
         // Password Login via Supabase
         const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
+          email: emailForAuth,
           password: password,
         });
 
@@ -43,18 +61,18 @@ export default function Login() {
 
         // Sync with backend
         const res = await api.post("/auth/login-sync", {
-          email: email.trim().toLowerCase(),
+          email: emailForAuth,
           supabaseId: data.user.id,
           supabaseAccessToken: data.session.access_token,
         });
 
-        handleAuthSuccess(res.data, email.trim().toLowerCase());
+        handleAuthSuccess(res.data, emailForAuth);
       } else {
         // OTP Login via Supabase
         if (!otpSent) {
           // Send OTP
           const { error: otpError } = await supabase.auth.signInWithOtp({
-            email: email.trim().toLowerCase(),
+            email: emailForAuth,
             options: {
               shouldCreateUser: false,
             },
@@ -63,11 +81,11 @@ export default function Login() {
           if (otpError) throw otpError;
 
           setOtpSent(true);
-          toast.success("OTP sent to your email!");
+          toast.success(`OTP sent to ${isNic ? 'the email associated with this NIC' : 'your email'}!`);
         } else {
           // Verify OTP
           const { data, error: verifyError } = await supabase.auth.verifyOtp({
-            email: email.trim().toLowerCase(),
+            email: emailForAuth,
             token: otp,
             type: "email",
           });
@@ -80,12 +98,12 @@ export default function Login() {
 
           // Sync with backend
           const res = await api.post("/auth/login-sync", {
-            email: email.trim().toLowerCase(),
+            email: emailForAuth,
             supabaseId: data.user.id,
             supabaseAccessToken: data.session.access_token,
           });
 
-          handleAuthSuccess(res.data, email.trim().toLowerCase());
+          handleAuthSuccess(res.data, emailForAuth);
         }
       }
     } catch (err) {
@@ -212,26 +230,26 @@ export default function Login() {
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
               {loginMode === "password"
                 ? "Enter your credentials to access your dashboard."
-                : "Enter your email to receive a login OTP."}
+                : "Enter your email or National ID to receive a login OTP."}
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                Email Address
+                Email Address OR National ID
               </label>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
                   <FiMail />
                 </div>
                 <input
-                  type="email"
-                  value={email}
+                  type="text"
+                  value={identifier}
                   disabled={otpSent}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
-                  placeholder="operator@curevirtual.io"
+                  placeholder="operator@curevirtual.io or 1234567890123"
                   required
                 />
               </div>
