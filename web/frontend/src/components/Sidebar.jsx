@@ -236,8 +236,8 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
                 />
               </DropdownItem>
               <NavItem to="/superadmin/system-reports" icon={<FaChartBar />} label="System Audit" />
-              <NavItem to="/superadmin/settings" icon={<FaCogs />} label="	Settings" />
-              <NavItem to="/superadmin/activity-logs" icon={<FaListUl />} label="	Activity Logs" />
+              <NavItem to="/superadmin/settings" icon={<FaCogs />} label="Settings" />
+              <NavItem to="/superadmin/activity-logs" icon={<FaListUl />} label="Activity Logs" />
               <DropdownItem
                 icon={<FaEnvelope />}
                 label="Messages"
@@ -263,7 +263,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
               >
                 <SubItem to="/admin/users-list" label="User Registry" icon={<FaListUl />} />
                 <SubItem to="/admin/manage-users" label="Add User" icon={<FaUserShield />} />
-                <SubItem to="/admin/reports" label="Operati onal Audit" icon={<FaChartBar />} />
+                <SubItem to="/admin/reports" label="Activity Reports" icon={<FaChartBar />} />
               </DropdownItem>
               <DropdownItem
                 icon={<FaUsers />}
