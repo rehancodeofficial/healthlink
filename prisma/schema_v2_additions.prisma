@@ -1,0 +1,298 @@
+// ============================================
+// CUREVIRTUAL V2.0 - NEW SCHEMA ADDITIONS
+// ============================================
+// This file contains all new models to be added to the main schema.prisma
+// Copy these models into your main schema.prisma file
+
+// ============================================
+// ENUMS (Add to existing enums section)
+// ============================================
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  REJECTED
+}
+
+enum TransactionType {
+  SUBSCRIPTION_PAYMENT
+  ORDER_PAYMENT
+  CONSULTATION_PAYMENT
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  APPOINTMENT
+  PRESCRIPTION
+  ORDER
+  MESSAGE
+  PAYMENT
+  SYSTEM
+}
+
+// ============================================
+// PHARMACY INVENTORY MANAGEMENT
+// ============================================
+
+model Medicine {
+  id            String   @id @default(uuid())
+  pharmacyId    String
+  pharmacy      PharmacyProfile @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  
+  name          String
+  genericName   String?
+  category      String   // e.g., "Antibiotic", "Painkiller"
+  manufacturer  String?
+  description   String?  @db.Text
+  
+  // Inventory
+  stockQuantity Int      @default(0)
+  unitPrice     Float    // Price per unit
+  currency      String   @default("USD")
+  
+  // Product Details
+  dosageForm    String?  // e.g., "Tablet", "Syrup", "Injection"
+  strength      String?  // e.g., "500mg"
+  packSize      Int?     // Units per pack
+  
+  // Availability
+  isAvailable   Boolean  @default(true)
+  requiresPrescription Boolean @default(true)
+  
+  // Alerts
+  lowStockThreshold Int  @default(10)
+  
+  // Images
+  imageUrl      String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  orderItems    MedicineOrderItem[]
+  
+  @@index([pharmacyId])
+  @@index([name])
+  @@map("medicine")
+}
+
+// ============================================
+// MEDICINE ORDERS (Patient → Pharmacy)
+// ============================================
+
+model MedicineOrder {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique // e.g., "ORD-2025-001"
+  
+  // Relations
+  patientId       String
+  patient         PatientProfile @relation(fields: [patientId], references: [id])
+  
+  pharmacyId      String
+  pharmacy        PharmacyProfile @relation(fields: [pharmacyId], references: [id])
+  
+  prescriptionId  String?     // Optional: linked prescription
+  prescription    Prescription? @relation(fields: [prescriptionId], references: [id], onDelete: SetNull)
+  
+  // Order Details
+  status          OrderStatus @default(PENDING)
+  items           MedicineOrderItem[]
+  
+  // Pricing
+  subtotal        Float
+  deliveryFee     Float       @default(0)
+  tax             Float       @default(0)
+  discount        Float       @default(0)
+  totalAmount     Float
+  
+  // Payment
+  paymentStatus   String      @default("PENDING") // PENDING, PAID, FAILED
+  paymentMethod   String?     // e.g., "CARD", "CASH"
+  paymentReference String?    @unique
+  
+  // Delivery
+  deliveryAddress String?     @db.Text
+  deliveryType    String      @default("PICKUP") // PICKUP, DELIVERY
+  estimatedDelivery DateTime?
+  
+  // Tracking
+  notes           String?     @db.Text
+  rejectionReason String?     @db.Text
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  completedAt     DateTime?
+  
+  // Relations
+  transactions    Transaction[]
+  
+  @@index([patientId])
+  @@index([pharmacyId])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("medicineorder")
+}
+
+model MedicineOrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       MedicineOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  medicineId  String
+  medicine    Medicine @relation(fields: [medicineId], references: [id])
+  
+  quantity    Int
+  unitPrice   Float
+  totalPrice  Float
+  
+  @@index([orderId])
+  @@index([medicineId])
+  @@map("medicineorderitem")
+}
+
+// ============================================
+// PAYMENTS & TRANSACTIONS
+// ============================================
+
+model Transaction {
+  id              String            @id @default(uuid())
+  
+  // User
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  
+  // Transaction Details
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          Float
+  currency        String            @default("USD")
+  
+  // Payment Gateway
+  provider        String            // e.g., "STRIPE", "PAYPAL", "MOCK"
+  providerTxId    String?           @unique // Stripe payment intent ID
+  providerCustomerId String?
+  
+  // References
+  subscriptionId  String?
+  subscription    Subscription?     @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  
+  orderId         String?
+  order           MedicineOrder?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  // Metadata
+  description     String?
+  metadata        String?           @db.Text // JSON string
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("transaction")
+}
+
+// ============================================
+// REAL-TIME NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  
+  // Metadata
+  link        String?          // URL to navigate
+  actionData  String?          @db.Text // JSON metadata
+  
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  
+  createdAt   DateTime         @default(now())
+  
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notification")
+}
+
+// ============================================
+// VIDEO CONSULTATION ENHANCEMENTS
+// ============================================
+
+model VideoSession {
+  id              String   @id @default(uuid())
+  consultationId  String   @unique
+  consultation    VideoConsultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  
+  // Agora/Twilio Details
+  channelName     String   @unique
+  token           String?  @db.Text
+  uid             String?
+  
+  // Session State
+  startedAt       DateTime?
+  endedAt         DateTime?
+  duration        Int?     // minutes
+  
+  // Recording (if enabled)
+  recordingUrl    String?
+  recordingId     String?
+  
+  @@map("videosession")
+}
+
+// ============================================
+// ANALYTICS & REPORTING
+// ============================================
+
+model SystemMetric {
+  id          String   @id @default(uuid())
+  metricType  String   // e.g., "DAILY_REVENUE", "ACTIVE_USERS", "ORDERS_COUNT"
+  value       Float
+  metadata    String?  @db.Text // JSON
+  recordedAt  DateTime @default(now())
+  
+  @@index([metricType, recordedAt])
+  @@map("systemmetric")
+}
+
+// ============================================
+// RELATION UPDATES FOR EXISTING MODELS
+// ============================================
+// Add these fields to existing models in your main schema.prisma:
+
+// User model - Add:
+//   transactions    Transaction[]
+//   notifications   Notification[]
+
+// PharmacyProfile model - Add:
+//   medicines       Medicine[]
+//   medicineOrders  MedicineOrder[]
+
+// PatientProfile model - Add:
+//   medicineOrders  MedicineOrder[]
+
+// Prescription model - Add:
+//   medicineOrders  MedicineOrder[]
+
+// Subscription model - Add:
+//   transactions    Transaction[]
+
+// VideoConsultation model - Add:
+//   videoSession    VideoSession?
