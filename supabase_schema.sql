@@ -1,97 +1,432 @@
--- =============================================================================
--- 1. Update Enum for User Roles (Mirroring Prisma)
--- =============================================================================
--- We use ALTER TYPE because the enum likely already exists from Prisma
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'SUPERADMIN';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'ADMIN';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'SUPPORT';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'PHARMACY';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'DOCTOR';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'PATIENT';
+-- CreateTable
+CREATE TABLE `EmailOTP` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `otp` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `verified` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
--- Also ensure Gender enum has what we need
-ALTER TYPE "Gender" ADD VALUE IF NOT EXISTS 'MALE';
-ALTER TYPE "Gender" ADD VALUE IF NOT EXISTS 'FEMALE';
-ALTER TYPE "Gender" ADD VALUE IF NOT EXISTS 'OTHER';
-ALTER TYPE "Gender" ADD VALUE IF NOT EXISTS 'PREFER_NOT_TO_SAY';
+    INDEX `EmailOTP_email_idx`(`email`),
+    INDEX `EmailOTP_expiresAt_idx`(`expiresAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Ensure public.User exists (Prisma should create this, but RLS needs to be on it)
-ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+-- CreateTable
+CREATE TABLE `User` (
+    `id` VARCHAR(191) NOT NULL,
+    `firstName` VARCHAR(191) NOT NULL,
+    `middleName` VARCHAR(191) NULL,
+    `lastName` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `phone` VARCHAR(191) NULL,
+    `password` VARCHAR(191) NOT NULL,
+    `role` ENUM('DOCTOR', 'PATIENT', 'PHARMACY') NOT NULL DEFAULT 'PATIENT',
+    `dateOfBirth` DATETIME(3) NOT NULL,
+    `gender` ENUM('MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY') NOT NULL,
+    `subscriptionState` ENUM('UNSUBSCRIBED', 'PENDING', 'ACTIVE', 'EXPIRED', 'DEACTIVATED', 'FAILED') NOT NULL DEFAULT 'UNSUBSCRIBED',
+    `organizationId` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
--- =============================================================================
--- 3. RLS Policies for "User" Table
--- =============================================================================
+    UNIQUE INDEX `User_email_key`(`email`),
+    INDEX `User_organizationId_idx`(`organizationId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- POLICY: SUPERADMIN and ADMIN can see ALL users
-DROP POLICY IF EXISTS "Admins can view all users" ON "User";
-CREATE POLICY "Admins can view all users"
-ON "User"
-FOR SELECT
-USING (
-  (SELECT role FROM "User" WHERE id = auth.uid()::text) IN ('SUPERADMIN', 'ADMIN')
-);
+-- CreateTable
+CREATE TABLE `Organization` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `ownerId` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
--- POLICY: SUPPORT can view all users (read-only)
-DROP POLICY IF EXISTS "Support can view all users" ON "User";
-CREATE POLICY "Support can view all users"
-ON "User"
-FOR SELECT
-USING (
-  (SELECT role FROM "User" WHERE id = auth.uid()::text) = 'SUPPORT'
-);
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- POLICY: Users can view their own profile
-DROP POLICY IF EXISTS "Users can view own profile" ON "User";
-CREATE POLICY "Users can view own profile"
-ON "User"
-FOR SELECT
-USING (
-  auth.uid()::text = id
-);
+-- CreateTable
+CREATE TABLE `admin` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NOT NULL,
+    `role` ENUM('SUPERADMIN', 'ADMIN', 'SUPPORT') NOT NULL DEFAULT 'ADMIN',
+    `token` VARCHAR(191) NULL,
+    `isSuspended` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
--- POLICY: Upload/Update - Admins Only or Self
-DROP POLICY IF EXISTS "Admins can update all users" ON "User";
-CREATE POLICY "Admins can update all users"
-ON "User"
-FOR UPDATE
-USING (
-  (SELECT role FROM "User" WHERE id = auth.uid()::text) IN ('SUPERADMIN', 'ADMIN')
-)
-WITH CHECK (
-  (SELECT role FROM "User" WHERE id = auth.uid()::text) IN ('SUPERADMIN', 'ADMIN')
-);
+    UNIQUE INDEX `admin_email_key`(`email`),
+    UNIQUE INDEX `admin_token_key`(`token`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-DROP POLICY IF EXISTS "Users can update own profile" ON "User";
-CREATE POLICY "Users can update own profile"
-ON "User"
-FOR UPDATE
-USING (
-  auth.uid()::text = id
-);
+-- CreateTable
+CREATE TABLE `SupportAgent` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` VARCHAR(191) NOT NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
--- =============================================================================
--- 4. Trigger to Sync New Auth Users to Public User Table
--- =============================================================================
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public."User" (id, email, "firstName", "lastName", role, "updatedAt", "dateOfBirth", gender)
-  values (
-    new.id,
-    new.email,
-    new.raw_user_meta_data->>'firstName',
-    new.raw_user_meta_data->>'lastName',
-    COALESCE((new.raw_user_meta_data->>'role')::"UserRole", 'PATIENT'),
-    now(),
-    COALESCE((new.raw_user_meta_data->>'dateOfBirth')::timestamp, now()),
-    COALESCE((new.raw_user_meta_data->>'gender')::"Gender", 'PREFER_NOT_TO_SAY')
-  );
-  return new;
-end;
-$$ language plpgsql security definer;
+    UNIQUE INDEX `SupportAgent_userId_key`(`userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Trigger
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- CreateTable
+CREATE TABLE `ActivityLog` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `actorId` VARCHAR(191) NOT NULL,
+    `actorRole` VARCHAR(191) NOT NULL,
+    `action` VARCHAR(191) NOT NULL,
+    `entity` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `DoctorProfile` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `specialization` VARCHAR(191) NOT NULL,
+    `qualifications` VARCHAR(191) NOT NULL,
+    `licenseNumber` VARCHAR(191) NOT NULL,
+    `hospitalAffiliation` VARCHAR(191) NULL,
+    `yearsOfExperience` INTEGER NULL,
+    `consultationFee` DOUBLE NOT NULL,
+    `availability` LONGTEXT NULL,
+    `timezone` VARCHAR(191) NOT NULL DEFAULT 'UTC',
+    `bio` VARCHAR(191) NULL,
+    `languages` LONGTEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `DoctorProfile_userId_key`(`userId`),
+    UNIQUE INDEX `DoctorProfile_licenseNumber_key`(`licenseNumber`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `PharmacyProfile` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `displayName` VARCHAR(191) NULL,
+    `licenseNumber` VARCHAR(191) NULL,
+    `phone` VARCHAR(191) NULL,
+    `address` VARCHAR(191) NULL,
+    `city` VARCHAR(191) NULL,
+    `state` VARCHAR(191) NULL,
+    `country` VARCHAR(191) NULL,
+    `postalCode` VARCHAR(191) NULL,
+    `latitude` DOUBLE NULL,
+    `longitude` DOUBLE NULL,
+    `openingHours` LONGTEXT NULL,
+    `services` LONGTEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `PharmacyProfile_userId_key`(`userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `PatientProfile` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `bloodGroup` ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'UNKNOWN') NOT NULL,
+    `height` DOUBLE NULL,
+    `weight` DOUBLE NULL,
+    `allergies` LONGTEXT NULL,
+    `medications` LONGTEXT NULL,
+    `medicalHistory` LONGTEXT NULL,
+    `address` VARCHAR(191) NULL,
+    `medicalRecordNumber` VARCHAR(191) NULL,
+    `insuranceProvider` VARCHAR(191) NULL,
+    `insuranceMemberId` VARCHAR(191) NULL,
+    `emergencyContact` LONGTEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `PatientProfile_userId_key`(`userId`),
+    UNIQUE INDEX `PatientProfile_medicalRecordNumber_key`(`medicalRecordNumber`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Appointment` (
+    `id` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
+    `appointmentDate` DATETIME(3) NOT NULL,
+    `reason` VARCHAR(191) NULL,
+    `status` ENUM('PENDING', 'APPROVED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `Appointment_doctorId_idx`(`doctorId`),
+    INDEX `Appointment_patientId_idx`(`patientId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `DoctorSchedule` (
+    `id` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NOT NULL,
+    `dayOfWeek` INTEGER NOT NULL,
+    `startTime` VARCHAR(191) NOT NULL,
+    `endTime` VARCHAR(191) NOT NULL,
+    `effectiveFrom` DATETIME(3) NULL,
+    `effectiveTo` DATETIME(3) NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `DoctorSchedule_doctorId_idx`(`doctorId`),
+    INDEX `DoctorSchedule_dayOfWeek_idx`(`dayOfWeek`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SupportTicket` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `ticketNo` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `agentId` INTEGER NULL,
+    `subject` VARCHAR(191) NOT NULL,
+    `body` TEXT NOT NULL,
+    `status` ENUM('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED') NOT NULL DEFAULT 'OPEN',
+    `priority` ENUM('LOW', 'MEDIUM', 'HIGH') NOT NULL DEFAULT 'MEDIUM',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `SupportTicket_ticketNo_key`(`ticketNo`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SupportReply` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `ticketId` INTEGER NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `adminId` INTEGER NULL,
+    `message` TEXT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Prescription` (
+    `id` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
+    `medication` VARCHAR(191) NOT NULL,
+    `dosage` VARCHAR(191) NOT NULL,
+    `frequency` VARCHAR(191) NOT NULL,
+    `duration` VARCHAR(191) NOT NULL,
+    `notes` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `pharmacyId` VARCHAR(191) NULL,
+    `dispatchStatus` ENUM('NONE', 'SENT', 'ACKNOWLEDGED', 'READY', 'DISPENSED', 'REJECTED') NOT NULL DEFAULT 'NONE',
+    `dispatchedAt` DATETIME(3) NULL,
+
+    INDEX `Prescription_doctorId_idx`(`doctorId`),
+    INDEX `Prescription_patientId_idx`(`patientId`),
+    INDEX `Prescription_pharmacyId_idx`(`pharmacyId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Message` (
+    `id` VARCHAR(191) NOT NULL,
+    `senderId` VARCHAR(191) NULL,
+    `receiverId` VARCHAR(191) NULL,
+    `content` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `readAt` DATETIME(3) NULL,
+    `adminSenderId` INTEGER NULL,
+    `adminReceiverId` INTEGER NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `VideoConsultation` (
+    `id` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NULL,
+    `notes` VARCHAR(191) NULL,
+    `scheduledAt` DATETIME(3) NOT NULL,
+    `durationMins` INTEGER NULL,
+    `status` ENUM('SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'SCHEDULED',
+    `roomName` VARCHAR(191) NULL,
+    `meetingUrl` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `VideoConsultation_doctorId_idx`(`doctorId`),
+    INDEX `VideoConsultation_patientId_idx`(`patientId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SubscriptionSetting` (
+    `id` INTEGER NOT NULL DEFAULT 1,
+    `doctorMonthlyUsd` DOUBLE NULL,
+    `doctorYearlyUsd` DOUBLE NULL,
+    `patientMonthlyUsd` DOUBLE NULL,
+    `patientYearlyUsd` DOUBLE NULL,
+    `pharmacyMonthlyUsd` DOUBLE NULL,
+    `pharmacyYearlyUsd` DOUBLE NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Subscription` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `plan` ENUM('MONTHLY', 'YEARLY') NOT NULL,
+    `status` ENUM('UNSUBSCRIBED', 'PENDING', 'ACTIVE', 'EXPIRED', 'DEACTIVATED', 'FAILED') NOT NULL DEFAULT 'PENDING',
+    `provider` VARCHAR(191) NULL,
+    `reference` VARCHAR(191) NULL,
+    `amount` INTEGER NULL,
+    `currency` VARCHAR(191) NULL,
+    `startDate` DATETIME(3) NULL,
+    `endDate` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Subscription_reference_key`(`reference`),
+    INDEX `Subscription_userId_idx`(`userId`),
+    INDEX `Subscription_status_idx`(`status`),
+    INDEX `Subscription_plan_idx`(`plan`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `DoctorPatient` (
+    `id` VARCHAR(191) NOT NULL,
+    `doctorId` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `DoctorPatient_patientId_idx`(`patientId`),
+    INDEX `DoctorPatient_doctorId_idx`(`doctorId`),
+    UNIQUE INDEX `DoctorPatient_doctorId_patientId_key`(`doctorId`, `patientId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SelectedPharmacy` (
+    `id` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
+    `pharmacyId` VARCHAR(191) NOT NULL,
+    `preferred` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `SelectedPharmacy_patientId_pharmacyId_key`(`patientId`, `pharmacyId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SystemSetting` (
+    `id` INTEGER NOT NULL DEFAULT 1,
+    `systemName` VARCHAR(191) NULL,
+    `themeColor` VARCHAR(191) NULL,
+    `logoUrl` VARCHAR(191) NULL,
+    `defaultFee` DOUBLE NULL,
+    `monthlyPlan` DOUBLE NULL,
+    `yearlyPlan` DOUBLE NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `User` ADD CONSTRAINT `User_organizationId_fkey` FOREIGN KEY (`organizationId`) REFERENCES `Organization`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportAgent` ADD CONSTRAINT `SupportAgent_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DoctorProfile` ADD CONSTRAINT `DoctorProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PharmacyProfile` ADD CONSTRAINT `PharmacyProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `DoctorProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DoctorSchedule` ADD CONSTRAINT `DoctorSchedule_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `DoctorProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportTicket` ADD CONSTRAINT `SupportTicket_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportTicket` ADD CONSTRAINT `SupportTicket_agentId_fkey` FOREIGN KEY (`agentId`) REFERENCES `SupportAgent`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportReply` ADD CONSTRAINT `SupportReply_ticketId_fkey` FOREIGN KEY (`ticketId`) REFERENCES `SupportTicket`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportReply` ADD CONSTRAINT `SupportReply_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SupportReply` ADD CONSTRAINT `SupportReply_adminId_fkey` FOREIGN KEY (`adminId`) REFERENCES `admin`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Prescription` ADD CONSTRAINT `Prescription_pharmacyId_fkey` FOREIGN KEY (`pharmacyId`) REFERENCES `PharmacyProfile`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Prescription` ADD CONSTRAINT `Prescription_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `DoctorProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Prescription` ADD CONSTRAINT `Prescription_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_senderId_fkey` FOREIGN KEY (`senderId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_receiverId_fkey` FOREIGN KEY (`receiverId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_adminSenderId_fkey` FOREIGN KEY (`adminSenderId`) REFERENCES `admin`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_adminReceiverId_fkey` FOREIGN KEY (`adminReceiverId`) REFERENCES `admin`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `VideoConsultation` ADD CONSTRAINT `VideoConsultation_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `DoctorProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `VideoConsultation` ADD CONSTRAINT `VideoConsultation_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Subscription` ADD CONSTRAINT `Subscription_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DoctorPatient` ADD CONSTRAINT `DoctorPatient_doctorId_fkey` FOREIGN KEY (`doctorId`) REFERENCES `DoctorProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DoctorPatient` ADD CONSTRAINT `DoctorPatient_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SelectedPharmacy` ADD CONSTRAINT `SelectedPharmacy_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SelectedPharmacy` ADD CONSTRAINT `SelectedPharmacy_pharmacyId_fkey` FOREIGN KEY (`pharmacyId`) REFERENCES `PharmacyProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
