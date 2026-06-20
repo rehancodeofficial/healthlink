@@ -96,7 +96,11 @@ export default function Register() {
         window.location.href = "/login";
       }, 3000);
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error("❌ Registration error:", err);
+      // Log more details if it's a Supabase error
+      if (err.status) console.error("Status Code:", err.status);
+      if (err.name) console.error("Error Name:", err.name);
+      
       toast.error(err.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
