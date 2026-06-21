@@ -105,8 +105,8 @@ test_endpoint "PATCH" "/subscription/subscription/123/status" '{"status":"ACTIVE
 test_endpoint "PUT" "/subscription/subscription/prices" '{"doctorMonthlyUsd":30}' "Bearer doctor-token" "403" "PUT /subscription/prices (DOCTOR role)"
 test_endpoint "GET" "/subscription/stats" "" "Bearer doctor-token" "403" "GET /subscription/stats (DOCTOR role)"
 
-# Test 	Send Message to All message with patient token (should fail)
-test_endpoint "POST" "/messages/send" '{"content":"test","senderId":"patient-id","	Send Message to All":true}' "Bearer patient-token" "403" "POST /messages/send 	Send Message to All (PATIENT role)"
+# Test broadcast message with patient token (should fail)
+test_endpoint "POST" "/messages/send" '{"content":"test","senderId":"patient-id","broadcast":true}' "Bearer patient-token" "403" "POST /messages/send broadcast (PATIENT role)"
 
 echo -e "\n${BLUE}📊 Test Results Summary${NC}"
 echo "========================="
