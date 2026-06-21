@@ -249,7 +249,7 @@ export default function Login() {
                   disabled={otpSent}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
-                  placeholder="operator@curevirtual.io or 1234567890123"
+                  placeholder="Email or National ID"
                   required
                 />
               </div>
