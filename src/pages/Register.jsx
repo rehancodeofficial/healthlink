@@ -100,7 +100,7 @@ export default function Register() {
       // Log more details if it's a Supabase error
       if (err.status) console.error("Status Code:", err.status);
       if (err.name) console.error("Error Name:", err.name);
-      
+
       toast.error(err.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
@@ -236,7 +236,7 @@ export default function Register() {
                   value={form.nic}
                   onChange={handleChange}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                  placeholder="1234567890123 (13 digits)"
+                  placeholder="National ID"
                   required
                 />
               </div>
