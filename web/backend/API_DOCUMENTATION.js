@@ -55,14 +55,14 @@
 
 /**
  * POST /api/messages/send
- * Send a message to a single user OR 	Send Message to All to all users
+ * Send a message to a single user OR broadcast to all users
  *
  * Single message:
  * Body: { senderId, receiverId, content }
  * OR: { senderId, recipient, content }
  *
- * 	Send Message to All:
- * Body: { senderId, content, 	Send Message to All: true }
+ * broadcast:
+ * Body: { senderId, content, broadcast: true }
  * OR: { senderId, recipient: "ALL", content }
  *
  * Returns: { data: msg } OR { success: true, message: "...", count }
@@ -320,7 +320,7 @@
 
 /**
  * GET /api/messages/contacts/all (when logged in as superadmin)
- * Get all users and admins for 	Send Message to Alling
+ * Get all users and admins for broadcasting
  */
 
 /**
@@ -329,8 +329,8 @@
  */
 
 /**
- * POST /api/messages/send (with 	Send Message to All flag)
- * Send message or 	Send Message to All to all users
+ * POST /api/messages/send (with broadcast flag)
+ * Send message or broadcast to all users
  */
 
 // ==========================================
