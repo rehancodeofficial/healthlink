@@ -2,7 +2,7 @@
 // Tests the /api/auth/register endpoint
 // After the fix: expects a 201 with a "check your email" message (NOT auto-confirmed)
 
-const https = require("https");
+import https from "https";
 
 const BASE_URL = process.env.API_URL || "https://curevirtual-2-production-ee33.up.railway.app";
 
