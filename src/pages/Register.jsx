@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
-import { supabase } from "../Lib/supabase";
+
 import api from "../Lib/api";
 
 export default function Register() {
@@ -55,31 +55,10 @@ export default function Register() {
 
     setSubmitting(true);
     try {
-      // Register with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      // Use backend API to register to bypass Supabase's email limit quota "Error sending confirmation email"
+      const res = await api.post("/auth/register", {
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: {
-          data: {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            role: form.role,
-            dateOfBirth: form.dateOfBirth,
-            gender: form.gender,
-            specialization:
-              form.specialization === "Other" ? form.customProfession : form.specialization,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      console.log("✅ Registration successful:", data);
-
-      // Sync with backend immediately
-      await api.post("/auth/register-success", {
-        supabaseId: data.user.id,
-        email: form.email.trim().toLowerCase(),
         firstName: form.firstName,
         lastName: form.lastName,
         nic: form.nic.replace(/-/g, ""), // Store cleaned 13-digit NIC
@@ -90,11 +69,13 @@ export default function Register() {
           form.specialization === "Other" ? form.customProfession : form.specialization,
       });
 
-      toast.success("Registration successful! Please check your email for the verification link.");
+      console.log("✅ Registration successful:", res.data);
+
+      toast.success("Registration successful! Redirecting to login...");
 
       setTimeout(() => {
         window.location.href = "/login";
-      }, 3000);
+      }, 2000);
     } catch (err) {
       console.error("❌ Registration error:", err);
       // Log more details if it's a Supabase error
