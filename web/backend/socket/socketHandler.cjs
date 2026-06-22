@@ -20,7 +20,7 @@ module.exports = (io) => {
       });
       console.log(`👤 User online: ${name} (${role}) - Socket: ${socket.id}`);
 
-      // 	Send Message to All to all that user is online
+      // broadcast to all that user is online
       socket.broadcast.emit("user_status", {
         userId,
         role,
