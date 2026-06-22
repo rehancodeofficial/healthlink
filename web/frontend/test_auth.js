@@ -219,29 +219,29 @@ async function testRoleBasedAccess() {
   logTest('PATCH /subscription/status (ADMIN role)', response.status === 200 || response.status === 403, `Status: ${response.status}`);
 }
 
-// Test message 	Send Message to All functionality
-async function testMessage	Send Message to All() {
-  log('\n📢 Testing Message 	Send Message to All', 'blue');
+// Test message broadcast functionality
+async function testMessageBroadcast() {
+  log('\n📢 Testing Message Broadcast', 'blue');
   
-  // Test 	Send Message to All with PATIENT role (should fail)
+  // Test broadcast with PATIENT role (should fail)
   let response = await makeRequest('post', '/messages/send', {
-    content: 'Test 	Send Message to All',
+    content: 'Test broadcast',
     senderId: testUsers.patient.id,
-    	Send Message to All: true
+    broadcast: true
   }, testUsers.patient.token);
-  logTest('POST /messages/send 	Send Message to All (PATIENT role)', response.status === 403, `Status: ${response.status}`);
+  logTest('POST /messages/send broadcast (PATIENT role)', response.status === 403, `Status: ${response.status}`);
 
-  // Test 	Send Message to All with ADMIN role (should succeed)
+  // Test broadcast with ADMIN role (should succeed)
   response = await makeRequest('post', '/messages/send', {
-    content: 'Test 	Send Message to All',
+    content: 'Test broadcast',
     senderId: testUsers.admin.id,
-    	Send Message to All: true
+    broadcast: true
   }, testUsers.admin.token);
-  logTest('POST /messages/send 	Send Message to All (ADMIN role)', response.status === 200 || response.status === 403, `Status: ${response.status}`);
+  logTest('POST /messages/send broadcast (ADMIN role)', response.status === 200 || response.status === 403, `Status: ${response.status}`);
 
   // Test "ALL" recipient with regular user (should fail)
   response = await makeRequest('post', '/messages/send', {
-    content: 'Test 	Send Message to All',
+    content: 'Test broadcast',
     senderId: testUsers.patient.id,
     recipient: 'ALL'
   }, testUsers.patient.token);
@@ -286,7 +286,7 @@ async function runTests() {
   try {
     await testAuthentication();
     await testRoleBasedAccess();
-    await testMessage	Send Message to All();
+    await testMessageBroadcast();
     
     const success = generateReport();
     
