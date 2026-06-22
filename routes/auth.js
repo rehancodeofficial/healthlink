@@ -9,6 +9,92 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // -------------------------
+// Register (Bypass Supabase email sending limits)
+// -------------------------
+router.post("/register", async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, phone, nic, role, dateOfBirth, gender, specialization } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Missing email or password" });
+    }
+    
+    const normedEmail = String(email).trim().toLowerCase();
+    
+    // Check if user already exists
+    const existing = await prisma.user.findUnique({ where: { email: normedEmail } });
+    if (existing) {
+      return res.status(400).json({ error: "User already exists with this email" });
+    }
+    
+    // Create via Supabase Admin (auto confirms email)
+    const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
+      email: normedEmail,
+      password: password,
+      email_confirm: true,
+      user_metadata: {
+        firstName, lastName, role, nic, dateOfBirth, gender, specialization
+      }
+    });
+    
+    if (supaError) {
+      console.error("Supabase Admin Create Error:", supaError);
+      return res.status(400).json({ error: supaError.message });
+    }
+    
+    // Create or update in Prisma (Supabase trigger might have already inserted basic info)
+    const existingUser = await prisma.user.upsert({
+      where: { id: supaData.user.id },
+      update: {
+        firstName: firstName || "First",
+        lastName: lastName || "Last",
+        phone: phone || null,
+        nic: nic || null,
+        role: role || "PATIENT",
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+        gender: gender || "PREFER_NOT_TO_SAY"
+      },
+      create: {
+        id: supaData.user.id,
+        firstName: firstName || "First",
+        lastName: lastName || "Last",
+        email: normedEmail,
+        phone: phone || null,
+        nic: nic || null,
+        password: null,
+        role: role || "PATIENT",
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+        gender: gender || "PREFER_NOT_TO_SAY"
+      }
+    });
+    
+    if (specialization) {
+      try {
+        await ensureDefaultProfile(existingUser, specialization);
+      } catch (e) {
+        console.error("Failed to provision profile:", e);
+      }
+    }
+    
+    const token = jwt.sign(
+      { id: existingUser.id, role: existingUser.role, type: "USER" },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+    
+    return res.status(201).json({
+      message: "Registration successful",
+      user: existingUser,
+      token
+    });
+    
+  } catch (err) {
+    console.error("Register error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// -------------------------
 // Register Success (Supabase Sync)
 // -------------------------
 router.post("/register-success", async (req, res) => {
