@@ -9,7 +9,7 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // -------------------------
-// Register (Bypass Supabase email sending limits)
+// Register — sends confirmation email via Supabase signUp
 // -------------------------
 router.post("/register", async (req, res) => {
   try {
@@ -27,19 +27,22 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "User already exists with this email" });
     }
     
-    // Create via Supabase Admin (auto confirms email)
-    const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
+    // Create via standard Supabase signUp — sends confirmation email to user
+    const { data: supaData, error: supaError } = await supabaseAdmin.auth.signUp({
       email: normedEmail,
       password: password,
-      email_confirm: true,
-      user_metadata: {
-        firstName, lastName, role, nic, dateOfBirth, gender, specialization
+      options: {
+        data: { firstName, lastName, role, nic, dateOfBirth, gender, specialization }
       }
     });
     
     if (supaError) {
-      console.error("Supabase Admin Create Error:", supaError);
+      console.error("Supabase SignUp Error:", supaError);
       return res.status(400).json({ error: supaError.message });
+    }
+    
+    if (!supaData?.user?.id) {
+      return res.status(400).json({ error: "Failed to create user — please try again." });
     }
     
     // Create or update in Prisma (Supabase trigger might have already inserted basic info)
@@ -83,7 +86,7 @@ router.post("/register", async (req, res) => {
     );
     
     return res.status(201).json({
-      message: "Registration successful",
+      message: "Account created! Please check your email to confirm your account before logging in.",
       user: existingUser,
       token
     });
