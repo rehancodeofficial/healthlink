@@ -71,11 +71,8 @@ export default function Register() {
 
       console.log("✅ Registration successful:", res.data);
 
-      toast.success("Registration successful! Redirecting to login...");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+      toast.success("Account created! Please check your email to confirm your account before logging in.");
+      // No redirect — user must verify email first before they can log in
     } catch (err) {
       console.error("❌ Registration error:", err);
       // Log more details if it's a Supabase error
