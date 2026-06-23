@@ -9,7 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
-  const [identifier, setIdentifier] = useState(""); // Can be email OR NIC
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [loginMode, setLoginMode] = useState("password"); // 'password' or 'otp'
@@ -25,23 +25,7 @@ export default function Login() {
     setError("");
 
     try {
-      const trimmedInput = identifier.trim().toLowerCase();
-      let emailForAuth = trimmedInput;
-      
-      // Check if input looks like a NIC (13 digits without hyphens)
-      const isNic = /^\d{13}$/.test(trimmedInput.replace(/-/g, ""));
-      
-      if (isNic) {
-        try {
-          // Resolve NIC to email using our newly created backend route
-          const nicRes = await api.post("/auth/lookup-by-nic", { 
-            nic: trimmedInput.replace(/-/g, "") 
-          });
-          emailForAuth = nicRes.data.email;
-        } catch {
-          throw new Error("No account found with this National ID.");
-        }
-      }
+      const emailForAuth = email.trim().toLowerCase();
 
       if (loginMode === "password") {
         // Password Login via Supabase
@@ -81,7 +65,7 @@ export default function Login() {
           if (otpError) throw otpError;
 
           setOtpSent(true);
-          toast.success(`OTP sent to ${isNic ? 'the email associated with this NIC' : 'your email'}!`);
+          toast.success(`OTP sent to your email!`);
         } else {
           // Verify OTP
           const { data, error: verifyError } = await supabase.auth.verifyOtp({
@@ -230,14 +214,14 @@ export default function Login() {
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
               {loginMode === "password"
                 ? "Enter your credentials to access your dashboard."
-                : "Enter your email or National ID to receive a login OTP."}
+                : "Enter your email to receive a login OTP."}
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                Email Address OR National ID
+                Email Address
               </label>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
@@ -245,11 +229,11 @@ export default function Login() {
                 </div>
                 <input
                   type="text"
-                  value={identifier}
+                  value={email}
                   disabled={otpSent}
-                  onChange={(e) => setIdentifier(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
-                  placeholder="Email or National ID"
+                  placeholder="Email Address"
                   required
                 />
               </div>
