@@ -21,10 +21,18 @@ router.post("/register", async (req, res) => {
     
     const normedEmail = String(email).trim().toLowerCase();
     
-    // Check if user already exists
-    const existing = await prisma.user.findUnique({ where: { email: normedEmail } });
-    if (existing) {
+    // Check if user already exists by email
+    const existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
+    if (existingEmail) {
       return res.status(400).json({ error: "User already exists with this email" });
+    }
+
+    // Check if NIC is already taken
+    if (nic) {
+      const existingNic = await prisma.user.findUnique({ where: { nic: String(nic).trim() } });
+      if (existingNic) {
+        return res.status(400).json({ error: "An account already exists with this National ID (NIC)." });
+      }
     }
     
     // Create via standard Supabase signUp — sends confirmation email to user
