@@ -13,13 +13,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, firstName, lastName, phone, nic, role, dateOfBirth, gender, specialization } = req.body;
+    let { email, password, firstName, lastName, phone, nic, role, dateOfBirth, gender, specialization } = req.body;
     
     if (!email || !password) {
       return res.status(400).json({ error: "Missing email or password" });
     }
     
     const normedEmail = String(email).trim().toLowerCase();
+    nic = nic && String(nic).trim() !== "" ? String(nic).trim() : null;
     
     // Check if user already exists by email
     const existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
@@ -28,10 +29,10 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if NIC is already taken
-    if (nic && String(nic).trim() !== "") {
-      const existingNic = await prisma.user.findUnique({ where: { nic: String(nic).trim() } });
+    if (nic) {
+      const existingNic = await prisma.user.findUnique({ where: { nic } });
       if (existingNic) {
-        return res.status(400).json({ error: "CNIC already exists" });
+        return res.status(400).json({ error: "An account already exists with this National ID (NIC)." });
       }
     }
     
@@ -203,7 +204,7 @@ router.post("/register-success", async (req, res) => {
   }
 });
 
-// NIC Lookup removed as per user request (reverting NIC-based login)
+
 
 // -------------------------
 // Login Sync (Validate Supabase JWT & Sync)
