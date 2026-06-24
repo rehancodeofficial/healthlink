@@ -28,10 +28,10 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if NIC is already taken
-    if (nic) {
+    if (nic && String(nic).trim() !== "") {
       const existingNic = await prisma.user.findUnique({ where: { nic: String(nic).trim() } });
       if (existingNic) {
-        return res.status(400).json({ error: "An account already exists with this National ID (NIC)." });
+        return res.status(400).json({ error: "CNIC already exists" });
       }
     }
     
@@ -203,31 +203,7 @@ router.post("/register-success", async (req, res) => {
   }
 });
 
-// -------------------------
-// Lookup Email by NIC (for NIC Login)
-// -------------------------
-router.post("/lookup-by-nic", async (req, res) => {
-  try {
-    const { nic } = req.body;
-    if (!nic) {
-      return res.status(400).json({ error: "Missing NIC" });
-    }
-
-    const account = await prisma.user.findUnique({
-      where: { nic: nic.trim() },
-      select: { email: true }
-    });
-
-    if (!account) {
-      return res.status(404).json({ error: "No account found with this NIC." });
-    }
-
-    return res.json({ email: account.email });
-  } catch (err) {
-    console.error("NIC lookup error:", err);
-    return res.status(500).json({ error: "Server error during NIC lookup" });
-  }
-});
+// NIC Lookup removed as per user request (reverting NIC-based login)
 
 // -------------------------
 // Login Sync (Validate Supabase JWT & Sync)
@@ -261,15 +237,9 @@ router.post("/login-sync", async (req, res) => {
       }
     }
 
-    // Find User in our DB by email OR nic (in case the frontend sends NIC as the identifier to sync)
-    // For syncing, email is guaranteed from Supabase. We just find the user by email here.
-    let account = await prisma.user.findFirst({
-      where: { 
-        OR: [
-          { email: normedEmail },
-          { nic: normedEmail } // In case the frontend passes NIC in the 'email' field for sync
-        ]
-      },
+    // Find User in our DB by email
+    let account = await prisma.user.findUnique({
+      where: { email: normedEmail },
     });
 
     if (!account) {
