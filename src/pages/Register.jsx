@@ -46,12 +46,11 @@ export default function Register() {
       return;
     }
 
-    // Optional NIC validation: 13 digits if provided
-    if (form.nic && form.nic.trim() !== "") {
+    // Basic NIC validation if provided: 13 digits (Pakistani CNIC format)
+    if (form.nic) {
       const nicRegex = /^\d{13}$/;
       if (!nicRegex.test(form.nic.replace(/-/g, ""))) {
         toast.error("Please enter a valid 13-digit National ID (NIC) without hyphens.");
-        setSubmitting(false);
         return;
       }
     }
@@ -64,7 +63,7 @@ export default function Register() {
         password: form.password,
         firstName: form.firstName,
         lastName: form.lastName,
-        nic: form.nic.replace(/-/g, ""), // Store cleaned 13-digit NIC
+        nic: form.nic ? form.nic.replace(/-/g, "") : null, // Store cleaned NIC or null
         role: form.role,
         dateOfBirth: form.dateOfBirth,
         gender: form.gender,
@@ -209,7 +208,7 @@ export default function Register() {
 
             <div className="space-y-1.5 focus-within:z-10 transition-all">
               <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                National ID (NIC) (Optional)
+                National ID (NIC) - Optional
               </label>
               <div className="relative group">
                 <input
@@ -217,7 +216,7 @@ export default function Register() {
                   value={form.nic}
                   onChange={handleChange}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-3.5 px-4 text-xs font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                  placeholder="National ID (Optional)"
+                  placeholder="National ID"
                 />
               </div>
             </div>
