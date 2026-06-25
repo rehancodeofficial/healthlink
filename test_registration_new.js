@@ -47,14 +47,13 @@ async function run() {
   console.assert(t1.status === 400, `❌ Test 1 failed: expected 400, got ${t1.status}`);
   console.log(`✅ Test 1 (missing fields): ${t1.status} — ${t1.body.error}`);
 
-  // --- Test 2: Valid registration with NIC ---
+  // --- Test 2: Valid registration ---
   const uniqueEmail = `testuser_${Date.now()}@mailtest.dev`;
   const t2 = await post("/api/auth/register", {
     email: uniqueEmail,
     password: "TestPass123!",
     firstName: "Test",
     lastName: "User",
-    nic: "1234567890123",         // 13-digit Pakistani NIC
     role: "PATIENT",
     dateOfBirth: "2000-01-01",
     gender: "MALE",
@@ -64,7 +63,6 @@ async function run() {
   console.log(`   Status: ${t2.status}`);
   console.log(`   Message: ${t2.body?.message}`);
   console.log(`   User ID: ${t2.body?.user?.id}`);
-  console.log(`   NIC stored: ${t2.body?.user?.nic}`);
   console.log(`   Token present: ${!!t2.body?.token}`);
 
   if (t2.status === 201) {
@@ -74,13 +72,6 @@ async function run() {
       console.log("   ✅ Email confirmation message present — fix confirmed!");
     } else {
       console.warn("   ⚠️  Message doesn't mention email confirmation — check the backend.");
-    }
-
-    // ✅ Verify NIC was stored
-    if (t2.body?.user?.nic === "1234567890123") {
-      console.log("   ✅ NIC stored correctly.");
-    } else {
-      console.warn(`   ⚠️  NIC mismatch: ${t2.body?.user?.nic}`);
     }
   } else {
     console.error(`   ❌ Registration failed: ${JSON.stringify(t2.body)}`);
@@ -93,7 +84,6 @@ async function run() {
       password: "TestPass123!",
       firstName: "Dupe",
       lastName: "User",
-      nic: "9876543210987",
     });
     console.log(`\n✅ Test 3 (duplicate email):`);
     console.log(`   Status: ${t3.status}`);
