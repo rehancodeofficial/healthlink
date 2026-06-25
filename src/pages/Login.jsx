@@ -9,7 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Email address
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [loginMode, setLoginMode] = useState("password"); // 'password' or 'otp'
@@ -25,7 +25,7 @@ export default function Login() {
     setError("");
 
     try {
-      const emailForAuth = email.trim().toLowerCase();
+      const emailForAuth = identifier.trim().toLowerCase();
 
       if (loginMode === "password") {
         // Password Login via Supabase
@@ -229,11 +229,11 @@ export default function Login() {
                 </div>
                 <input
                   type="text"
-                  value={email}
+                  value={identifier}
                   disabled={otpSent}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
-                  placeholder="Email Address"
+                  placeholder="Email"
                   required
                 />
               </div>
