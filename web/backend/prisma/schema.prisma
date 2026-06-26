@@ -140,7 +140,6 @@ model User {
   middleName  String?
   lastName    String
   email       String   @unique
-  nic         String?  @unique // National Identification Number (CNIC)
   phone       String?
   password    String?  // Made optional - Supabase manages passwords
   role        UserRole @default(PATIENT)
