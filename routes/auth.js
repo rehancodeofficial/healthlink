@@ -13,14 +13,13 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 router.post("/register", async (req, res) => {
   try {
-    let { email, password, firstName, lastName, phone, nic, role, dateOfBirth, gender, specialization } = req.body;
+    let { email, password, firstName, lastName, phone, role, dateOfBirth, gender, specialization } = req.body;
     
     if (!email || !password) {
       return res.status(400).json({ error: "Missing email or password" });
     }
     
     const normedEmail = String(email).trim().toLowerCase();
-    nic = nic && String(nic).trim() !== "" ? String(nic).trim() : null;
     
     // Check if user already exists by email
     const existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
@@ -28,20 +27,13 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "User already exists with this email" });
     }
 
-    // Check if NIC is already taken
-    if (nic) {
-      const existingNic = await prisma.user.findUnique({ where: { nic } });
-      if (existingNic) {
-        return res.status(400).json({ error: "An account already exists with this National ID (NIC)." });
-      }
-    }
-    
+
     // Create via standard Supabase signUp — sends confirmation email to user
     const { data: supaData, error: supaError } = await supabaseAdmin.auth.signUp({
       email: normedEmail,
       password: password,
       options: {
-        data: { firstName, lastName, role, nic, dateOfBirth, gender, specialization }
+        data: { firstName, lastName, role, dateOfBirth, gender, specialization }
       }
     });
     
@@ -61,7 +53,6 @@ router.post("/register", async (req, res) => {
         firstName: firstName || "First",
         lastName: lastName || "Last",
         phone: phone || null,
-        nic: nic || null,
         role: role || "PATIENT",
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
         gender: gender || "PREFER_NOT_TO_SAY"
@@ -72,7 +63,6 @@ router.post("/register", async (req, res) => {
         lastName: lastName || "Last",
         email: normedEmail,
         phone: phone || null,
-        nic: nic || null,
         password: null,
         role: role || "PATIENT",
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
@@ -117,7 +107,6 @@ router.post("/register-success", async (req, res) => {
         lastName,
         email,
         phone,
-        nic,
         role,
         dateOfBirth,
         gender,
@@ -147,7 +136,6 @@ router.post("/register-success", async (req, res) => {
               lastName: lastName || "Last",
               email: normedEmail,
               phone: phone || null,
-              nic: nic || null,
               password: null, // Supabase manages passwords
               role: role || "PATIENT",
               dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
