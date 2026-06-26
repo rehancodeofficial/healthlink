@@ -4,6 +4,14 @@ const jwt = require("jsonwebtoken");
 const prisma = require("../prisma/prismaClient");
 const { ensureDefaultProfile } = require("../lib/provisionProfile");
 const { supabaseAdmin } = require("../lib/supabaseAdmin");
+const rateLimit = require("express-rate-limit");
+
+// Rate limit for registration: more lenient in development
+const registerLimiter = rateLimit({
+  windowMs: process.env.NODE_ENV === "development" ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 min dev, 15 min prod
+  max: process.env.NODE_ENV === "development" ? 100 : 10, // 100 req/window in dev, 10 req/window in prod
+  message: { error: "Too many registration attempts. Please wait a few minutes and try again." },
+});
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -11,9 +19,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 // Register — sends confirmation email via Supabase signUp
 // -------------------------
-router.post("/register", async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   try {
     let { email, password, firstName, lastName, phone, role, dateOfBirth, gender, specialization } = req.body;
+    console.log(`[DEBUG] Incoming /register request for email: ${email}`);
     
     if (!email || !password) {
       return res.status(400).json({ error: "Missing email or password" });
@@ -105,7 +114,7 @@ router.post("/register", async (req, res) => {
 // -------------------------
 // Register Success (Supabase Sync)
 // -------------------------
-router.post("/register-success", async (req, res) => {
+router.post("/register-success", registerLimiter, async (req, res) => {
   try {
       const {
         supabaseId,
@@ -118,6 +127,8 @@ router.post("/register-success", async (req, res) => {
         gender,
         specialization,
       } = req.body || {};
+
+      console.log(`[DEBUG] Incoming /register-success request for email: ${email}, supabaseId: ${supabaseId}`);
 
       if (!supabaseId || !email) {
         return res
