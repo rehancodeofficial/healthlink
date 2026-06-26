@@ -85,12 +85,12 @@ router.post("/register", registerLimiter, async (req, res) => {
       }
     });
     
-    if (specialization) {
-      try {
-        await ensureDefaultProfile(existingUser, specialization);
-      } catch (e) {
-        console.error("Failed to provision profile:", e);
-      }
+    // Provision default profile (handles PATIENT, DOCTOR, PHARMACY)
+    try {
+      await ensureDefaultProfile(existingUser, specialization);
+      console.log(`[DEBUG] Default profile ensured for role: ${existingUser.role}`);
+    } catch (e) {
+      console.error("Failed to provision profile during registration:", e);
     }
     
     const token = jwt.sign(
