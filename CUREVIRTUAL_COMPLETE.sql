@@ -110,14 +110,13 @@ LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public."User" (id, email, "firstName", "lastName", role, nic, phone, "updatedAt", "dateOfBirth", gender)
+  INSERT INTO public."User" (id, email, "firstName", "lastName", role, phone, "updatedAt", "dateOfBirth", gender)
   VALUES (
     new.id,
     new.email,
     COALESCE(new.raw_user_meta_data->>'firstName', 'Unknown'),
     COALESCE(new.raw_user_meta_data->>'lastName', 'Unknown'),
     COALESCE((new.raw_user_meta_data->>'role')::public."UserRole", 'PATIENT'),
-    new.raw_user_meta_data->>'nic',
     new.raw_user_meta_data->>'phone',
     NOW(),
     COALESCE(NULLIF(new.raw_user_meta_data->>'dateOfBirth', '')::timestamp, NOW()),
