@@ -39,6 +39,12 @@ router.post("/register", async (req, res) => {
     
     if (supaError) {
       console.error("Supabase SignUp Error:", supaError);
+      // Handle known Supabase email rate limit error
+      if (supaError.message && supaError.message.toLowerCase().includes("sending confirmation email")) {
+        return res.status(429).json({ 
+          error: "Email service is temporarily busy. Your account may have been created — please try logging in, or wait a few minutes and try again." 
+        });
+      }
       return res.status(400).json({ error: supaError.message });
     }
     
