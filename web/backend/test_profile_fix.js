@@ -1,7 +1,7 @@
 const axios = require('axios');
 const prisma = require('./prisma/prismaClient');
 
-const BASE_URL = 'http://localhost:5001/api';
+const BASE_URL = 'https://curevirtual-2-production-ee33.up.railway.app/api';
 
 async function testProfileUpdate() {
   try {
