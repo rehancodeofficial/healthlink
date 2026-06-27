@@ -9,7 +9,7 @@ const rateLimit = require("express-rate-limit");
 // Rate limit for registration: more lenient in development
 const registerLimiter = rateLimit({
   windowMs: process.env.NODE_ENV === "development" ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 min dev, 15 min prod
-  max: process.env.NODE_ENV === "development" ? 100 : 10, // 100 req/window in dev, 10 req/window in prod
+  max: process.env.NODE_ENV === "development" ? 100 : 50, // 100 req/window in dev, 50 req/window in prod
   message: { error: "Too many registration attempts. Please wait a few minutes and try again." },
 });
 
@@ -114,7 +114,7 @@ router.post("/register", registerLimiter, async (req, res) => {
 // -------------------------
 // Register Success (Supabase Sync)
 // -------------------------
-router.post("/register-success", registerLimiter, async (req, res) => {
+router.post("/register-success", async (req, res) => {
   try {
       const {
         supabaseId,
