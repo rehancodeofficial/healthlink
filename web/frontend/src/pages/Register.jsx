@@ -1,5 +1,5 @@
 // FILE: src/pages/Register.jsx
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiShield } from "react-icons/fi";
 import { FaArrowRight, FaStethoscope } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -25,6 +25,7 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const { theme } = useTheme();
 
   const handleChange = (e) => {
@@ -33,7 +34,10 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || isSubmittingRef.current) {
+      console.warn("Registration already in progress. Ignoring duplicate click.");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       toast.error("Passwords do not match.");
@@ -46,6 +50,7 @@ export default function Register() {
     }
 
     setSubmitting(true);
+    isSubmittingRef.current = true;
     try {
       // Register with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
@@ -91,6 +96,7 @@ export default function Register() {
       toast.error(err.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
