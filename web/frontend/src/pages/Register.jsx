@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
-import { supabase } from "../Lib/supabase";
+
 import api from "../Lib/api";
 
 export default function Register() {
@@ -51,32 +51,11 @@ export default function Register() {
 
     setSubmitting(true);
     isSubmittingRef.current = true;
+    console.log("[DEBUG] 📤 Sending SINGLE registration request to backend...");
     try {
-      // Register with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      const payload = {
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: {
-          data: {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            role: form.role,
-            dateOfBirth: form.dateOfBirth,
-            gender: form.gender,
-            specialization:
-              form.specialization === "Other" ? form.customProfession : form.specialization,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      console.log("✅ Registration successful:", data);
-
-      // Sync with backend immediately
-      await api.post("/auth/register-success", {
-        supabaseId: data.user.id,
-        email: form.email.trim().toLowerCase(),
         firstName: form.firstName,
         lastName: form.lastName,
         role: form.role,
@@ -84,7 +63,13 @@ export default function Register() {
         gender: form.gender,
         specialization:
           form.specialization === "Other" ? form.customProfession : form.specialization,
-      });
+      };
+
+      console.log("[DEBUG] Payload (no CNIC, no extra fields):", Object.keys(payload));
+
+      const { data } = await api.post("/auth/register", payload);
+
+      console.log("[DEBUG] ✅ Registration API responded successfully:", data.message);
 
       toast.success("Registration successful! Please check your email for the verification link.");
 
@@ -92,11 +77,14 @@ export default function Register() {
         window.location.href = "/login";
       }, 3000);
     } catch (err) {
-      console.error("Registration error:", err);
-      toast.error(err.message || "Registration failed. Please try again.");
+      console.error("[DEBUG] ❌ Registration error:", err);
+      const errorMsg =
+        err?.response?.data?.error || err.message || "Registration failed. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
       isSubmittingRef.current = false;
+      console.log("[DEBUG] 🔓 Submit lock released");
     }
   };
 
