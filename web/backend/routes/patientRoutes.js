@@ -448,7 +448,16 @@ router.post("/appointments", async (req, res) => {
     if (!doctorId || !appointmentDate)
       return res.status(400).json({ error: "Missing required fields" });
 
-    const pid = await getPatientProfileIdByUserId(userId);
+    let pid = await getPatientProfileIdByUserId(userId);
+    if (!pid) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (user && user.role === "PATIENT") {
+        const { ensureDefaultProfile } = require("../lib/provisionProfile");
+        const newProfile = await ensureDefaultProfile(user);
+        pid = newProfile.id;
+        console.log(`[DEBUG] Provisioned missing patient profile for user: ${userId}`);
+      }
+    }
     if (!pid) return res.status(404).json({ error: "Patient profile not found" });
 
     const doctor = await prisma.doctorProfile.findUnique({
