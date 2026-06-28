@@ -251,10 +251,22 @@ router.post("/book", async (req, res) => {
     let patientProfile = await prisma.patientProfile.findUnique({
       where: { userId: patientId },
     });
-    if (!patientProfile)
+    if (!patientProfile) {
       patientProfile = await prisma.patientProfile.findUnique({
         where: { id: patientId },
       });
+    }
+
+    // Fallback: Auto-provision if missing
+    if (!patientProfile) {
+      const user = await prisma.user.findUnique({ where: { id: patientId } });
+      if (user && user.role === "PATIENT") {
+        const { ensureDefaultProfile } = require("../lib/provisionProfile");
+        patientProfile = await ensureDefaultProfile(user);
+        console.log(`[DEBUG] Provisioned missing patient profile for user: ${patientId}`);
+      }
+    }
+
     if (!patientProfile) return res.status(404).json({ error: "Patient profile not found" });
 
     const startDate = parseAsLocal(startTime);
