@@ -131,7 +131,7 @@ const doctorVideoRoutes = require("./routes/doctorVideo");
 const doctorPatientsRoutes = require("./routes/doctorPatients");
 const clinicalEncounterRoutes = require("./routes/clinicalEncounter");
 
-app.use("/api", doctorPatientsRoutes);
+app.use("/api/doctor", doctorPatientsRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/doctor/video", doctorVideoRoutes);
 app.use("/api/clinical-encounter", clinicalEncounterRoutes);
@@ -150,7 +150,7 @@ const patientRoutes = require("./routes/patientRoutes");
 const patientDoctorsRoutes = require("./routes/patientDoctors");
 
 // 👇 mount under /api
-app.use("/api", patientDoctorsRoutes);
+app.use("/api/patient", patientDoctorsRoutes);
 app.use("/api/patient", patientRoutes);
 
 const notificationsRoutes = require("./routes/notifications");
