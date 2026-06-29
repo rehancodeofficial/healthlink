@@ -27,10 +27,17 @@ const BookAppointment = () => {
         // Use the patient-accessible endpoint (no DOCTOR role restriction)
         const res = await api.get("/patient/doctors/all");
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-        console.log("[BookAppointment] Loaded doctors:", data.length, data.map(d => ({ id: d.id, name: d.user?.firstName })));
+        console.log(
+          "[BookAppointment] Loaded doctors:",
+          data.length,
+          data.map((d) => ({ id: d.id, name: d.user?.firstName }))
+        );
         setDoctors(data);
       } catch (err) {
-        console.error("[BookAppointment] Failed to load doctors:", err.response?.data || err.message);
+        console.error(
+          "[BookAppointment] Failed to load doctors:",
+          err.response?.data || err.message
+        );
         toast.error("Failed to load doctors");
       } finally {
         setLoadingDoctors(false);
@@ -188,7 +195,7 @@ const BookAppointment = () => {
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
               >
-                {loading ? "Booking..." : "Initialize Booking"}
+                {loading ? "Booking..." : "Confirming"}
               </button>
             </form>
 
