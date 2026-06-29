@@ -60,7 +60,7 @@ function buildPatientWhere(q, doctorProfileId) {
  *   - search, gender, bloodGroup, minAge, maxAge (optional)
  * Returns PatientProfile[] with user info
  */
-router.get("/doctor/patients", verifyToken, requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
+router.get("/patients", verifyToken, requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { doctorUserId } = req.query;
     if (!doctorUserId) return res.status(400).json({ error: "doctorUserId is required" });
