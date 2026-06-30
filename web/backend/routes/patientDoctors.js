@@ -58,7 +58,7 @@ function buildDoctorFilters(q) {
  *  Public list for Patients (with filters)
  *  Query: search, specialization, minExperience, maxExperience, minFee, maxFee, language
  *  ============================ */
-router.get("/patient/doctors/all", async (req, res) => {
+router.get("/doctors/all", async (req, res) => {
   try {
     const where = buildDoctorFilters(req.query);
     const doctors = await prisma.doctorProfile.findMany({
@@ -84,7 +84,7 @@ router.get("/patient/doctors/all", async (req, res) => {
  *  Query: patientUserId
  *  Returns only doctors assigned to the patient
  *  ========================================= */
-router.get("/patient/doctors", verifyToken, async (req, res) => {
+router.get("/doctors", verifyToken, async (req, res) => {
   try {
     const { patientUserId } = req.query;
     if (!patientUserId) return res.status(400).json({ error: "patientUserId is required" });
@@ -120,7 +120,7 @@ router.get("/patient/doctors", verifyToken, async (req, res) => {
  *  Body: { patientUserId, doctorProfileId }
  *  Creates link if not exists (idempotent)
  *  ========================================= */
-router.post("/patient/doctors/assign", verifyToken, async (req, res) => {
+router.post("/doctors/assign", verifyToken, async (req, res) => {
   try {
     const { patientUserId, doctorProfileId } = req.body || {};
     if (!patientUserId || !doctorProfileId) {
