@@ -17,23 +17,17 @@ export default function DoctorSendMessage() {
   const doctorName =
     localStorage.getItem("userName") || localStorage.getItem("name") || "Doctor";
 
-      // Load my patients for dropdown
-    async function loadMyPatients() {
-      const res = await api.get("/doctor/patients", { params: { doctorUserId } });
-      setPatients(res.data?.data || []); // array of PatientProfile with p.user
-    }
-    useEffect(() => { loadMyPatients(); }, []);
-
-  // Load patients for dropdown
+  // Load my patients for dropdown
   useEffect(() => {
-    (async () => {
+    async function loadPatients() {
+      if (!doctorUserId) return;
       try {
-        const res = await api.get("/doctor/patients");
-        const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        // Normalize to { id: <Patient User.id>, name: <Patient Name> }
+        setLoading(true);
+        const res = await api.get("/doctor/patients", { params: { doctorUserId } });
+        const list = res.data?.data || res.data || [];
         const normalized = list.map((p) => ({
           id: p?.user?.id ?? p?.userId ?? p?.id,
-          name: p?.user?.name ?? p?.name ?? "Patient",
+          name: p?.user ? `${p.user.firstName} ${p.user.lastName}`.trim() : (p?.name ?? "Patient"),
         })).filter(p => !!p.id);
         setPatients(normalized);
       } catch (err) {
@@ -42,8 +36,10 @@ export default function DoctorSendMessage() {
       } finally {
         setLoading(false);
       }
-    })();
-  }, []);
+    }
+    loadPatients();
+  }, [doctorUserId]);
+
 
   const handleSend = async (e) => {
     e.preventDefault();
