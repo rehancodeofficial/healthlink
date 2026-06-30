@@ -610,7 +610,7 @@ export default function MyAppointments() {
                       : "btn-primary"
                   }`}
                 >
-                  {rescheduleId ? "Confirm Helper" : "Initialize Booking"}
+                  {rescheduleId ? "Confirm Helper" : "Confirming"}
                 </button>
               </div>
             </form>
