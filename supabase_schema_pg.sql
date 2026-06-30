@@ -57,7 +57,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- CreateTable
-CREATE TABLE "EmailOTP" (
+CREATE TABLE IF NOT EXISTS "EmailOTP" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "otp" TEXT NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE "EmailOTP" (
 );
 
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE IF NOT EXISTS "User" (
     "id" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "middleName" TEXT,
@@ -89,7 +89,7 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Organization" (
+CREATE TABLE IF NOT EXISTS "Organization" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "ownerId" TEXT,
@@ -100,7 +100,7 @@ CREATE TABLE "Organization" (
 );
 
 -- CreateTable
-CREATE TABLE "admin" (
+CREATE TABLE IF NOT EXISTS "admin" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE "admin" (
 );
 
 -- CreateTable
-CREATE TABLE "SupportAgent" (
+CREATE TABLE IF NOT EXISTS "SupportAgent" (
     "id" SERIAL NOT NULL,
     "userId" TEXT NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
@@ -125,7 +125,7 @@ CREATE TABLE "SupportAgent" (
 );
 
 -- CreateTable
-CREATE TABLE "ActivityLog" (
+CREATE TABLE IF NOT EXISTS "ActivityLog" (
     "id" SERIAL NOT NULL,
     "actorId" TEXT NOT NULL,
     "actorRole" TEXT NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE "ActivityLog" (
 );
 
 -- CreateTable
-CREATE TABLE "DoctorProfile" (
+CREATE TABLE IF NOT EXISTS "DoctorProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "specialization" TEXT NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE "DoctorProfile" (
 );
 
 -- CreateTable
-CREATE TABLE "PharmacyProfile" (
+CREATE TABLE IF NOT EXISTS "PharmacyProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "displayName" TEXT,
@@ -179,7 +179,7 @@ CREATE TABLE "PharmacyProfile" (
 );
 
 -- CreateTable
-CREATE TABLE "PatientProfile" (
+CREATE TABLE IF NOT EXISTS "PatientProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "bloodGroup" "BloodGroup" NOT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE "PatientProfile" (
 );
 
 -- CreateTable
-CREATE TABLE "Appointment" (
+CREATE TABLE IF NOT EXISTS "Appointment" (
     "id" TEXT NOT NULL,
     "doctorId" TEXT NOT NULL,
     "patientId" TEXT NOT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE "Appointment" (
 );
 
 -- CreateTable
-CREATE TABLE "DoctorSchedule" (
+CREATE TABLE IF NOT EXISTS "DoctorSchedule" (
     "id" TEXT NOT NULL,
     "doctorId" TEXT NOT NULL,
     "dayOfWeek" INTEGER NOT NULL,
@@ -230,7 +230,7 @@ CREATE TABLE "DoctorSchedule" (
 );
 
 -- CreateTable
-CREATE TABLE "SupportTicket" (
+CREATE TABLE IF NOT EXISTS "SupportTicket" (
     "id" SERIAL NOT NULL,
     "ticketNo" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -246,7 +246,7 @@ CREATE TABLE "SupportTicket" (
 );
 
 -- CreateTable
-CREATE TABLE "SupportReply" (
+CREATE TABLE IF NOT EXISTS "SupportReply" (
     "id" SERIAL NOT NULL,
     "ticketId" INTEGER NOT NULL,
     "userId" TEXT NOT NULL,
@@ -258,7 +258,7 @@ CREATE TABLE "SupportReply" (
 );
 
 -- CreateTable
-CREATE TABLE "Prescription" (
+CREATE TABLE IF NOT EXISTS "Prescription" (
     "id" TEXT NOT NULL,
     "doctorId" TEXT NOT NULL,
     "patientId" TEXT NOT NULL,
@@ -277,7 +277,7 @@ CREATE TABLE "Prescription" (
 );
 
 -- CreateTable
-CREATE TABLE "Message" (
+CREATE TABLE IF NOT EXISTS "Message" (
     "id" TEXT NOT NULL,
     "senderId" TEXT,
     "receiverId" TEXT,
@@ -291,7 +291,7 @@ CREATE TABLE "Message" (
 );
 
 -- CreateTable
-CREATE TABLE "VideoConsultation" (
+CREATE TABLE IF NOT EXISTS "VideoConsultation" (
     "id" TEXT NOT NULL,
     "doctorId" TEXT NOT NULL,
     "patientId" TEXT NOT NULL,
@@ -309,7 +309,7 @@ CREATE TABLE "VideoConsultation" (
 );
 
 -- CreateTable
-CREATE TABLE "SubscriptionSetting" (
+CREATE TABLE IF NOT EXISTS "SubscriptionSetting" (
     "id" INTEGER NOT NULL DEFAULT 1,
     "doctorMonthlyUsd" DOUBLE PRECISION,
     "doctorYearlyUsd" DOUBLE PRECISION,
@@ -324,7 +324,7 @@ CREATE TABLE "SubscriptionSetting" (
 );
 
 -- CreateTable
-CREATE TABLE "Subscription" (
+CREATE TABLE IF NOT EXISTS "Subscription" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "plan" "Plan" NOT NULL,
@@ -342,7 +342,7 @@ CREATE TABLE "Subscription" (
 );
 
 -- CreateTable
-CREATE TABLE "DoctorPatient" (
+CREATE TABLE IF NOT EXISTS "DoctorPatient" (
     "id" TEXT NOT NULL,
     "doctorId" TEXT NOT NULL,
     "patientId" TEXT NOT NULL,
@@ -352,7 +352,7 @@ CREATE TABLE "DoctorPatient" (
 );
 
 -- CreateTable
-CREATE TABLE "SelectedPharmacy" (
+CREATE TABLE IF NOT EXISTS "SelectedPharmacy" (
     "id" TEXT NOT NULL,
     "patientId" TEXT NOT NULL,
     "pharmacyId" TEXT NOT NULL,
@@ -363,7 +363,7 @@ CREATE TABLE "SelectedPharmacy" (
 );
 
 -- CreateTable
-CREATE TABLE "SystemSetting" (
+CREATE TABLE IF NOT EXISTS "SystemSetting" (
     "id" INTEGER NOT NULL DEFAULT 1,
     "systemName" TEXT,
     "themeColor" TEXT,
@@ -378,173 +378,308 @@ CREATE TABLE "SystemSetting" (
 );
 
 -- CreateIndex
-CREATE INDEX "EmailOTP_email_idx" ON "EmailOTP"("email");
+CREATE INDEX IF NOT EXISTS "EmailOTP_email_idx" ON "EmailOTP"("email");
 
 -- CreateIndex
-CREATE INDEX "EmailOTP_expiresAt_idx" ON "EmailOTP"("expiresAt");
+CREATE INDEX IF NOT EXISTS "EmailOTP_expiresAt_idx" ON "EmailOTP"("expiresAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "User_organizationId_idx" ON "User"("organizationId");
+CREATE INDEX IF NOT EXISTS "User_organizationId_idx" ON "User"("organizationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "admin_email_key" ON "admin"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "admin_email_key" ON "admin"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "admin_token_key" ON "admin"("token");
+CREATE UNIQUE INDEX IF NOT EXISTS "admin_token_key" ON "admin"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SupportAgent_userId_key" ON "SupportAgent"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "SupportAgent_userId_key" ON "SupportAgent"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DoctorProfile_userId_key" ON "DoctorProfile"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "DoctorProfile_userId_key" ON "DoctorProfile"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DoctorProfile_licenseNumber_key" ON "DoctorProfile"("licenseNumber");
+CREATE UNIQUE INDEX IF NOT EXISTS "DoctorProfile_licenseNumber_key" ON "DoctorProfile"("licenseNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PharmacyProfile_userId_key" ON "PharmacyProfile"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "PharmacyProfile_userId_key" ON "PharmacyProfile"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PatientProfile_userId_key" ON "PatientProfile"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "PatientProfile_userId_key" ON "PatientProfile"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PatientProfile_medicalRecordNumber_key" ON "PatientProfile"("medicalRecordNumber");
+CREATE UNIQUE INDEX IF NOT EXISTS "PatientProfile_medicalRecordNumber_key" ON "PatientProfile"("medicalRecordNumber");
 
 -- CreateIndex
-CREATE INDEX "Appointment_doctorId_idx" ON "Appointment"("doctorId");
+CREATE INDEX IF NOT EXISTS "Appointment_doctorId_idx" ON "Appointment"("doctorId");
 
 -- CreateIndex
-CREATE INDEX "Appointment_patientId_idx" ON "Appointment"("patientId");
+CREATE INDEX IF NOT EXISTS "Appointment_patientId_idx" ON "Appointment"("patientId");
 
 -- CreateIndex
-CREATE INDEX "DoctorSchedule_doctorId_idx" ON "DoctorSchedule"("doctorId");
+CREATE INDEX IF NOT EXISTS "DoctorSchedule_doctorId_idx" ON "DoctorSchedule"("doctorId");
 
 -- CreateIndex
-CREATE INDEX "DoctorSchedule_dayOfWeek_idx" ON "DoctorSchedule"("dayOfWeek");
+CREATE INDEX IF NOT EXISTS "DoctorSchedule_dayOfWeek_idx" ON "DoctorSchedule"("dayOfWeek");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SupportTicket_ticketNo_key" ON "SupportTicket"("ticketNo");
+CREATE UNIQUE INDEX IF NOT EXISTS "SupportTicket_ticketNo_key" ON "SupportTicket"("ticketNo");
 
 -- CreateIndex
-CREATE INDEX "Prescription_doctorId_idx" ON "Prescription"("doctorId");
+CREATE INDEX IF NOT EXISTS "Prescription_doctorId_idx" ON "Prescription"("doctorId");
 
 -- CreateIndex
-CREATE INDEX "Prescription_patientId_idx" ON "Prescription"("patientId");
+CREATE INDEX IF NOT EXISTS "Prescription_patientId_idx" ON "Prescription"("patientId");
 
 -- CreateIndex
-CREATE INDEX "Prescription_pharmacyId_idx" ON "Prescription"("pharmacyId");
+CREATE INDEX IF NOT EXISTS "Prescription_pharmacyId_idx" ON "Prescription"("pharmacyId");
 
 -- CreateIndex
-CREATE INDEX "VideoConsultation_doctorId_idx" ON "VideoConsultation"("doctorId");
+CREATE INDEX IF NOT EXISTS "VideoConsultation_doctorId_idx" ON "VideoConsultation"("doctorId");
 
 -- CreateIndex
-CREATE INDEX "VideoConsultation_patientId_idx" ON "VideoConsultation"("patientId");
+CREATE INDEX IF NOT EXISTS "VideoConsultation_patientId_idx" ON "VideoConsultation"("patientId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_reference_key" ON "Subscription"("reference");
+CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_reference_key" ON "Subscription"("reference");
 
 -- CreateIndex
-CREATE INDEX "Subscription_userId_idx" ON "Subscription"("userId");
+CREATE INDEX IF NOT EXISTS "Subscription_userId_idx" ON "Subscription"("userId");
 
 -- CreateIndex
-CREATE INDEX "Subscription_status_idx" ON "Subscription"("status");
+CREATE INDEX IF NOT EXISTS "Subscription_status_idx" ON "Subscription"("status");
 
 -- CreateIndex
-CREATE INDEX "Subscription_plan_idx" ON "Subscription"("plan");
+CREATE INDEX IF NOT EXISTS "Subscription_plan_idx" ON "Subscription"("plan");
 
 -- CreateIndex
-CREATE INDEX "DoctorPatient_patientId_idx" ON "DoctorPatient"("patientId");
+CREATE INDEX IF NOT EXISTS "DoctorPatient_patientId_idx" ON "DoctorPatient"("patientId");
 
 -- CreateIndex
-CREATE INDEX "DoctorPatient_doctorId_idx" ON "DoctorPatient"("doctorId");
+CREATE INDEX IF NOT EXISTS "DoctorPatient_doctorId_idx" ON "DoctorPatient"("doctorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DoctorPatient_doctorId_patientId_key" ON "DoctorPatient"("doctorId", "patientId");
+CREATE UNIQUE INDEX IF NOT EXISTS "DoctorPatient_doctorId_patientId_key" ON "DoctorPatient"("doctorId", "patientId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SelectedPharmacy_patientId_pharmacyId_key" ON "SelectedPharmacy"("patientId", "pharmacyId");
+CREATE UNIQUE INDEX IF NOT EXISTS "SelectedPharmacy_patientId_pharmacyId_key" ON "SelectedPharmacy"("patientId", "pharmacyId");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'User_organizationId_fkey') THEN
+        ALTER TABLE "User" ADD CONSTRAINT "User_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportAgent" ADD CONSTRAINT "SupportAgent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportAgent_userId_fkey') THEN
+        ALTER TABLE "SupportAgent" ADD CONSTRAINT "SupportAgent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "DoctorProfile" ADD CONSTRAINT "DoctorProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DoctorProfile_userId_fkey') THEN
+        ALTER TABLE "DoctorProfile" ADD CONSTRAINT "DoctorProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "PharmacyProfile" ADD CONSTRAINT "PharmacyProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PharmacyProfile_userId_fkey') THEN
+        ALTER TABLE "PharmacyProfile" ADD CONSTRAINT "PharmacyProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "PatientProfile" ADD CONSTRAINT "PatientProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PatientProfile_userId_fkey') THEN
+        ALTER TABLE "PatientProfile" ADD CONSTRAINT "PatientProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Appointment_doctorId_fkey') THEN
+        ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Appointment_patientId_fkey') THEN
+        ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "DoctorSchedule" ADD CONSTRAINT "DoctorSchedule_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DoctorSchedule_doctorId_fkey') THEN
+        ALTER TABLE "DoctorSchedule" ADD CONSTRAINT "DoctorSchedule_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportTicket_userId_fkey') THEN
+        ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "SupportAgent"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportTicket_agentId_fkey') THEN
+        ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "SupportAgent"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "SupportTicket"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportReply_ticketId_fkey') THEN
+        ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "SupportTicket"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportReply_userId_fkey') THEN
+        ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admin"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupportReply_adminId_fkey') THEN
+        ALTER TABLE "SupportReply" ADD CONSTRAINT "SupportReply_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admin"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_pharmacyId_fkey" FOREIGN KEY ("pharmacyId") REFERENCES "PharmacyProfile"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Prescription_pharmacyId_fkey') THEN
+        ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_pharmacyId_fkey" FOREIGN KEY ("pharmacyId") REFERENCES "PharmacyProfile"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Prescription_doctorId_fkey') THEN
+        ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Prescription_patientId_fkey') THEN
+        ALTER TABLE "Prescription" ADD CONSTRAINT "Prescription_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Message_senderId_fkey') THEN
+        ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Message_receiverId_fkey') THEN
+        ALTER TABLE "Message" ADD CONSTRAINT "Message_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_adminSenderId_fkey" FOREIGN KEY ("adminSenderId") REFERENCES "admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Message_adminSenderId_fkey') THEN
+        ALTER TABLE "Message" ADD CONSTRAINT "Message_adminSenderId_fkey" FOREIGN KEY ("adminSenderId") REFERENCES "admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_adminReceiverId_fkey" FOREIGN KEY ("adminReceiverId") REFERENCES "admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Message_adminReceiverId_fkey') THEN
+        ALTER TABLE "Message" ADD CONSTRAINT "Message_adminReceiverId_fkey" FOREIGN KEY ("adminReceiverId") REFERENCES "admin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "VideoConsultation" ADD CONSTRAINT "VideoConsultation_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'VideoConsultation_doctorId_fkey') THEN
+        ALTER TABLE "VideoConsultation" ADD CONSTRAINT "VideoConsultation_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "VideoConsultation" ADD CONSTRAINT "VideoConsultation_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'VideoConsultation_patientId_fkey') THEN
+        ALTER TABLE "VideoConsultation" ADD CONSTRAINT "VideoConsultation_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Subscription_userId_fkey') THEN
+        ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "DoctorPatient" ADD CONSTRAINT "DoctorPatient_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DoctorPatient_doctorId_fkey') THEN
+        ALTER TABLE "DoctorPatient" ADD CONSTRAINT "DoctorPatient_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "DoctorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "DoctorPatient" ADD CONSTRAINT "DoctorPatient_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DoctorPatient_patientId_fkey') THEN
+        ALTER TABLE "DoctorPatient" ADD CONSTRAINT "DoctorPatient_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SelectedPharmacy" ADD CONSTRAINT "SelectedPharmacy_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SelectedPharmacy_patientId_fkey') THEN
+        ALTER TABLE "SelectedPharmacy" ADD CONSTRAINT "SelectedPharmacy_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "PatientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
 -- AddForeignKey
-ALTER TABLE "SelectedPharmacy" ADD CONSTRAINT "SelectedPharmacy_pharmacyId_fkey" FOREIGN KEY ("pharmacyId") REFERENCES "PharmacyProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SelectedPharmacy_pharmacyId_fkey') THEN
+        ALTER TABLE "SelectedPharmacy" ADD CONSTRAINT "SelectedPharmacy_pharmacyId_fkey" FOREIGN KEY ("pharmacyId") REFERENCES "PharmacyProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
+
 
