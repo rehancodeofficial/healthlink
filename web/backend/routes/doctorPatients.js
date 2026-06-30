@@ -62,7 +62,11 @@ function buildPatientWhere(q, doctorProfileId) {
  */
 router.get("/patients", verifyToken, requireRole(["DOCTOR", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
-    const { doctorUserId } = req.query;
+    let { doctorUserId } = req.query;
+    if (!doctorUserId && req.user && req.user.id) {
+      doctorUserId = req.user.id;
+    }
+
     if (!doctorUserId) return res.status(400).json({ error: "doctorUserId is required" });
 
     const doctor = await getDoctorProfileByUserId(doctorUserId);
