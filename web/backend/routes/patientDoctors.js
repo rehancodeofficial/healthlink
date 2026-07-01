@@ -86,7 +86,11 @@ router.get("/doctors/all", async (req, res) => {
  *  ========================================= */
 router.get("/doctors", verifyToken, async (req, res) => {
   try {
-    const { patientUserId } = req.query;
+    let { patientUserId } = req.query;
+    if (!patientUserId && req.user && req.user.id) {
+      patientUserId = req.user.id;
+    }
+
     if (!patientUserId) return res.status(400).json({ error: "patientUserId is required" });
     const patient = await getPatientProfileByUserId(patientUserId);
     if (!patient) return res.status(404).json({ error: "Patient profile not found" });
