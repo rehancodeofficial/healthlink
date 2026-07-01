@@ -50,39 +50,20 @@ export default function Login() {
 
         handleAuthSuccess(res.data, email.trim().toLowerCase());
       } else {
-        // OTP Login via Supabase
+        // OTP Login via Backend
         if (!otpSent) {
-          // Send OTP
-          const { error: otpError } = await supabase.auth.signInWithOtp({
+          // Request OTP from backend
+          await api.post("/auth/request-otp-login", {
             email: email.trim().toLowerCase(),
-            options: {
-              shouldCreateUser: false,
-            },
           });
-
-          if (otpError) throw otpError;
 
           setOtpSent(true);
-          toast.success("OTP sent to your email!");
+          toast.success("6-digit OTP sent to your email!");
         } else {
-          // Verify OTP
-          const { data, error: verifyError } = await supabase.auth.verifyOtp({
+          // Verify OTP via backend
+          const res = await api.post("/auth/verify-otp-login", {
             email: email.trim().toLowerCase(),
-            token: otp,
-            type: "email",
-          });
-
-          if (verifyError) throw verifyError;
-
-          if (!data.user) {
-            throw new Error("Invalid OTP. Please try again.");
-          }
-
-          // Sync with backend
-          const res = await api.post("/auth/login-sync", {
-            email: email.trim().toLowerCase(),
-            supabaseId: data.user.id,
-            supabaseAccessToken: data.session.access_token,
+            otp: otp,
           });
 
           handleAuthSuccess(res.data, email.trim().toLowerCase());
