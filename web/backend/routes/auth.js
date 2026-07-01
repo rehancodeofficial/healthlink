@@ -5,6 +5,9 @@ const prisma = require("../prisma/prismaClient");
 const { ensureDefaultProfile } = require("../lib/provisionProfile");
 const { supabaseAdmin } = require("../lib/supabaseAdmin");
 const rateLimit = require("express-rate-limit");
+const { generateOTP, getOTPExpiration, isOTPExpired } = require('../lib/otpGenerator');
+const { sendOTPEmail } = require('../lib/emailService');
+const { authenticateToken } = require("../middleware/auth");
 
 // Rate limit for registration: more lenient in development
 const registerLimiter = rateLimit({
@@ -288,32 +291,45 @@ router.post("/request-otp-login", async (req, res) => {
     const normedEmail = String(email).trim().toLowerCase();
 
     // Check if user exists in our DB first
-    const user = await prisma.user.findUnique({
+    const userSnapshot = await prisma.user.findUnique({
       where: { email: normedEmail },
     });
 
-    if (!user) {
+    if (!userSnapshot) {
       return res
         .status(404)
         .json({ error: "No account found with this email" });
     }
 
-    // Send OTP via Supabase
-    const { error } = await supabaseAdmin.auth.signInWithOtp({
-      email: normedEmail,
-      options: {
-        shouldCreateUser: false, // Don't create new users via OTP login
+    // Generate custom 6-digit OTP
+    const otp = generateOTP();
+    const expiresAt = getOTPExpiration();
+
+    // Store OTP in database
+    await prisma.emailOTP.deleteMany({
+      where: { email: normedEmail, verified: false },
+    });
+
+    await prisma.emailOTP.create({
+      data: {
+        email: normedEmail,
+        otp,
+        expiresAt,
+        verified: false,
       },
     });
 
-    if (error) {
-      console.error("Supabase OTP error:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to send OTP. Please try again." });
+    // Send OTP email
+    try {
+      await sendOTPEmail(normedEmail, otp);
+    } catch (emailError) {
+      console.error("Failed to send OTP email:", emailError);
+      return res.status(500).json({
+        error: "Failed to send verification email. Please try again later.",
+      });
     }
 
-    return res.json({ message: "OTP sent to your email" });
+    return res.json({ message: "6-digit OTP sent to your email", expiresAt });
   } catch (err) {
     console.error("OTP Request Error:", err);
     return res.status(500).json({ error: "Failed to send OTP" });
@@ -331,17 +347,34 @@ router.post("/verify-otp-login", async (req, res) => {
     }
 
     const normedEmail = String(email).trim().toLowerCase();
+    const otpCode = String(otp).trim();
 
-    // Verify OTP with Supabase
-    const { data, error } = await supabaseAdmin.auth.verifyOtp({
-      email: normedEmail,
-      token: otp,
-      type: "email",
+    // Find the latest OTP for this email
+    const otpRecord = await prisma.emailOTP.findFirst({
+      where: {
+        email: normedEmail,
+        otp: otpCode,
+        verified: false,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    if (error || !data.user) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
+    if (!otpRecord) {
+      return res.status(400).json({ error: 'Invalid OTP' });
     }
+
+    // Check if OTP has expired
+    if (isOTPExpired(otpRecord.expiresAt)) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+    }
+
+    // Mark OTP as verified
+    await prisma.emailOTP.update({
+      where: { id: otpRecord.id },
+      data: { verified: true },
+    });
 
     // Get user from our DB
     const user = await prisma.user.findUnique({
@@ -372,6 +405,37 @@ router.post("/verify-otp-login", async (req, res) => {
   } catch (err) {
     console.error("OTP Verification Error:", err);
     return res.status(500).json({ error: "Verification failed" });
+  }
+});
+
+/**
+ * -------------------------
+ * POST /api/auth/change-password
+ * Change user password in Supabase
+ * -------------------------
+ */
+router.post("/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
+    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      password: newPassword,
+    });
+
+    if (error) {
+      console.error("Change password error:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Change password catch:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
