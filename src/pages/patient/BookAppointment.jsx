@@ -195,7 +195,7 @@ const BookAppointment = () => {
                     : "bg-blue-700 hover:bg-blue-800"
                 } text-white`}
               >
-                {loading ? "Booking..." : "Confirming"}
+                {loading ? "Booking..." : "Confirm"}
               </button>
             </form>
 
