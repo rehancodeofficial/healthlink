@@ -4,6 +4,8 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ChangePasswordModal from "../../components/ChangePasswordModal";
+import { FiLock } from "react-icons/fi";
 
 export default function PharmacyProfile() {
   const role = "PHARMACY";
@@ -30,6 +32,7 @@ export default function PharmacyProfile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const normalizeLoaded = useCallback(
     (p = {}) => ({
@@ -327,7 +330,7 @@ export default function PharmacyProfile() {
               </div>
 
               {/* Save Button */}
-              <div className="md:col-span-2 flex justify-start pt-4">
+              <div className="md:col-span-2 flex justify-between items-center pt-4">
                 <button
                   type="submit"
                   disabled={saving}
@@ -335,10 +338,24 @@ export default function PharmacyProfile() {
                 >
                   {saving ? "Saving..." : "Save Profile"}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  className="rounded-2xl bg-[var(--brand-orange)]/10 border border-[var(--brand-orange)]/20 hover:bg-[var(--brand-orange)]/20 px-8 py-3 text-[var(--brand-orange)] font-bold tracking-wider uppercase text-xs shadow-sm transition-all flex items-center gap-2 group"
+                >
+                  <FiLock className="group-hover:rotate-12 transition-transform" />
+                  Change Password
+                </button>
               </div>
             </form>
           )}
         </div>
+
+        <ChangePasswordModal 
+          isOpen={isChangePasswordOpen} 
+          onClose={() => setIsChangePasswordOpen(false)} 
+        />
       </div>
       <ToastContainer position="top-right" autoClose={2200} />
     </DashboardLayout>
