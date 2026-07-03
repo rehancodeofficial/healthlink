@@ -519,11 +519,11 @@ export default function DoctorAppointments() {
                     required
                   >
                     <option value="">-- Choose Subject --</option>
-                    {patients.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name || p.user?.name}
-                      </option>
-                    ))}
+                      {patients.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.user ? `${p.user.firstName} ${p.user.lastName}` : (p.name || "Unnamed Subject")}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className="space-y-1.5 text-[var(--text-main)]">
