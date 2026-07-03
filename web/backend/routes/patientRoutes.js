@@ -276,6 +276,7 @@ router.get("/stats", async (req, res) => {
           totalPrescriptions: 0,
           totalConsultations: 0,
           totalDoctors: 0,
+          totalPharmacies: 0,
         },
       });
     }
@@ -296,6 +297,9 @@ router.get("/stats", async (req, res) => {
       where: { patientId: pid },
     });
     const totalConsultations = await prisma.videoConsultation.count({
+      where: { patientId: pid },
+    });
+    const totalPharmacies = await prisma.selectedPharmacy.count({
       where: { patientId: pid },
     });
 
@@ -332,6 +336,7 @@ router.get("/stats", async (req, res) => {
         totalPrescriptions,
         totalConsultations,
         totalDoctors: doctorSet.size,
+        totalPharmacies,
       },
     });
   } catch (err) {
@@ -643,6 +648,7 @@ router.get("/prescriptions", async (req, res) => {
     const prescriptions = await prisma.prescription.findMany({
       where: { patientId: pid },
       include: {
+        pharmacy: true,
         doctor: {
           include: {
             user: {
