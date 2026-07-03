@@ -149,6 +149,7 @@ export default function PatientPrescriptions() {
               <thead>
                 <tr className="border-b border-[var(--border)]">
                   <th className="p-3">Doctor</th>
+                  <th className="p-3">Pharmacy</th>
                   <th className="p-3">Medication</th>
                   <th className="p-3">Dosage</th>
                   <th className="p-3">Frequency</th>
@@ -164,7 +165,12 @@ export default function PatientPrescriptions() {
                       key={p.id}
                       className="border-b border-[var(--border)] hover:bg-[var(--bg-glass)] transition"
                     >
-                      <td className="p-3">{p.doctor?.user?.name || "N/A"}</td>
+                      <td className="p-3">
+                        {p.doctor?.user ? `${p.doctor.user.firstName} ${p.doctor.user.lastName}` : "N/A"}
+                      </td>
+                      <td className="p-3">
+                        {p.pharmacy?.displayName || "N/A"}
+                      </td>
                       <td className="p-3">{p.medication}</td>
                       <td className="p-3">{p.dosage}</td>
                       <td className="p-3">{p.frequency}</td>
@@ -245,7 +251,7 @@ export default function PatientPrescriptions() {
                   <p className="text-sm">
                     Dr:{" "}
                     <span className="font-semibold">
-                      {selectedPrescription?.doctor?.user?.name || "N/A"}
+                      {selectedPrescription?.doctor?.user ? `${selectedPrescription.doctor.user.firstName} ${selectedPrescription.doctor.user.lastName}` : "N/A"}
                     </span>
                   </p>
                 </div>
@@ -254,11 +260,15 @@ export default function PatientPrescriptions() {
               <div className="grid grid-cols-1 gap-2">
                 <p>
                   <span className="font-semibold">Patient:</span>{" "}
-                  {selectedPrescription?.patient?.user?.name || "—"}
+                  {selectedPrescription?.patient?.user ? `${selectedPrescription.patient.user.firstName} ${selectedPrescription.patient.user.lastName}` : "—"}
                 </p>
                 <p>
                   <span className="font-semibold">Patient ID:</span>{" "}
                   {selectedPrescription?.patient?.userId || "—"}
+                </p>
+                <p>
+                  <span className="font-semibold">Pharmacy:</span>{" "}
+                  {selectedPrescription?.pharmacy?.displayName || "N/A"}
                 </p>
 
                 <p>
