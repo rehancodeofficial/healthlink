@@ -7,7 +7,7 @@ const router = express.Router();
 /**
  * Helpers
  */
-const pickUserSlim = (u) => (u ? { id: u.id, name: u.name, email: u.email || null } : null);
+const pickUserSlim = (u) => (u ? { id: u.id, name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.name, email: u.email || null } : null);
 const includeTicket = {
   user: true,
   agent: true,
@@ -236,7 +236,7 @@ router.get("/tickets", verifyToken, requireRole(["SUPPORT", "ADMIN", "SUPERADMIN
         createdAt: t.createdAt,
         updatedAt: t.updatedAt,
         repliesCount: t._count.replies || 0,
-        user: t.user ? { id: t.user.id, name: t.user.name, email: t.user.email } : null,
+        user: t.user ? { id: t.user.id, name: `${t.user.firstName || ""} ${t.user.lastName || ""}`.trim() || t.user.name, email: t.user.email } : null,
         agent: t.agent ? { id: t.agent.id, name: t.agent.name } : null,
       })),
     });
