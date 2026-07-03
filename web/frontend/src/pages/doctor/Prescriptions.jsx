@@ -304,11 +304,11 @@ export default function DoctorPrescriptions() {
                   required
                 >
                   <option value="">-- Choose Patient --</option>
-                  {patients.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name || p.user?.name}
-                    </option>
-                  ))}
+                    {patients.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.user ? `${p.user.firstName} ${p.user.lastName}` : (p.name || "Unnamed Patient")}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className="space-y-1.5">
