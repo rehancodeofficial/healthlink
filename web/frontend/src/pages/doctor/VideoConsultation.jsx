@@ -247,7 +247,7 @@ export default function VideoConsultation() {
                     className="border-b border-[var(--border)] hover:bg-[var(--bg-main)]/50 transition"
                   >
                     <td className="p-4 text-sm font-bold text-[var(--text-main)]">
-                      {c.patient?.user?.name || c.patient?.user?.fullName || "N/A"}
+                      {c.patient?.user ? `${c.patient.user.firstName} ${c.patient.user.lastName}` : "N/A"}
                     </td>
                     <td className="p-4 text-xs font-bold text-[var(--text-soft)]">
                       {c.scheduledAt
@@ -361,7 +361,7 @@ export default function VideoConsultation() {
                   <option value="">-- Select Patient --</option>
                   {patients.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.user?.name || p.name || p.user?.email || "Unnamed Patient"}
+                      {p.user ? `${p.user.firstName} ${p.user.lastName}` : (p.name || p.user?.email || "Unnamed Patient")}
                     </option>
                   ))}
                 </select>
