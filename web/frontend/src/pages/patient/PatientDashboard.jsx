@@ -11,6 +11,7 @@ import {
   FaHeartbeat,
   FaArrowRight,
   FaCheckCircle,
+  FaPills,
 } from "react-icons/fa";
 
 export default function PatientDashboard() {
@@ -19,9 +20,9 @@ export default function PatientDashboard() {
     totalAppointments: 0,
     completedAppointments: 0,
     pendingAppointments: 0,
-    totalPrescriptions: 0,
     totalConsultations: 0,
     totalDoctors: 0,
+    totalPharmacies: 0,
   });
 
   const patientId = localStorage.getItem("userId");
@@ -62,7 +63,7 @@ export default function PatientDashboard() {
         </div>
 
         {/* Dense Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard
             title="Scheduled Visits"
             value={stats.totalAppointments}
@@ -95,6 +96,14 @@ export default function PatientDashboard() {
             subtext="Active"
             onClick={() => navigate("/patient/doctors/my")}
           />
+          <StatCard
+            title="Pharmacies"
+            value={stats.totalPharmacies}
+            icon={<FaPills />}
+            color="--brand-orange"
+            subtext="Nearby"
+            onClick={() => navigate("/patient/pharmacy/list")}
+          />
         </div>
 
         {/* Action Center - Unified Panels */}
@@ -116,6 +125,12 @@ export default function PatientDashboard() {
                 title="Join Consult"
                 desc="Encrypted high-speed video"
                 onClick={() => navigate("/patient/video-consultation")}
+              />
+              <QuickLink
+                icon={<FaPills className="text-[var(--brand-orange)]" />}
+                title="Pharmacies"
+                desc="Find nearby terminals"
+                onClick={() => navigate("/patient/pharmacy/list")}
               />
             </div>
           </div>
