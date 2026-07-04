@@ -5,7 +5,7 @@ import Topbar from "../../../components/Topbar";
 import api from "../../../Lib/api";
 
 export default function PatientSendMessage() {
-  const [doctors, setDoctors] = useState([]);
+  const [recipients, setRecipients] = useState([]);
   const [receiverId, setReceiverId] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -20,23 +20,36 @@ export default function PatientSendMessage() {
 
 
 
-  // Load doctors for dropdown
+  // Load doctors and pharmacies for dropdown
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/patient/doctors/all");
-        const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        // Expect user.id at doctor.user.id for messaging by userId
-        setDoctors(
-          list.map((d) => ({
-            id: d.user?.id || d.id, // fallback
-            name: d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : (d.name || "Unnamed Doctor"),
-            email: d.user?.email || d.email || "",
-          }))
-        );
+        const [docsRes, pharRes] = await Promise.all([
+          api.get("/patient/doctors/all"),
+          api.get("/pharmacy/list")
+        ]);
+        
+        const docs = Array.isArray(docsRes.data) ? docsRes.data : docsRes.data?.data || [];
+        const phars = pharRes.data?.data?.items || pharRes.data?.items || [];
+        
+        const doctorRecipients = docs.map((d) => ({
+          id: d.user?.id || d.id, // we want the user id for messaging
+          name: d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : (d.name || "Unnamed Doctor"),
+          type: "DOCTOR",
+          email: d.user?.email || d.email || "",
+        }));
+
+        const pharmacyRecipients = phars.map((p) => ({
+          id: p.pharmacyProfile?.userId || p.userId || p.id, // ideally the userId
+          name: p.name || "Unnamed Pharmacy",
+          type: "PHARMACY",
+          email: p.email || "",
+        }));
+
+        setRecipients([...doctorRecipients, ...pharmacyRecipients]);
       } catch (err) {
-        console.error("Failed to fetch doctors:", err);
-        setError("Failed to load doctors");
+        console.error("Failed to fetch recipients:", err);
+        setError("Failed to load contacts");
       } finally {
         setLoading(false);
       }
@@ -49,7 +62,7 @@ export default function PatientSendMessage() {
     setSuccess("");
     setError("");
     if (!receiverId || !content.trim()) {
-      setError("Please select a doctor and type a message.");
+      setError("Please select a recipient and type a message.");
       return;
     }
     setSending(true);
@@ -90,22 +103,33 @@ export default function PatientSendMessage() {
             className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-xl"
           >
             <div className="mb-4">
-              <label className="block font-semibold mb-2">Select Doctor</label>
+              <label className="block font-semibold mb-2">Select Recipient</label>
               {loading ? (
-                <p>Loading doctors...</p>
+                <p>Loading contacts...</p>
               ) : (
                 <select
-                  className="w-full border border-gray-300 text-black rounded-md p-2"
+                  className="w-full border border-gray-300 text-white rounded-md p-2"
                   value={receiverId}
                   onChange={(e) => setReceiverId(e.target.value)}
                   required
                 >
-                  <option value="">-- Choose Doctor --</option>
-                  {doctors.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} {d.email ? `(${d.email})` : ""}
-                    </option>
-                  ))}
+                  <option value="">-- Choose Recipient --</option>
+                  
+                  <optgroup label="Doctors">
+                    {recipients.filter(r => r.type === "DOCTOR").map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} {d.email ? `(${d.email})` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+
+                  <optgroup label="Pharmacies">
+                    {recipients.filter(r => r.type === "PHARMACY").map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} {p.email ? `(${p.email})` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               )}
             </div>
@@ -113,7 +137,7 @@ export default function PatientSendMessage() {
             <div className="mb-4">
               <label className="block font-semibold mb-2">Message</label>
               <textarea
-                className="w-full border border-gray-300 text-black rounded-md p-3 h-32 focus:outline-none focus:ring-2 focus:ring-[#027906]"
+                className="w-full border border-gray-300 text-white rounded-md p-3 h-32 focus:outline-none focus:ring-2 focus:ring-[#027906]"
                 placeholder="Type your message here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
