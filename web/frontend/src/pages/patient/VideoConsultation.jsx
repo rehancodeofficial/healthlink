@@ -193,7 +193,7 @@ export default function VideoConsultation() {
                   consultations.map((c) => (
                     <tr key={c.id} className="hover:bg-[var(--bg-main)]/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-black text-[var(--text-main)]">
-                        {c.doctor?.user?.name || "IDENTITY_REDACTED"}
+                        {c.doctor?.user ? `${c.doctor.user.firstName} ${c.doctor.user.lastName}` : "IDENTITY_REDACTED"}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
@@ -270,7 +270,7 @@ export default function VideoConsultation() {
                   <option value="">-- Choose Doctor --</option>
                   {doctors.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.user?.name || "Doctor"} — {d.specialization || "General"}
+                      {d.user ? `${d.user.firstName} ${d.user.lastName}` : "Doctor"} — {d.specialization || "General"}
                     </option>
                   ))}
                 </select>
