@@ -193,7 +193,7 @@ export default function VideoConsultation() {
                   consultations.map((c) => (
                     <tr key={c.id} className="hover:bg-[var(--bg-main)]/30 transition-colors">
                       <td className="px-6 py-4 text-sm font-black text-[var(--text-main)]">
-                        {c.doctor?.user?.name || "IDENTITY_REDACTED"}
+                        {[c.doctor?.user?.firstName, c.doctor?.user?.lastName].filter(Boolean).join(" ") || "Unknown Doctor"}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
@@ -254,7 +254,7 @@ export default function VideoConsultation() {
           <div onClick={() => setModalOpen(false)}></div>
           <div className="relative w-full max-w-lg glass !p-8 animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-6">
-              Initialize Hub Session
+              Start Video Consultations
             </h2>
             <form onSubmit={handleSchedule} className="space-y-4">
               <div className="space-y-1.5">
