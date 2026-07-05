@@ -6,7 +6,7 @@ const chatbotController = require("../controllers/chatbot.controller");
 // Rate Limiter: Max 5 requests per minute
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 5,
+  max: 100, // Increased from 5 to 100
   message: { error: "Too many requests, please try again later." },
 });
 
