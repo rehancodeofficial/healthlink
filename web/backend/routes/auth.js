@@ -42,17 +42,13 @@ router.post("/register", async (req, res) => {
     }
 
 
-    // 1. Strict SMTP Health Check
-    const isSMTPHealthy = await verifySMTPConnection();
-    if (!isSMTPHealthy) {
-      console.error("❌ Registration Aborted: Gmail SMTP is not responding.");
-      return res.status(503).json({ 
-        error: "Email service temporarily unavailable. Please try again later." 
-      });
-    }
+    // 1. SMTP Health Check (Non-blocking)
+    // We check it for logging, but we no longer block registration with a 503.
+    verifySMTPConnection().then(isHealthy => {
+      if (!isHealthy) console.warn("⚠️ SMTP Health Check failed during registration. Email might be delayed.");
+    });
 
-    // 2. Create user via Admin API to bypass Supabase's rate-limited email service
-    // We set email_confirm: true because we are handling the "Welcome" verification via our own SMTP
+    // 2. Create user via Admin API
     const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
       email: normedEmail,
       password: password,
@@ -69,7 +65,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Failed to create user — please try again." });
     }
     
-    // Create or update in Prisma (Supabase trigger might have already inserted basic info)
+    // Create or update in Prisma
     const existingUser = await prisma.user.upsert({
       where: { id: supaData.user.id },
       update: {
@@ -93,22 +89,16 @@ router.post("/register", async (req, res) => {
       }
     });
     
-    // 3. Send custom Welcome/Registration email via Gmail SMTP
-    try {
-      await sendRegistrationEmail(normedEmail, firstName);
-      console.log(`✅ Custom registration email sent to ${normedEmail}`);
-    } catch (emailErr) {
-      // We don't fail the registration if email fails here (user is already created), 
-      // but we log it heavily.
-      console.error("⚠️ User created but Welcome Email failed:", emailErr.message);
-    }
+    // 3. Send custom Welcome email in BACKGROUND (Non-blocking)
+    sendRegistrationEmail(normedEmail, firstName).catch(err => {
+      console.error("🚨 Background Email Delivery Failed (all retries exhausted):", err.message);
+    });
 
-    // Provision default profile (handles PATIENT, DOCTOR, PHARMACY)
+    // Provision default profile
     try {
       await ensureDefaultProfile(existingUser, specialization);
-      console.log(`[DEBUG] Default profile ensured for role: ${existingUser.role}`);
     } catch (e) {
-      console.error("Failed to provision profile during registration:", e);
+      console.error("Failed to provision profile:", e);
     }
     
     const token = jwt.sign(
@@ -118,7 +108,7 @@ router.post("/register", async (req, res) => {
     );
     
     return res.status(201).json({
-      message: "Account created! Please check your email to confirm your account before logging in.",
+      message: "Account created! We are sending a welcome email to your inbox shortly.",
       user: existingUser,
       token
     });
