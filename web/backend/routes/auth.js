@@ -22,7 +22,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 // Register — sends confirmation email via Supabase signUp
 // -------------------------
-router.post("/register", registerLimiter, async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
     let { email, password, firstName, lastName, phone, role, dateOfBirth, gender, specialization } = req.body;
     console.log(`[DEBUG] Incoming /register request for email: ${email}`);
