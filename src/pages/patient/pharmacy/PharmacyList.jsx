@@ -60,8 +60,16 @@ export default function PharmacyList() {
     }
   };
 
+  // Initial load on mount (works even if geolocation is denied)
   useEffect(() => {
     load();
+  }, []);
+
+  // Re-load with coordinates once geolocation resolves
+  useEffect(() => {
+    if (myLat != null && myLng != null) {
+      load();
+    }
   }, [myLat, myLng]);
 
   const withDistance = useMemo(() => {
