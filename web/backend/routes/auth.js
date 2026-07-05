@@ -50,14 +50,25 @@ router.post("/register", registerLimiter, async (req, res) => {
     });
     
     if (supaError) {
-      console.error("Supabase SignUp Error:", supaError);
+      console.error("❌ Supabase SignUp Error:", supaError.message || supaError);
+      
       // Handle known Supabase email rate limit error
-      if (supaError.message && supaError.message.toLowerCase().includes("sending confirmation email")) {
+      const msg = supaError.message?.toLowerCase() || "";
+      if (msg.includes("sending confirmation email") || msg.includes("rate limit")) {
         return res.status(429).json({ 
-          error: "Email service is temporarily busy. Your account may have been created — please try logging in, or wait a few minutes and try again." 
+          error: "Registration rate limit exceeded. Please wait a few minutes or increase Email Rate Limits in Supabase Auth settings." 
         });
       }
-      return res.status(400).json({ error: supaError.message });
+
+      // Hint for SMTP configuration errors
+      if (msg.includes("smtp") || msg.includes("connection") || msg.includes("authentication") || msg.includes("handshake")) {
+        console.error("⚠️ SMTP Configuration issue detected in Supabase.");
+        return res.status(400).json({ 
+          error: "Email service configuration error. Please ensure your SendGrid SMTP settings (Host, Port, API Key) are correct and your Sender is verified." 
+        });
+      }
+      
+      return res.status(400).json({ error: supaError.message || "Failed to create account in Supabase" });
     }
     
     if (!supaData?.user?.id) {
