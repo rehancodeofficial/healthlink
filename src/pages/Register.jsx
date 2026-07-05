@@ -66,12 +66,14 @@ export default function Register() {
       toast.success("Account created! Please check your email to confirm your account before logging in.");
       // No redirect — user must verify email first before they can log in
     } catch (err) {
-      console.error("❌ Registration error:", err);
-      // Log more details if it's a Supabase error
-      if (err.status) console.error("Status Code:", err.status);
-      if (err.name) console.error("Error Name:", err.name);
+      console.error("❌ Registration error details:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
 
-      toast.error(err.message || "Registration failed. Please try again.");
+      const errorMessage = err.response?.data?.error || err.message || "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
