@@ -12,31 +12,35 @@ if (SENDGRID_API_KEY && EMAIL_PROVIDER === "sendgrid") {
   sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
-// Configure Gmail/SMTP transporter
-// Configure Gmail/SMTP transporter
+// Configure Gmail/SMTP transporter with explicit robust settings
 let transporter = null;
 if (EMAIL_PROVIDER === "gmail") {
-  const defaultPort = parseInt(process.env.EMAIL_PORT || "465");
-  const defaultSecure =
-    process.env.EMAIL_SECURE === "true" || defaultPort === 465;
+  const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+  const port = parseInt(process.env.EMAIL_PORT || "587");
+  const secure = process.env.EMAIL_SECURE === "true"; // False for 587
 
   transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: defaultPort,
-    secure: defaultSecure, // true for 465, false for other ports
+    host,
+    port,
+    secure, 
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // Force IPv4 to avoid Docker IPv6 issues
-    family: 4,
-    // Add connection timeouts
-    connectionTimeout: 30000, // 30 seconds
-    greetingTimeout: 30000, // 30 seconds
-    socketTimeout: 30000, // 30 seconds
+    // Enhanced settings for Gmail compatibility and timeout resilience
+    tls: {
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false
+    },
+    pool: true, // Use connection pooling
+    maxConnections: 5,
+    maxMessages: 100,
+    connectionTimeout: 20000, // 20s
+    greetingTimeout: 20000, 
+    socketTimeout: 30000, // 30s
   });
   console.log(
-    `📧 Gmail Transporter initialized with 30s timeout. Host: ${process.env.EMAIL_HOST}`,
+    `📧 Gmail SMTP Transporter initialized (Port: ${port}, Secure: ${secure}). Host: ${host}`,
   );
 }
 
@@ -140,16 +144,47 @@ async function verifySMTPConnection() {
 }
 
 /**
- * Send Welcome/Registration email to new users.
+ * Generic send function with retry logic.
+ * @param {Object} mailOptions - Nodemailer mail options
+ * @param {number} maxRetries - Maximum number of retries
+ * @returns {Promise<void>}
+ */
+async function sendWithRetry(mailOptions, maxRetries = 3) {
+  let attempts = 0;
+  const delay = 5000; // 5 seconds between retries
+
+  while (attempts < maxRetries) {
+    attempts++;
+    const timestamp = new Date().toISOString();
+    try {
+      console.log(`[${timestamp}] 📧 SMTP Attempt ${attempts}/${maxRetries} for: ${mailOptions.to}`);
+      
+      if (!transporter) throw new Error("SMTP Transporter not initialized.");
+      
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`[${timestamp}] ✅ Email Sent Successfully: ${info.messageId}`);
+      return; 
+    } catch (error) {
+      console.error(`[${timestamp}] ❌ SMTP Attempt ${attempts} Failed:`, error.message);
+      
+      if (attempts >= maxRetries) {
+        console.error(`[${timestamp}] 🚨 ALERT: Email failed after ${maxRetries} attempts for: ${mailOptions.to}`);
+        throw new Error(`Email delivery ultimately failed after ${maxRetries} attempts.`);
+      }
+      
+      console.log(`[${timestamp}] ⏳ Waiting ${delay/1000}s before next retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+/**
+ * Send Welcome/Registration email to new users (with retry).
  * @param {string} email - Recipient email
  * @param {string} firstName - Recipient first name
  * @returns {Promise<void>}
  */
 async function sendRegistrationEmail(email, firstName) {
-  if (!transporter) {
-    throw new Error("Gmail transporter not configured.");
-  }
-
   const mailOptions = {
     from: `"CureVirtual" <${FROM_EMAIL}>`,
     to: email,
@@ -170,29 +205,41 @@ async function sendRegistrationEmail(email, firstName) {
     `,
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Registration welcome email sent to ${email} via Gmail SMTP.`);
-  } catch (error) {
-    console.error("❌ Failed to send registration email:", error.message);
-    throw new Error(`SMTP Delivery Failed: ${error.message}`);
-  }
+  return sendWithRetry(mailOptions);
 }
 
 /**
- * Send OTP email using configured provider
+ * Send OTP email using configured provider (with retry for Gmail).
  * @param {string} email - Recipient email
  * @param {string} otp - 6-digit OTP
  * @returns {Promise<void>}
  */
 async function sendOTPEmail(email, otp) {
-  console.log(`📧 Attempting to send OTP email to ${email} using ${EMAIL_PROVIDER.toUpperCase()} SMTP...`);
+  console.log(`📧 Dispatching OTP email to ${email}...`);
+  
+  const mailOptions = {
+    from: `"CureVirtual" <${FROM_EMAIL}>`,
+    to: email,
+    subject: "Email Verification - CureVirtual",
+    text: `Your verification code is: ${otp}\n\nThis code will expire in 5 minutes.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #4F46E5;">Email Verification</h2>
+        <p>Your verification code is:</p>
+        <div style="background-color: #F3F4F6; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+          <h1 style="color: #4F46E5; letter-spacing: 5px; margin: 0;">${otp}</h1>
+        </div>
+        <p style="color: #6B7280; font-size: 14px;">This code will expire in 5 minutes.</p>
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">CureVirtual - Your Health, Our Priority</p>
+      </div>
+    `,
+  };
+
   if (EMAIL_PROVIDER === "sendgrid") {
     return sendOTPViaSendGrid(email, otp);
-  } else if (EMAIL_PROVIDER === "gmail") {
-    return sendOTPViaGmail(email, otp);
   } else {
-    throw new Error(`Unsupported email provider: ${EMAIL_PROVIDER}`);
+    return sendWithRetry(mailOptions);
   }
 }
 
