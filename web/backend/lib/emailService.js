@@ -121,12 +121,72 @@ async function sendOTPViaGmail(email, otp) {
 }
 
 /**
+ * Perform pre-send SMTP health check.
+ * @returns {Promise<boolean>} True if SMTP is healthy
+ */
+async function verifySMTPConnection() {
+  if (EMAIL_PROVIDER !== "gmail" || !transporter) {
+    console.error("❌ SMTP Health Check Failed: Gmail provider not configured.");
+    return false;
+  }
+  try {
+    await transporter.verify();
+    console.log("✅ SMTP Health Check Passed: Gmail SMTP is ready.");
+    return true;
+  } catch (error) {
+    console.error("❌ SMTP Health Check Failed:", error.message);
+    return false;
+  }
+}
+
+/**
+ * Send Welcome/Registration email to new users.
+ * @param {string} email - Recipient email
+ * @param {string} firstName - Recipient first name
+ * @returns {Promise<void>}
+ */
+async function sendRegistrationEmail(email, firstName) {
+  if (!transporter) {
+    throw new Error("Gmail transporter not configured.");
+  }
+
+  const mailOptions = {
+    from: `"CureVirtual" <${FROM_EMAIL}>`,
+    to: email,
+    subject: "Welcome to CureVirtual!",
+    text: `Hi ${firstName || "there"},\n\nWelcome to CureVirtual! Your account has been successfully created. You can now log in to access our healthcare services.\n\nBest Regards,\nThe CureVirtual Team`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #4F46E5;">Welcome to CureVirtual!</h2>
+        <p>Hi ${firstName || "there"},</p>
+        <p>Thank you for joining CureVirtual! Your healthcare journey starts here.</p>
+        <p>Your account has been successfully created and confirmed. You can now log in to your dashboard.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.APP_BASE_URL}/login" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log In Now</a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">CureVirtual - Your Health, Our Priority</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Registration welcome email sent to ${email} via Gmail SMTP.`);
+  } catch (error) {
+    console.error("❌ Failed to send registration email:", error.message);
+    throw new Error(`SMTP Delivery Failed: ${error.message}`);
+  }
+}
+
+/**
  * Send OTP email using configured provider
  * @param {string} email - Recipient email
  * @param {string} otp - 6-digit OTP
  * @returns {Promise<void>}
  */
 async function sendOTPEmail(email, otp) {
+  console.log(`📧 Attempting to send OTP email to ${email} using ${EMAIL_PROVIDER.toUpperCase()} SMTP...`);
   if (EMAIL_PROVIDER === "sendgrid") {
     return sendOTPViaSendGrid(email, otp);
   } else if (EMAIL_PROVIDER === "gmail") {
@@ -138,4 +198,6 @@ async function sendOTPEmail(email, otp) {
 
 module.exports = {
   sendOTPEmail,
+  sendRegistrationEmail,
+  verifySMTPConnection,
 };
