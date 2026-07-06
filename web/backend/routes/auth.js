@@ -6,15 +6,17 @@ const { ensureDefaultProfile } = require("../lib/provisionProfile");
 const { supabaseAdmin } = require("../lib/supabaseAdmin");
 const rateLimit = require("express-rate-limit");
 const { generateOTP, getOTPExpiration, isOTPExpired } = require('../lib/otpGenerator');
-const { sendOTPEmail } = require('../lib/emailService');
+const { sendOTPEmail, sendRegistrationEmail, verifySMTPConnection } = require('../lib/emailService');
 const { authenticateToken } = require("../middleware/auth");
 
-// Rate limit for registration: more lenient in development
+// Rate limit for registration: removed as per request to prevent accidental blocking
+/* 
 const registerLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === "development" ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 min dev, 15 min prod
-  max: process.env.NODE_ENV === "development" ? 1000 : 500, // 1000 req/window in dev, 500 req/window in prod
+  windowMs: process.env.NODE_ENV === "development" ? 1 * 60 * 1000 : 15 * 60 * 1000, 
+  max: process.env.NODE_ENV === "development" ? 1000 : 500,
   message: { error: "Too many registration attempts. Please wait a few minutes and try again." },
 });
+*/
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -40,35 +42,27 @@ router.post("/register", async (req, res) => {
     }
 
 
-    // Create via standard Supabase signUp — sends confirmation email to user
-    const { data: supaData, error: supaError } = await supabaseAdmin.auth.signUp({
+    // 1. Strict SMTP Health Check
+    const isSMTPHealthy = await verifySMTPConnection();
+    if (!isSMTPHealthy) {
+      console.error("❌ Registration Aborted: Gmail SMTP is not responding.");
+      return res.status(503).json({ 
+        error: "Email service temporarily unavailable. Please try again later." 
+      });
+    }
+
+    // 2. Create user via Admin API to bypass Supabase's rate-limited email service
+    // We set email_confirm: true because we are handling the "Welcome" verification via our own SMTP
+    const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
       email: normedEmail,
       password: password,
-      options: {
-        data: { firstName, lastName, role, dateOfBirth, gender, specialization }
-      }
+      email_confirm: true,
+      user_metadata: { firstName, lastName, role, dateOfBirth, gender, specialization }
     });
     
     if (supaError) {
-      console.error("❌ Supabase SignUp Error:", supaError.message || supaError);
-      
-      // Handle known Supabase email rate limit error
-      const msg = supaError.message?.toLowerCase() || "";
-      if (msg.includes("sending confirmation email") || msg.includes("rate limit")) {
-        return res.status(429).json({ 
-          error: "Registration rate limit exceeded. Please wait a few minutes or increase Email Rate Limits in Supabase Auth settings." 
-        });
-      }
-
-      // Hint for SMTP configuration errors
-      if (msg.includes("smtp") || msg.includes("connection") || msg.includes("authentication") || msg.includes("handshake")) {
-        console.error("⚠️ SMTP Configuration issue detected in Supabase.");
-        return res.status(400).json({ 
-          error: "Email service configuration error. Please ensure your SendGrid SMTP settings (Host, Port, API Key) are correct and your Sender is verified." 
-        });
-      }
-      
-      return res.status(400).json({ error: supaError.message || "Failed to create account in Supabase" });
+      console.error("❌ Supabase Admin CreateUser Error:", supaError.message || supaError);
+      return res.status(400).json({ error: supaError.message || "Failed to create account" });
     }
     
     if (!supaData?.user?.id) {
@@ -99,6 +93,16 @@ router.post("/register", async (req, res) => {
       }
     });
     
+    // 3. Send custom Welcome/Registration email via Gmail SMTP
+    try {
+      await sendRegistrationEmail(normedEmail, firstName);
+      console.log(`✅ Custom registration email sent to ${normedEmail}`);
+    } catch (emailErr) {
+      // We don't fail the registration if email fails here (user is already created), 
+      // but we log it heavily.
+      console.error("⚠️ User created but Welcome Email failed:", emailErr.message);
+    }
+
     // Provision default profile (handles PATIENT, DOCTOR, PHARMACY)
     try {
       await ensureDefaultProfile(existingUser, specialization);
