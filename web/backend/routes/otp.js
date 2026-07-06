@@ -9,7 +9,7 @@ const router = express.Router();
 // Rate limiting map (in-memory for simplicity, use Redis in production)
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 3;
+const MAX_REQUESTS_PER_WINDOW = 100; // Increased from 3 to 100 to avoid blocking users during testing/production
 
 /**
  * Check rate limit for an email
