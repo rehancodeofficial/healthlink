@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1); // ✅ Trust Railway's proxy for rate limiting (detects client IP correctly)
 const http = require("http");
 const { Server } = require("socket.io");
 
