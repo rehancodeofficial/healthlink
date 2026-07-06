@@ -1,3 +1,12 @@
+// Polyfill for Headers, Fetch, and Request (required for Supabase SDK on Node < 18)
+if (typeof global.Headers === 'undefined') {
+  const { Headers, Request, Response, fetch } = require('node-fetch-native');
+  global.Headers = Headers;
+  global.Request = Request;
+  global.Response = Response;
+  global.fetch = fetch;
+}
+
 // FILE: backend/server.js
 const express = require("express");
 const cors = require("cors");
