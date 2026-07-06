@@ -12,7 +12,7 @@ const { authenticateToken } = require("../middleware/auth");
 // Rate limit for registration: more lenient in development
 const registerLimiter = rateLimit({
   windowMs: process.env.NODE_ENV === "development" ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 min dev, 15 min prod
-  max: process.env.NODE_ENV === "development" ? 100 : 50, // 100 req/window in dev, 50 req/window in prod
+  max: process.env.NODE_ENV === "development" ? 1000 : 500, // 1000 req/window in dev, 500 req/window in prod
   message: { error: "Too many registration attempts. Please wait a few minutes and try again." },
 });
 
