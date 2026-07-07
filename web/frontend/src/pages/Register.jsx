@@ -65,7 +65,7 @@ export default function Register() {
           form.specialization === "Other" ? form.customProfession : form.specialization,
       };
 
-      console.log("[DEBUG] Payload (no CNIC, no extra fields):", Object.keys(payload));
+      console.log("[DEBUG] Sending payload to backend:", payload);
 
       const { data } = await api.post("/auth/register", payload);
 
