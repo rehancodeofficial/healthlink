@@ -135,7 +135,7 @@ router.post("/register", async (req, res) => {
     
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(400).json({ error: "Invalid input data" });
+    return res.status(500).json({ error: err.message || "An unexpected error occurred during registration" });
   }
 });
 
