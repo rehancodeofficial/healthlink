@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
 import { SocketContext } from "./useSocket";
+import { useUser } from "./UserContext";
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -10,19 +11,24 @@ export const SocketProvider = ({ children }) => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
+  const { user } = useUser();
+
   // Derive socket URL from API base URL (strip /api suffix)
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
   const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
 
   useEffect(() => {
-    // Get user info from localStorage
-    const userId = localStorage.getItem("userId");
-    const role = localStorage.getItem("role");
-    const name = localStorage.getItem("userName") || localStorage.getItem("name") || "User";
+    // Get user info from localStorage as fallback
+    const userId = user?.id || localStorage.getItem("userId");
+    const role = user?.role || localStorage.getItem("role");
+    const name = user?.name || localStorage.getItem("userName") || localStorage.getItem("name") || "User";
     const token = localStorage.getItem("token"); // JWT token for authentication
 
     if (!userId || !role || !token) {
-      console.warn("⚠️ No user credentials or token found. Socket connection delayed.");
+      console.warn("⚠️ No user credentials or token found. Socket will not connect.");
+      setSocket(null);
+      setIsConnected(false);
+      setConnectionState("disconnected");
       return;
     }
 
@@ -73,6 +79,7 @@ export const SocketProvider = ({ children }) => {
         localStorage.removeItem("userName");
         localStorage.removeItem("type");
         localStorage.removeItem("email");
+        newSocket.disconnect();
         window.location.href = "/login";
         return;
       }
@@ -129,7 +136,7 @@ export const SocketProvider = ({ children }) => {
         newSocket.disconnect();
       }
     };
-  }, [backendUrl]);
+  }, [backendUrl, user]);
 
   const contextValue = {
     socket,
