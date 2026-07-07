@@ -59,6 +59,24 @@ export const SocketProvider = ({ children }) => {
     // Connection error
     newSocket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error.message);
+      
+      if (
+        error.message === "Invalid token" ||
+        error.message === "Token expired" ||
+        error.message === "Authentication required"
+      ) {
+        console.warn("⚠️ Socket auth failed. Clearing credentials...");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("type");
+        localStorage.removeItem("email");
+        window.location.href = "/login";
+        return;
+      }
+
       setIsConnected(false);
       setConnectionState("reconnecting");
     });
