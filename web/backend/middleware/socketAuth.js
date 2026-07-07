@@ -10,6 +10,9 @@ const jwt = require("jsonwebtoken");
  *
  * Client must send token in handshake:
  *   io('url', { auth: { token: 'jwt_token' } })
+ *
+ * NOTE: JWT tokens are signed as { id, role, type } — NOT { userId, role }.
+ * Always read decoded.id for the user ID.
  */
 module.exports = (socket, next) => {
   const token = socket.handshake.auth.token;
@@ -22,15 +25,16 @@ module.exports = (socket, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Validate token expiry
+    // Validate token expiry explicitly (jwt.verify already does this, but keep for clarity)
     if (decoded.exp && decoded.exp < Date.now() / 1000) {
       console.warn(`⚠️ Expired token for socket: ${socket.id}`);
       return next(new Error("Token expired"));
     }
 
-    // Attach user info to socket for authorization checks
-    socket.userId = decoded.userId;
+    // ✅ FIX: JWT tokens are signed with { id, role, type } — read decoded.id (not decoded.userId)
+    socket.userId = decoded.id;
     socket.userRole = decoded.role;
+    socket.userType = decoded.type || "USER";
     socket.userEmail = decoded.email || null;
 
     console.log(
@@ -38,7 +42,10 @@ module.exports = (socket, next) => {
     );
     next();
   } catch (err) {
-    console.error(`❌ Socket authentication failed:`, err.message);
-    next(new Error("Invalid token"));
+    console.error(`❌ Socket authentication failed: ${err.message}`);
+    if (err.name === "TokenExpiredError") {
+      return next(new Error("Token expired"));
+    }
+    return next(new Error("Invalid token"));
   }
 };
