@@ -26,19 +26,38 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // -------------------------
 router.post("/register", async (req, res) => {
   try {
+    console.log("[DEBUG] Registration request body:", req.body);
+    
     let { email, password, firstName, lastName, phone, role, dateOfBirth, gender, specialization } = req.body;
-    console.log(`[DEBUG] Incoming /register request for email: ${email}`);
     
-    if (!email || !password) {
-      return res.status(400).json({ error: "Missing email or password" });
+    // 1. Validate Required Fields
+    if (!email || !password || !firstName) {
+      console.warn("⚠️ Registration failed: Missing required fields (email, password, or firstName).");
+      return res.status(400).json({ error: "All fields are required" });
     }
-    
+
     const normedEmail = String(email).trim().toLowerCase();
     
-    // Check if user already exists by email
+    // 2. Validate Email Format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normedEmail)) {
+      console.warn(`⚠️ Registration failed: Invalid email format for: ${normedEmail}`);
+      return res.status(400).json({ error: "Please provide a valid email address" });
+    }
+
+    // 3. Validate Password Length
+    if (password.length < 6) {
+      console.warn(`⚠️ Registration failed: Password too short for: ${normedEmail}`);
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
+    console.log(`[DEBUG] Finalizing /register validation for: ${normedEmail}`);
+    
+    // Check if user already exists
     const existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
     if (existingEmail) {
-      return res.status(400).json({ error: "User already exists with this email" });
+      console.warn(`⚠️ Registration failed: User already exists with email: ${normedEmail}`);
+      return res.status(400).json({ error: "User already exists" });
     }
 
 
@@ -48,7 +67,6 @@ router.post("/register", async (req, res) => {
       if (!isHealthy) console.warn("⚠️ SMTP Health Check failed during registration. Email might be delayed.");
     });
 
-    // 2. Create user via Admin API
     const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
       email: normedEmail,
       password: password,
@@ -56,9 +74,11 @@ router.post("/register", async (req, res) => {
       user_metadata: { firstName, lastName, role, dateOfBirth, gender, specialization }
     });
     
+    console.log("[DEBUG] Supabase response:", { supaData, supaError });
+    
     if (supaError) {
-      console.error("❌ Supabase Admin CreateUser Error:", supaError.message || supaError);
-      return res.status(400).json({ error: supaError.message || "Failed to create account" });
+      console.error("Supabase signup error:", supaError.message);
+      return res.status(400).json({ error: supaError.message });
     }
     
     if (!supaData?.user?.id) {
@@ -115,7 +135,7 @@ router.post("/register", async (req, res) => {
     
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(400).json({ error: "Invalid input data" });
   }
 });
 
