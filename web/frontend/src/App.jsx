@@ -5,6 +5,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "./context/UserContext";
+import { SocketProvider } from "./context/SocketContext";
 
 /* ================================
    SUPERADMIN
@@ -146,8 +147,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <UserProvider>
-        <ToastContainer position="top-right" autoClose={3000} />
-        <Suspense fallback={<LoadingSpinner />}>
+        <SocketProvider>
+          <ToastContainer position="top-right" autoClose={3000} />
+          <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
@@ -741,6 +743,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <Chatbot />
+        </SocketProvider>
       </UserProvider>
     </BrowserRouter>
   );
