@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
 
 import api from "../Lib/api";
+import OTPVerification from "../components/OTPVerification";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -25,6 +26,8 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const isSubmittingRef = useRef(false);
   const { theme } = useTheme();
 
@@ -71,11 +74,16 @@ export default function Register() {
 
       console.log("[DEBUG] ✅ Registration API responded successfully:", data.message);
 
-      toast.success("Registration successful! Please check your email for the verification link.");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 3000);
+      if (data.requiresVerification) {
+        setUserEmail(data.email || form.email.trim().toLowerCase());
+        setShowOTP(true);
+        toast.success(data.message);
+      } else {
+        toast.success("Registration successful! Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      }
     } catch (err) {
       console.error("[DEBUG] ❌ Registration error:", err);
       const errorMsg =
@@ -87,6 +95,29 @@ export default function Register() {
       console.log("[DEBUG] 🔓 Submit lock released");
     }
   };
+
+  if (showOTP) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-transparent)]">
+        {/* Triple Color Atmospheric Glow */}
+        <div className="absolute inset-0 overflow-hidden -z-10">
+          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[var(--brand-orange)] opacity-[0.05] blur-[150px] rounded-full"></div>
+          <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[var(--brand-green)] opacity-[0.05] blur-[150px] rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-[var(--brand-blue)] opacity-[0.03] blur-[150px] rounded-full"></div>
+        </div>
+        <OTPVerification
+          email={userEmail}
+          onVerified={() => {
+            toast.success("Email verified! Redirecting to login...");
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 2000);
+          }}
+          onBack={() => setShowOTP(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 bg-[var(--bg-transparent)]`}>
