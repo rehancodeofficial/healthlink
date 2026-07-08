@@ -70,7 +70,7 @@ router.post("/register", async (req, res) => {
     const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
       email: normedEmail,
       password: password,
-      email_confirm: true,
+      email_confirm: false, // 👈 Require email confirmation
       user_metadata: { firstName, lastName, role, dateOfBirth, gender, specialization }
     });
     
@@ -109,10 +109,32 @@ router.post("/register", async (req, res) => {
       }
     });
     
-    // 3. Send custom Welcome email in BACKGROUND (Non-blocking)
+    // 3. Generate and Send OTP for registration verification
+    const otp = generateOTP();
+    const expiresAt = getOTPExpiration();
+
+    // Store OTP in database
+    await prisma.emailOTP.create({
+      data: {
+        email: normedEmail,
+        otp,
+        expiresAt,
+        verified: false,
+      },
+    });
+
+    // Send OTP email
+    sendOTPEmail(normedEmail, otp).catch(err => {
+      console.error("🚨 Registration OTP Delivery Failed:", err.message);
+    });
+
+    // We still send the welcome email, but maybe after verification? 
+    // For now, let's keep it or move it to verification step.
+    /*
     sendRegistrationEmail(normedEmail, firstName).catch(err => {
       console.error("🚨 Background Email Delivery Failed (all retries exhausted):", err.message);
     });
+    */
 
     // Provision default profile
     try {
@@ -128,9 +150,10 @@ router.post("/register", async (req, res) => {
     );
     
     return res.status(201).json({
-      message: "Account created! We are sending a welcome email to your inbox shortly.",
+      message: "Account created! Please verify your email with the 6-digit code sent to your inbox.",
+      requiresVerification: true,
+      email: normedEmail,
       user: existingUser,
-      token
     });
     
   } catch (err) {
@@ -400,6 +423,19 @@ router.post("/verify-otp-login", async (req, res) => {
       where: { id: otpRecord.id },
       data: { verified: true },
     });
+
+    // 4. Sync verification status with Supabase (handles verification on login)
+    try {
+      const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      const supaUser = users.find(u => u.email?.toLowerCase() === normedEmail);
+      
+      if (supaUser && !supaUser.email_confirmed_at) {
+        console.log(`[DEBUG] Confirming user ${normedEmail} in Supabase after OTP verify-login...`);
+        await supabaseAdmin.auth.admin.updateUserById(supaUser.id, { email_confirm: true });
+      }
+    } catch (supaErr) {
+      console.error('⚠️ Supabase confirmation error in verify-otp-login:', supaErr.message);
+    }
 
     // Get user from our DB
     const user = await prisma.user.findUnique({
