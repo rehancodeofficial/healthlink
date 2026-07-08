@@ -955,3 +955,16 @@ model SystemMetric {
 
 // VideoConsultation model - Add:
 //   videoSession    VideoSession?
+
+model EmailOTP {
+  id        Int      @id @default(autoincrement())
+  email     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("EmailOTP")
+}
