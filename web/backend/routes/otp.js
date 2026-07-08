@@ -3,6 +3,7 @@ const express = require('express');
 const prisma = require('../prisma/prismaClient');
 const { generateOTP, getOTPExpiration, isOTPExpired } = require('../lib/otpGenerator');
 const { sendOTPEmail } = require('../lib/emailService');
+const { supabaseAdmin } = require('../lib/supabaseAdmin');
 
 const router = express.Router();
 
@@ -142,6 +143,32 @@ router.post('/verify', async (req, res) => {
       data: { verified: true },
     });
     
+    // 4. If user exists in our DB, check if they are confirmed in Supabase
+    // This handles the "Registration verification" flow
+    try {
+      if (supabaseAdmin) {
+        // Find user in Supabase by email
+        const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+        const supaUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        
+        if (supaUser && !supaUser.email_confirmed_at) {
+          console.log(`[DEBUG] Confirming user ${email} in Supabase after OTP verification...`);
+          const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+            supaUser.id,
+            { email_confirm: true }
+          );
+          
+          if (updateError) {
+            console.error(`❌ Failed to confirm user in Supabase: ${updateError.message}`);
+          } else {
+            console.log(`✅ User ${email} confirmed in Supabase.`);
+          }
+        }
+      }
+    } catch (supaErr) {
+      console.error('⚠️ Supabase confirmation error (non-blocking):', supaErr.message);
+    }
+
     console.log(`OTP verified for ${email}`);
     
     return res.status(200).json({ 
