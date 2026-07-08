@@ -1,0 +1,232 @@
+/* FILE: frontend/src/components/OTPVerification.css */
+
+.otp-verification-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.otp-verification-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 3rem;
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.otp-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-green);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.otp-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.otp-verification-card h2 {
+  text-align: center;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+}
+
+.otp-description {
+  text-align: center;
+  color: var(--text-soft);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.otp-description strong {
+  color: var(--brand-blue);
+  font-weight: 900;
+}
+
+.otp-inputs {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.otp-input {
+  width: 3.5rem;
+  height: 4rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-main);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.otp-input:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
+  background: white;
+  color: black;
+}
+
+.otp-timer {
+  text-align: center;
+  color: var(--text-soft);
+  margin-bottom: 2rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.otp-timer strong {
+  color: var(--brand-orange);
+  font-weight: 900;
+}
+
+.otp-expired {
+  text-align: center;
+  color: #ef4444;
+  margin-bottom: 2rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-verify {
+  width: 100%;
+  padding: 1.25rem;
+  background: var(--brand-green);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+}
+
+.btn-verify:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
+  filter: brightness(1.1);
+}
+
+.btn-verify:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--text-muted);
+}
+
+.otp-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-resend,
+.btn-back {
+  flex: 1;
+  padding: 1rem;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-resend:hover:not(:disabled),
+.btn-back:hover {
+  background: var(--bg-glass);
+  border-color: var(--brand-blue);
+  color: var(--brand-blue);
+  transform: translateY(-1px);
+}
+
+.btn-resend:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.otp-help {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .otp-verification-card {
+    padding: 2rem 1.5rem;
+    border-radius: 2rem;
+  }
+
+  .otp-inputs {
+    gap: 0.5rem;
+  }
+
+  .otp-input {
+    width: 2.75rem;
+    height: 3.5rem;
+    font-size: 1.25rem;
+  }
+
+  .otp-verification-card h2 {
+    font-size: 1.5rem;
+  }
+}
