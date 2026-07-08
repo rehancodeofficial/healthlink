@@ -1,12 +1,7 @@
-// FILE: frontend/src/components/OTPVerification.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../Lib/api";
 import { toast } from "react-toastify";
 import "./OTPVerification.css";
-
-const API_BASE_URL = import.meta.env.DEV
-  ? "https://curevirtual-2-production-ee33.up.railway.app/api"
-  : import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-ee33.up.railway.app/api";
 
 const OTPVerification = ({ email, onVerified, onBack }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -84,7 +79,7 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/otp/verify`, {
+      const response = await api.post("/otp/verify", {
         email,
         otp: otpValue,
       });
@@ -110,7 +105,7 @@ const OTPVerification = ({ email, onVerified, onBack }) => {
     setResending(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/otp/resend`, {
+      const response = await api.post("/otp/resend", {
         email,
       });
 
