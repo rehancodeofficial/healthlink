@@ -6,9 +6,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <SocketProvider>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-  </SocketProvider>
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
 );
