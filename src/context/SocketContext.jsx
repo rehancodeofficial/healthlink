@@ -19,10 +19,11 @@ export const SocketProvider = ({ children }) => {
     const userId = localStorage.getItem("userId");
     const role = localStorage.getItem("role");
     const name = localStorage.getItem("userName") || localStorage.getItem("name") || "User";
-    const token = localStorage.getItem("token"); // JWT token for authentication
+    const token = localStorage.getItem("token");
 
     if (!userId || !role || !token) {
       console.warn("⚠️ No user credentials or token found. Socket connection delayed.");
+      setConnectionState("disconnected");
       return;
     }
 
@@ -31,15 +32,18 @@ export const SocketProvider = ({ children }) => {
     // Initialize socket connection with JWT auth
     const newSocket = io(backendUrl, {
       withCredentials: true,
-      // Removed: transports: ["websocket"] to allow polling fallback
+      autoConnect: false, // Don't connect immediately
       auth: {
-        token: token, // JWT authentication
+        token: token,
       },
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: maxReconnectAttempts,
     });
+
+    // Manually connect
+    newSocket.connect();
 
     // Connection successful
     newSocket.on("connect", () => {
@@ -48,26 +52,43 @@ export const SocketProvider = ({ children }) => {
       setConnectionState("connected");
       reconnectAttempts.current = 0;
 
-      // Register user with the server
-      newSocket.emit("user_online", {
-        userId,
-        role,
-        name,
-      });
+      newSocket.emit("user_online", { userId, role, name });
     });
 
-    // Connection error
+    // Connection error (Handles "Token expired" or "Authentication required")
     newSocket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error.message);
-      setIsConnected(false);
-      setConnectionState("reconnecting");
+      
+      const isAuthError = 
+        error.message === "Token expired" || 
+        error.message === "Authentication required" || 
+        error.message === "Invalid token";
+
+      if (isAuthError) {
+        console.warn("🔒 Auth error detected. Logging out...");
+        
+        // Stop reconnecting
+        newSocket.disconnect();
+        
+        // Clear storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("role");
+        
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes("/login") && !window.location.pathname.includes("/register")) {
+          window.location.href = "/login?reason=session_expired";
+        }
+      } else {
+        setIsConnected(false);
+        setConnectionState("reconnecting");
+      }
     });
 
     // Reconnect attempt
     newSocket.on("reconnect_attempt", (attemptNumber) => {
       console.log(`🔄 Reconnection attempt ${attemptNumber}/${maxReconnectAttempts}`);
       setConnectionState("reconnecting");
-      reconnectAttempts.current = attemptNumber;
     });
 
     // Reconnect successful
@@ -76,13 +97,7 @@ export const SocketProvider = ({ children }) => {
       setIsConnected(true);
       setConnectionState("connected");
       reconnectAttempts.current = 0;
-
-      // Re-register user
-      newSocket.emit("user_online", {
-        userId,
-        role,
-        name,
-      });
+      newSocket.emit("user_online", { userId, role, name });
     });
 
     // Reconnect failed
@@ -96,20 +111,16 @@ export const SocketProvider = ({ children }) => {
     newSocket.on("disconnect", (reason) => {
       console.log("🔌 Socket disconnected:", reason);
       setIsConnected(false);
+      setConnectionState("disconnected");
       if (reason === "io server disconnect") {
-        // Server disconnected us, need to manually reconnect
         newSocket.connect();
       }
-      setConnectionState("disconnected");
     });
 
     setSocket(newSocket);
 
-    // Cleanup on unmount
     return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
+      if (newSocket) newSocket.disconnect();
     };
   }, [backendUrl]);
 
