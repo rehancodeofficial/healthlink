@@ -2,18 +2,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../Lib/api";
-import { supabase } from "../Lib/supabase";
-import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
-  const [identifier, setIdentifier] = useState(""); // Email address
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [loginMode, setLoginMode] = useState("password"); // 'password' or 'otp'
-  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,75 +21,31 @@ export default function Login() {
     setError("");
 
     try {
-      const emailForAuth = identifier.trim().toLowerCase();
+      const emailForAuth = email.trim().toLowerCase();
 
-      if (loginMode === "password") {
-        // Password Login via Supabase
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: emailForAuth,
-          password: password,
-        });
+      // Login via custom backend
+      const res = await api.post("/auth/login", {
+        email: emailForAuth,
+        password: password,
+      });
 
-        if (authError) throw authError;
-
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
-          throw new Error(
-            "Email not verified. Please check your email and verify your account before logging in."
-          );
-        }
-
-        // Sync with backend
-        const res = await api.post("/auth/login-sync", {
-          email: emailForAuth,
-          supabaseId: data.user.id,
-          supabaseAccessToken: data.session.access_token,
-        });
-
-        handleAuthSuccess(res.data, emailForAuth);
-      } else {
-        // OTP Login via Supabase
-        if (!otpSent) {
-          // Send OTP
-          const { error: otpError } = await supabase.auth.signInWithOtp({
-            email: emailForAuth,
-            options: {
-              shouldCreateUser: false,
-            },
-          });
-
-          if (otpError) throw otpError;
-
-          setOtpSent(true);
-          toast.success(`OTP sent to your email!`);
-        } else {
-          // Verify OTP
-          const { data, error: verifyError } = await supabase.auth.verifyOtp({
-            email: emailForAuth,
-            token: otp,
-            type: "email",
-          });
-
-          if (verifyError) throw verifyError;
-
-          if (!data.user) {
-            throw new Error("Invalid OTP. Please try again.");
-          }
-
-          // Sync with backend
-          const res = await api.post("/auth/login-sync", {
-            email: emailForAuth,
-            supabaseId: data.user.id,
-            supabaseAccessToken: data.session.access_token,
-          });
-
-          handleAuthSuccess(res.data, emailForAuth);
-        }
-      }
+      handleAuthSuccess(res.data, emailForAuth);
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.data?.error || err.message || "Login failed. Please try again.");
-      toast.error(err.response?.data?.error || err.message || "Login failed. Please try again.");
+      
+      const responseData = err.response?.data;
+      const errorMessage = responseData?.error || err.message || "Login failed. Please try again.";
+      
+      // Handle unverified user
+      if (err.response?.status === 403 && responseData?.unverified) {
+        toast.info("Account not verified. Redirecting to verification page...");
+        setTimeout(() => {
+          navigate("/verify-otp", { state: { email: responseData.email || email } });
+        }, 2000);
+      } else {
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +53,7 @@ export default function Login() {
 
   const handleAuthSuccess = (data, userEmail) => {
     const { token } = data;
-    const user = data.user || data;
+    const user = data.user;
 
     localStorage.setItem("token", token);
     localStorage.setItem("userId", user.id);
@@ -206,15 +158,13 @@ export default function Login() {
             </div>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/5 text-[var(--brand-green)] text-[9px] font-black uppercase tracking-[0.2em] mb-4">
-              <FiLock /> Secure
+              <FiLock /> Secure Auth
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase mb-2">
               Login
             </h1>
             <p className="text-[var(--text-soft)] text-sm font-bold opacity-70">
-              {loginMode === "password"
-                ? "Enter your credentials to access your dashboard."
-                : "Enter your email to receive a login OTP."}
+              Enter your credentials to access your dashboard.
             </p>
           </div>
 
@@ -228,74 +178,50 @@ export default function Login() {
                   <FiMail />
                 </div>
                 <input
-                  type="text"
-                  value={identifier}
-                  disabled={otpSent}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner disabled:opacity-50"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-blue)] outline-none transition-all shadow-inner"
                   placeholder="Email"
                   required
                 />
               </div>
             </div>
 
-            {loginMode === "password" ? (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                    Password
-                  </label>
-                  <Link
-                    to="/forgot-password"
-                    title="Recover Password"
-                    className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative group">
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
-                    <FiLock />
-                  </div>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                    placeholder="••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors z-10"
-                  >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </button>
-                </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  title="Recover Password"
+                  className="text-[9px] font-black text-[var(--brand-orange)] uppercase tracking-widest hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
-            ) : (
-              otpSent && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand-green)] ml-1">
-                    Enter OTP
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
-                      <FiSmartphone />
-                    </div>
-                    <input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
-                      placeholder="123456"
-                      required
-                    />
-                  </div>
+              <div className="relative group">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--brand-green)] transition-all">
+                  <FiLock />
                 </div>
-              )
-            )}
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl py-4 pl-14 pr-14 text-sm font-bold focus:border-[var(--brand-green)] outline-none transition-all shadow-inner"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors z-10"
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+            </div>
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 animate-shake">
@@ -315,25 +241,10 @@ export default function Login() {
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  {loginMode === "otp" && !otpSent ? "Send OTP" : "Submit"}
+                  Login
                   <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMode(loginMode === "password" ? "otp" : "password");
-                setOtpSent(false);
-                setError("");
-                setOtp("");
-              }}
-              className="w-full text-[10px] font-black text-[var(--brand-blue)] uppercase tracking-widest hover:underline text-center"
-            >
-              {loginMode === "password"
-                ? "Login with OTP instead?"
-                : "Login with Password instead?"}
             </button>
           </form>
 
