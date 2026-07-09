@@ -119,7 +119,6 @@ router.post('/verify', async (req, res) => {
     const otpRecord = await prisma.emailOTP.findFirst({
       where: {
         email,
-        otp,
         verified: false,
       },
       orderBy: {
@@ -128,6 +127,21 @@ router.post('/verify', async (req, res) => {
     });
     
     if (!otpRecord) {
+      return res.status(400).json({ error: 'No OTP found for this email' });
+    }
+
+    // Check max attempts
+    if (otpRecord.attempts >= 5) {
+      return res.status(400).json({ error: 'Too many failed attempts. Please request a new OTP.' });
+    }
+    
+    // Check if OTP matches
+    if (otpRecord.otp !== otp) {
+      // Increment attempts
+      await prisma.emailOTP.update({
+        where: { id: otpRecord.id },
+        data: { attempts: { increment: 1 } }
+      });
       return res.status(400).json({ error: 'Invalid OTP' });
     }
     
@@ -141,11 +155,17 @@ router.post('/verify', async (req, res) => {
       where: { id: otpRecord.id },
       data: { verified: true },
     });
+
+    // MARK USER AS VERIFIED
+    await prisma.user.updateMany({
+      where: { email: email },
+      data: { isVerified: true }
+    });
     
-    console.log(`OTP verified for ${email}`);
+    console.log(`OTP verified and user marked as verified for ${email}`);
     
     return res.status(200).json({ 
-      message: 'Email verified successfully',
+      message: 'Email verified successfully. You can now log in.',
       verified: true,
     });
     
