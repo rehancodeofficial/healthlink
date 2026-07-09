@@ -21,15 +21,9 @@ module.exports = (socket, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Validate token expiry
-    if (decoded.exp && decoded.exp < Date.now() / 1000) {
-      console.warn(`⚠️ Expired token for socket: ${socket.id}`);
-      return next(new Error("Token expired"));
-    }
-
-    // Attach user info to socket for authorization checks
-    socket.userId = decoded.userId;
+    
+    // Attach user info to socket (JWT signs as { id, role, type })
+    socket.userId = decoded.id;
     socket.userRole = decoded.role;
     socket.userEmail = decoded.email || null;
 
@@ -38,6 +32,10 @@ module.exports = (socket, next) => {
     );
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      console.warn(`⚠️ Token expired for socket: ${socket.id}`);
+      return next(new Error("Token expired"));
+    }
     console.error(`❌ Socket authentication failed:`, err.message);
     next(new Error("Invalid token"));
   }
