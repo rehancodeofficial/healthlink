@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiShield } from "react-icons/fi";
 import { FaArrowRight, FaStethoscope } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../context/ThemeContext";
@@ -26,6 +26,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { theme } = useTheme();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -63,8 +64,12 @@ export default function Register() {
 
       console.log("✅ Registration successful:", res.data);
 
-      toast.success("Account created! Please check your email to confirm your account before logging in.");
-      // No redirect — user must verify email first before they can log in
+      toast.success("OTP sent to your email!");
+      
+      // Redirect to Verify OTP page
+      setTimeout(() => {
+        navigate("/verify-otp", { state: { email: form.email.trim().toLowerCase() } });
+      }, 1500);
     } catch (err) {
       console.error("❌ Registration error details:", {
         message: err.message,
