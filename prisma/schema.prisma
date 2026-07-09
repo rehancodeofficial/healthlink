@@ -141,7 +141,8 @@ model User {
   lastName    String
   email       String   @unique
   phone       String?
-  password    String?  // Made optional - Supabase manages passwords
+  password    String?  // Hashed via bcrypt for custom auth
+  isVerified  Boolean  @default(false) // Must verify email via OTP before login
   role        UserRole @default(PATIENT)
   dateOfBirth DateTime
   gender      Gender
@@ -186,7 +187,22 @@ model Organization {
   @@map("Organization")
 }
 
+// =========================================================
+// EMAIL OTP - Custom verification system (no Supabase)
+// =========================================================
 
+model EmailOTP {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("EmailOTP")
+}
 
 model SupportAgent {
   id        Int      @id @default(autoincrement())
