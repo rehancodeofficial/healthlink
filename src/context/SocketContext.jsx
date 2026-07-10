@@ -20,8 +20,9 @@ export const SocketProvider = ({ children }) => {
     const role = localStorage.getItem("role");
     const name = localStorage.getItem("userName") || localStorage.getItem("name") || "User";
     const token = localStorage.getItem("token");
+    const isTokenValid = token && token !== "undefined" && token !== "null";
 
-    if (!userId || !role || !token) {
+    if (!userId || !role || !isTokenValid) {
       console.warn("⚠️ No user credentials or token found. Socket connection delayed.");
       setConnectionState("disconnected");
       return;
@@ -33,6 +34,7 @@ export const SocketProvider = ({ children }) => {
     const newSocket = io(backendUrl, {
       withCredentials: true,
       autoConnect: false, // Don't connect immediately
+      transports: ["websocket"], // 🚀 Force WebSockets only
       auth: {
         token: token,
       },
