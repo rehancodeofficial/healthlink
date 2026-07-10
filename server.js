@@ -35,6 +35,9 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
+  transports: ["websocket"], // 🚀 Force WebSockets only
+  pingTimeout: 60000,        // Increase timeout for better stability
+  pingInterval: 25000,
 });
 
 // Socket Authentication Middleware
