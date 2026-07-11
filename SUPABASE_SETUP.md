@@ -26,8 +26,8 @@ VITE_SUPABASE_ANON_KEY="your-anon-key"
    - **Enable Email Provider**: Ensure this is toggled ON.
    - **Confirm Email**: If you are in development, you might want to disable "Confirm Email" to allow immediate login after registration without checking a real Messages.
 2. **Anonymous Sign-ins**: Go to **Authentication > Settings**. Ensure "Allow anonymous sign-ins" is **Disabled** (which is correct), but if you see errors about it, it usually means the standard Email provider is NOT enabled or properly configured.
-3. **Site URL**: Set this to `http://localhost:5173`.
-4. **Redirect URLs**: Add `http://localhost:5173/**`.
+3. **Site URL**: Set this to `https://curevirtual-2.vercel.app`.
+4. **Redirect URLs**: Add `https://curevirtual-2.vercel.app/**`.
 
 ## 3. Database Schema
 
