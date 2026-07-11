@@ -21,19 +21,39 @@ const registerLimiter = rateLimit({
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// ✅ ENV Validation — logged once at startup so Railway logs show exactly what's missing
+console.log("[AUTH] ENV CHECK:", {
+  JWT_SECRET: JWT_SECRET ? "✅ SET" : "❌ MISSING",
+  DATABASE_URL: process.env.DATABASE_URL ? "✅ SET" : "❌ MISSING",
+  DIRECT_URL: process.env.DIRECT_URL ? "✅ SET" : "⚠️  NOT SET (may cause Prisma issues)",
+  EMAIL_USER: process.env.EMAIL_USER || process.env.GMAIL_USER ? "✅ SET" : "❌ MISSING",
+  EMAIL_PASS: process.env.EMAIL_PASS || process.env.GMAIL_PASS ? "✅ SET" : "❌ MISSING",
+  EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || "gmail (default)",
+  NODE_ENV: process.env.NODE_ENV || "not set",
+});
+
 // -------------------------
 // Register — sends confirmation email via Supabase signUp
 // -------------------------
 router.post("/register", async (req, res) => {
+  // 🔍 Step 1: Log all incoming data so Railway logs show exactly what arrived
+  console.log("[REGISTER] Incoming request body:", JSON.stringify(req.body, null, 2));
+
   try {
-    console.log("[DEBUG] Registration request body:", req.body);
-    
     let { email, password, firstName, lastName, phone, role, dateOfBirth, gender, specialization } = req.body;
     
     // 1. Validate Required Fields
-    if (!email || !password || !firstName) {
-      console.warn("⚠️ Registration failed: Missing required fields (email, password, or firstName).");
-      return res.status(400).json({ error: "All fields are required" });
+    if (!email) {
+      console.warn("[REGISTER] ⚠️ Missing email");
+      return res.status(400).json({ error: "email is required" });
+    }
+    if (!password) {
+      console.warn("[REGISTER] ⚠️ Missing password");
+      return res.status(400).json({ error: "password is required" });
+    }
+    if (!firstName) {
+      console.warn("[REGISTER] ⚠️ Missing firstName");
+      return res.status(400).json({ error: "firstName is required" });
     }
 
     const normedEmail = String(email).trim().toLowerCase();
@@ -41,32 +61,48 @@ router.post("/register", async (req, res) => {
     // 2. Validate Email Format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normedEmail)) {
-      console.warn(`⚠️ Registration failed: Invalid email format for: ${normedEmail}`);
+      console.warn(`[REGISTER] ⚠️ Invalid email format for: ${normedEmail}`);
       return res.status(400).json({ error: "Please provide a valid email address" });
     }
 
     // 3. Validate Password Length
     if (password.length < 6) {
-      console.warn(`⚠️ Registration failed: Password too short for: ${normedEmail}`);
+      console.warn(`[REGISTER] ⚠️ Password too short for: ${normedEmail}`);
       return res.status(400).json({ error: "Password must be at least 6 characters long" });
     }
 
-    console.log(`[DEBUG] Finalizing /register validation for: ${normedEmail}`);
-    
-    // Check if user already exists
-    const existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
-    if (existingEmail) {
-      console.warn(`⚠️ Registration failed: User already exists with email: ${normedEmail}`);
-      return res.status(400).json({ error: "User already exists" });
+    // ✅ Validate JWT_SECRET before proceeding
+    if (!JWT_SECRET) {
+      console.error("[REGISTER] ❌ JWT_SECRET is not set in environment!");
+      return res.status(500).json({ error: "Server configuration error: JWT_SECRET missing" });
     }
 
+    console.log(`[REGISTER] Finalizing validation for: ${normedEmail}`);
+    
+    // Check if user already exists
+    let existingEmail;
+    try {
+      existingEmail = await prisma.user.findUnique({ where: { email: normedEmail } });
+    } catch (dbErr) {
+      console.error("[REGISTER] ❌ DB connection error on findUnique:", dbErr.message);
+      return res.status(500).json({
+        error: "Database connection failed",
+        detail: dbErr.message,
+        code: dbErr.code
+      });
+    }
+
+    if (existingEmail) {
+      console.warn(`[REGISTER] ⚠️ User already exists with email: ${normedEmail}`);
+      return res.status(400).json({ error: "User already exists with this email" });
+    }
 
     // 1. SMTP Health Check (Non-blocking)
-    // We check it for logging, but we no longer block registration with a 503.
     verifySMTPConnection().then(isHealthy => {
-      if (!isHealthy) console.warn("⚠️ SMTP Health Check failed during registration. Email might be delayed.");
+      if (!isHealthy) console.warn("[REGISTER] ⚠️ SMTP Health Check failed. Email might be delayed.");
     });
 
+    console.log("[REGISTER] Creating user in Supabase...");
     const { data: supaData, error: supaError } = await supabaseAdmin.auth.admin.createUser({
       email: normedEmail,
       password: password,
@@ -74,91 +110,89 @@ router.post("/register", async (req, res) => {
       user_metadata: { firstName, lastName, role, dateOfBirth, gender, specialization }
     });
     
-    console.log("[DEBUG] Supabase response:", { supaData, supaError });
-    
     if (supaError) {
-      console.error("Supabase signup error:", supaError.message);
+      console.error("[REGISTER] ❌ Supabase signup error:", supaError.message);
       return res.status(400).json({ error: supaError.message });
     }
     
     if (!supaData?.user?.id) {
-      return res.status(400).json({ error: "Failed to create user — please try again." });
+      console.error("[REGISTER] ❌ No user ID returned from Supabase");
+      return res.status(400).json({ error: "Failed to create user in Supabase" });
     }
+
+    console.log("[REGISTER] ✅ Supabase user created:", supaData.user.id);
     
     // Create or update in Prisma
-    const existingUser = await prisma.user.upsert({
-      where: { id: supaData.user.id },
-      update: {
-        firstName: firstName || "First",
-        lastName: lastName || "Last",
-        phone: phone || null,
-        role: role || "PATIENT",
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-        gender: gender || "PREFER_NOT_TO_SAY"
-      },
-      create: {
-        id: supaData.user.id,
-        firstName: firstName || "First",
-        lastName: lastName || "Last",
-        email: normedEmail,
-        phone: phone || null,
-        password: null,
-        role: role || "PATIENT",
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-        gender: gender || "PREFER_NOT_TO_SAY"
-      }
-    });
+    let user;
+    try {
+      user = await prisma.user.upsert({
+        where: { id: supaData.user.id },
+        update: {
+          firstName: firstName || "First",
+          lastName: lastName || "Last",
+          phone: phone || null,
+          role: role || "PATIENT",
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+          gender: gender || "PREFER_NOT_TO_SAY"
+        },
+        create: {
+          id: supaData.user.id,
+          firstName: firstName || "First",
+          lastName: lastName || "Last",
+          email: normedEmail,
+          phone: phone || null,
+          password: null,
+          role: role || "PATIENT",
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+          gender: gender || "PREFER_NOT_TO_SAY"
+        }
+      });
+      console.log("[REGISTER] ✅ Prisma user synchronized:", user.id);
+    } catch (prismaErr) {
+      console.error("[REGISTER] ❌ Prisma sync error:", prismaErr.message);
+      return res.status(500).json({ error: "Failed to sync user to database", detail: prismaErr.message });
+    }
     
     // 3. Generate and Send OTP for registration verification
     const otp = generateOTP();
     const expiresAt = getOTPExpiration();
 
-    // Store OTP in database
-    await prisma.emailOTP.create({
-      data: {
-        email: normedEmail,
-        otp,
-        expiresAt,
-        verified: false,
-      },
-    });
+    try {
+      await prisma.emailOTP.create({
+        data: { email: normedEmail, otp, expiresAt, verified: false }
+      });
+      console.log("[REGISTER] ✅ OTP record created");
+    } catch (otpErr) {
+      console.error("[REGISTER] ❌ Failed to create OTP record:", otpErr.message);
+    }
 
     // Send OTP email
     sendOTPEmail(normedEmail, otp).catch(err => {
-      console.error("🚨 Registration OTP Delivery Failed:", err.message);
+      console.error("[REGISTER] ❌ Registration OTP Delivery Failed:", err.message);
     });
-
-    // We still send the welcome email, but maybe after verification? 
-    // For now, let's keep it or move it to verification step.
-    /*
-    sendRegistrationEmail(normedEmail, firstName).catch(err => {
-      console.error("🚨 Background Email Delivery Failed (all retries exhausted):", err.message);
-    });
-    */
 
     // Provision default profile
     try {
-      await ensureDefaultProfile(existingUser, specialization);
+      await ensureDefaultProfile(user, specialization);
+      console.log("[REGISTER] ✅ profile provisioned for specialization:", specialization || "none");
     } catch (e) {
-      console.error("Failed to provision profile:", e);
+      console.error("[REGISTER] Failed to provision profile:", e.message);
     }
-    
-    const token = jwt.sign(
-      { id: existingUser.id, role: existingUser.role, type: "USER" },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
     
     return res.status(201).json({
       message: "Account created! Please verify your email with the 6-digit code sent to your inbox.",
       requiresVerification: true,
       email: normedEmail,
-      user: existingUser,
+      user: user,
     });
     
   } catch (err) {
-    console.error("Register error:", err);
-    return res.status(500).json({ error: err.message || "An unexpected error occurred during registration" });
+    console.error("[REGISTER] ❌ Unhandled error:", err.message);
+    console.error("[REGISTER] Stack:", err.stack);
+    return res.status(500).json({ 
+      error: "An unexpected error occurred during registration",
+      detail: err.message
+    });
   }
 });
 
