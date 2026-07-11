@@ -12,6 +12,22 @@ if (SENDGRID_API_KEY && EMAIL_PROVIDER === "sendgrid") {
   sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
+// Resolve email credentials — check both naming conventions
+const RESOLVED_EMAIL_USER = process.env.EMAIL_USER || process.env.GMAIL_USER;
+const RESOLVED_EMAIL_PASS = process.env.EMAIL_PASS || process.env.GMAIL_PASS;
+
+console.log("[EMAIL-SERVICE] Config:", {
+  provider: EMAIL_PROVIDER,
+  emailUser: RESOLVED_EMAIL_USER ? `✅ ${RESOLVED_EMAIL_USER}` : "❌ MISSING (set EMAIL_USER or GMAIL_USER)",
+  emailPass: RESOLVED_EMAIL_PASS ? "✅ SET" : "❌ MISSING (set EMAIL_PASS or GMAIL_PASS)",
+  fromEmail: FROM_EMAIL,
+});
+
+// Configure SendGrid
+if (SENDGRID_API_KEY && EMAIL_PROVIDER === "sendgrid") {
+  sgMail.setApiKey(SENDGRID_API_KEY);
+}
+
 // Configure Gmail/SMTP transporter with explicit robust settings
 let transporter = null;
 if (EMAIL_PROVIDER === "gmail") {
@@ -19,29 +35,35 @@ if (EMAIL_PROVIDER === "gmail") {
   const port = parseInt(process.env.EMAIL_PORT || "587");
   const secure = process.env.EMAIL_SECURE === "true"; // False for 587
 
-  transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure, 
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    // Enhanced settings for Gmail compatibility and timeout resilience
-    tls: {
-      ciphers: 'SSLv3',
-      rejectUnauthorized: false
-    },
-    pool: true, // Use connection pooling
-    maxConnections: 5,
-    maxMessages: 100,
-    connectionTimeout: 20000, // 20s
-    greetingTimeout: 20000, 
-    socketTimeout: 30000, // 30s
-  });
-  console.log(
-    `📧 Gmail SMTP Transporter initialized (Port: ${port}, Secure: ${secure}). Host: ${host}`,
-  );
+  if (!RESOLVED_EMAIL_USER || !RESOLVED_EMAIL_PASS) {
+    console.error(
+      "[EMAIL-SERVICE] ❌ Gmail transporter NOT created — EMAIL_USER/GMAIL_USER or EMAIL_PASS/GMAIL_PASS is missing in Railway env vars!"
+    );
+  } else {
+    transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        user: RESOLVED_EMAIL_USER,
+        pass: RESOLVED_EMAIL_PASS,
+      },
+      // Enhanced settings for Gmail compatibility and timeout resilience
+      tls: {
+        ciphers: "SSLv3",
+        rejectUnauthorized: false,
+      },
+      pool: true, // Use connection pooling
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 20000, // 20s
+      greetingTimeout: 20000,
+      socketTimeout: 30000, // 30s
+    });
+    console.log(
+      `📧 Gmail SMTP Transporter initialized (Port: ${port}, Secure: ${secure}). Host: ${host}, User: ${RESOLVED_EMAIL_USER}`
+    );
+  }
 }
 
 /**
@@ -218,7 +240,7 @@ async function sendOTPEmail(email, otp) {
   console.log(`📧 Dispatching OTP email to ${email}...`);
   
   const mailOptions = {
-    from: `"CureVirtual" <${FROM_EMAIL}>`,
+    from: `"CureVirtual" <${RESOLVED_EMAIL_USER || FROM_EMAIL}>`,
     to: email,
     subject: "Email Verification - CureVirtual",
     text: `Your verification code is: ${otp}\n\nThis code will expire in 5 minutes.`,
