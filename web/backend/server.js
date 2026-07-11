@@ -60,15 +60,18 @@ require("./socket/socketHandler.cjs")(io);
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl requests)
+      // Allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
+      // Allow any *.vercel.app subdomain (covers preview deployments)
+      if (origin.endsWith(".vercel.app")) return callback(null, true);
+      if (origin.endsWith(".up.railway.app")) return callback(null, true);
       if (
         allowedOrigins.indexOf(origin) !== -1 ||
-        allowedOrigins.some((o) => origin.startsWith(o))
+        allowedOrigins.some((o) => o && origin.startsWith(o))
       ) {
         callback(null, true);
       } else {
-        console.warn(`CORS blocked for origin: ${origin}`);
+        console.warn(`[CORS] Blocked origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -214,6 +217,24 @@ app.get("/api/test", (req, res) => {
 
 app.get("/api/doctor/test", (req, res) => {
   res.json({ message: "Doctor routes are working!" });
+});
+
+// ✅ Env Debug Endpoint — helps diagnose production issues without reading Railway logs
+// Safe: only shows SET/MISSING, never actual values
+app.get("/api/debug/env", (_req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || "not set",
+    DATABASE_URL: process.env.DATABASE_URL ? "✅ SET" : "❌ MISSING",
+    DIRECT_URL: process.env.DIRECT_URL ? "✅ SET" : "⚠️ NOT SET",
+    JWT_SECRET: process.env.JWT_SECRET ? "✅ SET" : "❌ MISSING",
+    EMAIL_USER: process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : "❌ MISSING",
+    GMAIL_USER: process.env.GMAIL_USER ? `✅ ${process.env.GMAIL_USER}` : "not set",
+    EMAIL_PASS: process.env.EMAIL_PASS ? "✅ SET" : "❌ MISSING",
+    GMAIL_PASS: process.env.GMAIL_PASS ? "✅ SET" : "not set",
+    EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || "gmail (default)",
+    FRONTEND_URL: process.env.FRONTEND_URL || "not set",
+    PORT: process.env.PORT || "5001",
+  });
 });
 
 // ✅ Global Error Handler (Must be last)
