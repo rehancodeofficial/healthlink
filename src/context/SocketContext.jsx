@@ -11,8 +11,11 @@ export const SocketProvider = ({ children }) => {
   const maxReconnectAttempts = 5;
 
   // Derive socket URL from API base URL (strip /api suffix)
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://curevirtual-2-production-ee33.up.railway.app/api";
   const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
+
 
   useEffect(() => {
     // Get user info from localStorage
