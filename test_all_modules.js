@@ -2,7 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 
 // Configuration
-const BASE_URL = process.env.BACKEND_URL || 'http://localhost:5001';
+const BASE_URL = process.env.BACKEND_URL || 'https://curevirtual-2-production-ee33.up.railway.app';
 const API_BASE = `${BASE_URL}/api`;
 
 // Console colors
