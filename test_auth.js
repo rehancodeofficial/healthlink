@@ -9,7 +9,7 @@ const axios = require('axios');
 const fs = require('fs');
 
 // Configuration
-const BASE_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const BASE_URL = process.env.BACKEND_URL || 'https://curevirtual-2.vercel.app';
 const API_BASE = `${BASE_URL}/api`;
 
 // Test results storage
