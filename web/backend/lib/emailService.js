@@ -219,8 +219,9 @@ async function sendRegistrationEmail(email, firstName) {
         <p>Thank you for joining CureVirtual! Your healthcare journey starts here.</p>
         <p>Your account has been successfully created and confirmed. You can now log in to your dashboard.</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.APP_BASE_URL}/login" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log In Now</a>
+          <a href="${process.env.APP_BASE_URL || process.env.FRONTEND_URL || 'https://curevirtual-2.vercel.app'}/login" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log In Now</a>
         </div>
+
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
         <p style="color: #9CA3AF; font-size: 12px; text-align: center;">CureVirtual - Your Health, Our Priority</p>
       </div>
