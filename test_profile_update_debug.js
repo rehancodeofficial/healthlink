@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://curevirtual-2.vercel.app/api';
 const EMAIL = 'rehan.dev1514@gmail.com';
 const PASSWORD = '123123';
 
