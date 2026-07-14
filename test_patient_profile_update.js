@@ -5,7 +5,7 @@
 
 const axios = require("axios");
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://curevirtual-2-production-ee33.up.railway.app/api";
 const TEST_EMAIL = "rehan.dev1514@gmail.com";
 const TEST_PASSWORD = "123123";
 
