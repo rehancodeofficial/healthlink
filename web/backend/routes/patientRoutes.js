@@ -768,7 +768,7 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
     if (!PAYSTACK_SECRET_KEY)
       return res.status(500).json({ error: "PAYSTACK_SECRET_KEY not configured" });
 
-    const origin = req.headers.origin || req.headers.referer || "https://cure-virtual-2.vercel.app";
+    const origin = req.headers.origin || req.headers.referer || "https://curevirtual-2.vercel.app";
     const reference = `cv_sub_${user.id}_${Date.now()}`;
     const callback_url = process.env.PAYSTACK_CALLBACK_URL || `${origin}/subscription`;
 
@@ -890,10 +890,10 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
       customer_email: user.email,
       success_url:
         process.env.STRIPE_SUCCESS_URL ||
-        `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        `${process.env.APP_BASE_URL || "https://curevirtual-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         process.env.STRIPE_CANCEL_URL ||
-        `${process.env.APP_BASE_URL || "https://cure-virtual-2.vercel.app"}/subscription?status=cancel`,
+        `${process.env.APP_BASE_URL || "https://curevirtual-2.vercel.app"}/subscription?status=cancel`,
       metadata: { userId: user.id },
     });
 
