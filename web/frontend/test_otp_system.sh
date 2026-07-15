@@ -3,7 +3,7 @@
 # OTP System Test Script
 # This script tests the OTP email verification system
 
-API_URL="http://localhost:5001/api"
+API_URL="https://curevirtual-2-production-ee33.up.railway.app/api"
 TEST_EMAIL="test-$(date +%s)@example.com"
 
 echo "🧪 Testing OTP Email Verification System"
