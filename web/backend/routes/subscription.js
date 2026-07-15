@@ -524,7 +524,7 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
     const origin =
       req.headers.origin ||
       req.headers.referer ||
-      "https://cure-virtual-2.vercel.app";
+      "https://curevirtual-2.vercel.app";
     const roleSlug =
       user.role.toLowerCase() === "pharmacy"
         ? "pharmacist"
