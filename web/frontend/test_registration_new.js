@@ -14,7 +14,7 @@ async function testRegistration() {
     };
 
     console.log('Registering user:', user);
-    const response = await axios.post('http://localhost:5002/api/auth/register', user);
+    const response = await axios.post('https://curevirtual-2.vercel.app/api/auth/register', user);
     console.log('Registration Response:', response.status, response.data);
 
     if (response.data.user.firstName === 'Test' && response.data.user.lastName === 'User') {
@@ -37,7 +37,7 @@ async function testRegistration() {
     };
 
     console.log('Registering doctor:', doctor);
-    const docResponse = await axios.post('http://localhost:5002/api/auth/register', doctor);
+    const docResponse = await axios.post('https://curevirtual-2.vercel.app/api/auth/register', doctor);
     console.log('Doctor Registration Response:', docResponse.status, docResponse.data);
     
     // We need to verify if profile was created. The register response might not return the profile deep details immediately
