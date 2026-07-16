@@ -3,7 +3,7 @@
 # RBAC Testing Script using curl
 # Tests authentication enforcement and role-based access control
 
-BASE_URL="http://localhost:3001"
+BASE_URL="https://curevirtual-2.vercel.app"
 API_BASE="$BASE_URL/api"
 
 # Colors for output
