@@ -7,7 +7,7 @@ const axios = require("axios");
 async function testDirectUpdate() {
   try {
     // Login first
-    const loginRes = await axios.post("http://localhost:5001/api/auth/login", {
+    const loginRes = await axios.post("https://curevirtual-2-production-ee33.up.railway.app/api/auth/login", {
       email: "rehan.dev1514@gmail.com",
       password: "123123",
     });
@@ -16,7 +16,7 @@ async function testDirectUpdate() {
     console.log("✅ Logged in, token:", token.substring(0, 20) + "...");
 
     // Get profile to get userId
-    const profileRes = await axios.get("http://localhost:5001/api/patient/profile", {
+    const profileRes = await axios.get("https://curevirtual-2-production-ee33.up.railway.app/api/patient/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -25,7 +25,7 @@ async function testDirectUpdate() {
 
     // Try update
     const updateRes = await axios.put(
-      "http://localhost:5001/api/patient/profile",
+      "https://curevirtual-2-production-ee33.up.railway.app/api/patient/profile",
       {
         userId: userId,
         dateOfBirth: "1995-05-15",
