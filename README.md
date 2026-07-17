@@ -181,7 +181,7 @@ Distributed under the ISC License. See `LICENSE` for more information.
 
 ## Contact
 
-Project Link: [https://github.com/rehan/curevirtual](https://github.com/rehan/curevirtual)
+Project Link: [https://github.com/rehancode1514-pixel/curevirtual-2](https://github.com/rehancode1514-pixel/curevirtual-2)
 
 ---
 
