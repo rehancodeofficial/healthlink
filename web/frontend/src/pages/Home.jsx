@@ -15,10 +15,7 @@ import {
   FaSun,
   FaMoon,
   FaBars,
-  FaTimes,
-  FaUserCheck,
-  FaActivity,
-  FaFilePrescription
+  FaTimes
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
