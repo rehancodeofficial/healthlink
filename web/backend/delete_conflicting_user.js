@@ -1,19 +1,21 @@
-const prisma = require('./prisma/prismaClient');
+const prisma = require("./prisma/prismaClient");
 
 async function main() {
-  console.log('Searching for User with email support@curevirtual.com...');
+  console.log("Searching for User with email support@HealthBridge.com...");
   const user = await prisma.user.findUnique({
-    where: { email: 'support@curevirtual.com' },
+    where: { email: "support@HealthBridge.com" },
   });
 
   if (user) {
-    console.log(`Found conflicting User (id: ${user.id}, role: ${user.role}). Deleting...`);
+    console.log(
+      `Found conflicting User (id: ${user.id}, role: ${user.role}). Deleting...`,
+    );
     await prisma.user.delete({
-      where: { email: 'support@curevirtual.com' },
+      where: { email: "support@HealthBridge.com" },
     });
-    console.log('Deleted successfully.');
+    console.log("Deleted successfully.");
   } else {
-    console.log('No User found with this email.');
+    console.log("No User found with this email.");
   }
 }
 

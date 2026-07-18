@@ -1,27 +1,27 @@
-const prisma = require('./prisma/prismaClient');
+const prisma = require("./prisma/prismaClient");
 
 async function main() {
-  console.log('Seeding doctors...');
+  console.log("Seeding doctors...");
 
   const doctorData = [
     {
-      email: 'dr.john@curevirtual.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      specialization: 'Cardiologist',
-      qualifications: 'MD, FACC',
-      license: 'LIC12345',
-      fee: 150.0
+      email: "dr.john@HealthBridge.com",
+      firstName: "John",
+      lastName: "Doe",
+      specialization: "Cardiologist",
+      qualifications: "MD, FACC",
+      license: "LIC12345",
+      fee: 150.0,
     },
     {
-      email: 'dr.jane@curevirtual.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      specialization: 'Neurologist',
-      qualifications: 'MD, PhD',
-      license: 'LIC67890',
-      fee: 200.0
-    }
+      email: "dr.jane@HealthBridge.com",
+      firstName: "Jane",
+      lastName: "Smith",
+      specialization: "Neurologist",
+      qualifications: "MD, PhD",
+      license: "LIC67890",
+      fee: 200.0,
+    },
   ];
 
   for (const data of doctorData) {
@@ -32,10 +32,10 @@ async function main() {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        password: 'hashedpassword', // In production, use bcrypt
-        role: 'DOCTOR',
-        gender: 'MALE',
-        dateOfBirth: new Date('1980-01-01'),
+        password: "hashedpassword", // In production, use bcrypt
+        role: "DOCTOR",
+        gender: "MALE",
+        dateOfBirth: new Date("1980-01-01"),
       },
     });
 
@@ -60,15 +60,15 @@ async function main() {
         data: {
           doctorId: doctor.id,
           dayOfWeek: day,
-          startTime: '09:00',
-          endTime: '17:00',
+          startTime: "09:00",
+          endTime: "17:00",
           isActive: true,
-        }
+        },
       });
     }
   }
 
-  console.log('Seeding completed successfully!');
+  console.log("Seeding completed successfully!");
 }
 
 main()

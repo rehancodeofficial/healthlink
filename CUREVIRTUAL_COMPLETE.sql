@@ -1,5 +1,5 @@
 -- ============================================================
--- CUREVIRTUAL - COMPLETE SUPABASE SQL SETUP SCRIPT
+-- HealthBridge - COMPLETE SUPABASE SQL SETUP SCRIPT
 -- Run this ONCE in your Supabase SQL Editor
 -- Project: vjplxrhaiyxqkkvjwuvy
 -- ============================================================
@@ -401,7 +401,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Default System Settings (if not already inserted)
 INSERT INTO "SystemSetting" (id, "systemName", "themeColor", "createdAt", "updatedAt")
-VALUES (1, 'CureVirtual', '#4F46E5', NOW(), NOW())
+VALUES (1, 'HealthBridge', '#4F46E5', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 

@@ -16,9 +16,9 @@ export default function PatientSendMessage() {
   const role = "PATIENT";
   const userId = localStorage.getItem("userId") || "";
   const userName =
-    localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
-
-
+    localStorage.getItem("userName") ||
+    localStorage.getItem("name") ||
+    "Patient";
 
   // Load doctors for dropdown
   useEffect(() => {
@@ -30,9 +30,11 @@ export default function PatientSendMessage() {
         setDoctors(
           list.map((d) => ({
             id: d.user?.id || d.id, // fallback
-            name: d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : (d.name || "Unnamed Doctor"),
+            name: d.user
+              ? `${d.user.firstName} ${d.user.lastName}`.trim()
+              : d.name || "Unnamed Doctor",
             email: d.user?.email || d.email || "",
-          }))
+          })),
         );
       } catch (err) {
         console.error("Failed to fetch doctors:", err);
@@ -55,8 +57,8 @@ export default function PatientSendMessage() {
     setSending(true);
     try {
       await api.post("/patient/messages/send", {
-        senderId: userId,     // patient userId
-        receiverId,           // doctor userId
+        senderId: userId, // patient userId
+        receiverId, // doctor userId
         content,
       });
       setSuccess("Message sent successfully!");
@@ -77,13 +79,17 @@ export default function PatientSendMessage() {
         <Topbar userName={userName} />
 
         <div className="p-6">
-                          <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
-          <h1 className="text-2xl font-bold mb-6 text-[#FFFFFF]">Send Message</h1>
+          <img
+            src="/images/logo/Asset3.png"
+            alt="HealthBridge"
+            style={{ width: 120, height: "auto" }}
+            onError={(e) => {
+              e.currentTarget.src = PLACEHOLDER_LOGO;
+            }} // fallback if missing
+          />
+          <h1 className="text-2xl font-bold mb-6 text-[#FFFFFF]">
+            Send Message
+          </h1>
 
           <form
             onSubmit={handleSend}

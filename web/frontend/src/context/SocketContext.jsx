@@ -14,14 +14,17 @@ export const SocketProvider = ({ children }) => {
   const { user } = useUser();
 
   // Derive socket URL from API base URL (strip /api suffix)
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-ee33.up.railway.app/api";
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://HealthBridge-2-production-ee33.up.railway.app/api";
   const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
 
   useEffect(() => {
     // Get user info from localStorage as fallback
     const userId = user?.id || localStorage.getItem("userId");
     const role = user?.role || localStorage.getItem("role");
-    const name = user?.name || localStorage.getItem("userName") || localStorage.getItem("name") || "User";
+    const name =
+      user?.name || localStorage.getItem("userName") || localStorage.getItem("name") || "User";
     const token = localStorage.getItem("token"); // JWT token for authentication
 
     if (!userId || !role || !token) {
@@ -65,7 +68,7 @@ export const SocketProvider = ({ children }) => {
     // Connection error
     newSocket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error.message);
-      
+
       if (
         error.message === "Invalid token" ||
         error.message === "Token expired" ||

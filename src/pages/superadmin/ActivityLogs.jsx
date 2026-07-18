@@ -43,12 +43,16 @@ export default function ActivityLogs() {
 
   const role = localStorage.getItem("role") || "SUPERADMIN";
   const userName =
-    localStorage.getItem("userName") || localStorage.getItem("name") || "Super Admin";
+    localStorage.getItem("userName") ||
+    localStorage.getItem("name") ||
+    "Super Admin";
 
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/superadmin/activity-logs", { params: filters });
+      const res = await api.get("/superadmin/activity-logs", {
+        params: filters,
+      });
       setLogs(res.data || []);
       setTotalLogs(res.data?.length || 0);
       setLastRefresh(new Date());
@@ -94,7 +98,13 @@ export default function ActivityLogs() {
         newFilters.role = "SUPERADMIN";
         break;
       case "clear":
-        newFilters = { role: "", actorId: "", action: "", startDate: "", endDate: "" };
+        newFilters = {
+          role: "",
+          actorId: "",
+          action: "",
+          startDate: "",
+          endDate: "",
+        };
         break;
     }
 
@@ -112,7 +122,11 @@ export default function ActivityLogs() {
     ) {
       return "high";
     }
-    if (action.includes("delete") || action.includes("remove") || action.includes("update")) {
+    if (
+      action.includes("delete") ||
+      action.includes("remove") ||
+      action.includes("update")
+    ) {
       return "medium";
     }
     return "low";
@@ -167,11 +181,18 @@ export default function ActivityLogs() {
     if (!logs.length) return toast.error("No telemetry data to export.");
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("CureVirtual - System Audit Trail", 14, 20);
+    doc.text("HealthBridge - System Audit Trail", 14, 20);
     doc.setFontSize(10);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
     doc.text(`Total Logs: ${totalLogs}`, 14, 34);
-    const tableColumn = ["Actor ID", "Role", "Action", "Entity", "Time", "Risk"];
+    const tableColumn = [
+      "Actor ID",
+      "Role",
+      "Action",
+      "Entity",
+      "Time",
+      "Risk",
+    ];
     const tableRows = logs.map((log) => [
       log.actorId,
       log.actorRole,
@@ -448,7 +469,9 @@ export default function ActivityLogs() {
                       <tr
                         key={log.id}
                         className={`hover:bg-white/5 transition-colors ${
-                          securityLevel === "high" ? "bg-red-500/5 border-l-4 border-l-red-500" : ""
+                          securityLevel === "high"
+                            ? "bg-red-500/5 border-l-4 border-l-red-500"
+                            : ""
                         }`}
                       >
                         <td className="px-8 py-5 flex items-center gap-3">
@@ -486,12 +509,18 @@ export default function ActivityLogs() {
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-2">
                             {securityLevel === "high" && (
-                              <FaExclamationTriangle className={securityColor} />
+                              <FaExclamationTriangle
+                                className={securityColor}
+                              />
                             )}
                             {securityLevel === "medium" && (
-                              <FaExclamationTriangle className={securityColor} />
+                              <FaExclamationTriangle
+                                className={securityColor}
+                              />
                             )}
-                            {securityLevel === "low" && <FaCheckCircle className={securityColor} />}
+                            {securityLevel === "low" && (
+                              <FaCheckCircle className={securityColor} />
+                            )}
                             <span
                               className={`text-[10px] font-black uppercase tracking-widest ${securityColor}`}
                             >
@@ -512,8 +541,8 @@ export default function ActivityLogs() {
         {totalPages > 1 && (
           <div className="card glass !p-6 flex items-center justify-between">
             <div className="text-sm font-bold text-[var(--text-muted)]">
-              Showing {indexOfFirstLog + 1} to {Math.min(indexOfLastLog, logs.length)} of{" "}
-              {logs.length} logs
+              Showing {indexOfFirstLog + 1} to{" "}
+              {Math.min(indexOfLastLog, logs.length)} of {logs.length} logs
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -544,9 +573,15 @@ export default function ActivityLogs() {
                       {pageNum}
                     </button>
                   );
-                } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                } else if (
+                  pageNum === currentPage - 2 ||
+                  pageNum === currentPage + 2
+                ) {
                   return (
-                    <span key={pageNum} className="px-2 text-[var(--text-muted)]">
+                    <span
+                      key={pageNum}
+                      className="px-2 text-[var(--text-muted)]"
+                    >
                       ...
                     </span>
                   );

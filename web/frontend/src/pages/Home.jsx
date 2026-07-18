@@ -41,7 +41,7 @@ export default function Home() {
               <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8 md:w-9 md:h-9" />
             </div>
             <span className="text-lg md:text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
-              CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+              HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
             </span>
           </div>
 
@@ -154,12 +154,12 @@ export default function Home() {
             <div className="space-y-4 md:space-y-5">
               <img
                 src="/images/logo/Asset3.png"
-                alt="CureVirtual Logo"
+                alt="Health Bridge Logo"
                 className="w-24 md:w-28 h-auto mx-auto lg:mx-0 drop-shadow-2xl animate-in zoom-in duration-500"
               />
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[var(--text-main)] leading-[1.0] tracking-tighter uppercase whitespace-nowrap lg:whitespace-normal">
-                CURE <br className="hidden lg:block" />
-                <span className="text-gradient">VIRTUAL</span>
+                HEALTH <br className="hidden lg:block" />
+                <span className="text-gradient">BRIDGE</span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl font-black text-[var(--brand-orange)] tracking-[0.05em] uppercase italic opacity-90">
                 Healthcare Simplified to You
@@ -273,7 +273,7 @@ export default function Home() {
               Patient-first <br /> technology.
             </h3>
             <p className="text-lg md:text-xl text-[var(--text-soft)] leading-relaxed font-medium opacity-80">
-              We've re-engineered the telemedicine workflow from the ground up. CureVirtual isn't
+              We've re-engineered the telemedicine workflow from the ground up. Health Bridge isn't
               just a video tool; it's a complete medical ecosystem.
             </p>
             <div className="grid grid-cols-2 gap-4 md:gap-8">
@@ -314,7 +314,7 @@ export default function Home() {
                 <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
-                CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+                HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
               </span>
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] md:ml-4">

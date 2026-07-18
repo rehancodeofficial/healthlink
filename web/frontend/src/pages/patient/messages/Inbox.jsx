@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  FaEnvelopeOpen,
-  FaEnvelope,
-  FaTimes,
-  FaPaperPlane,
-  FaTrash,
-} from "react-icons/fa";
+import { FaEnvelopeOpen, FaEnvelope, FaTimes, FaPaperPlane, FaTrash } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import Topbar from "../../../components/Topbar";
 import api from "../../../Lib/api";
@@ -65,10 +59,7 @@ export default function PatientInbox() {
 
   const role = "PATIENT";
   const userId = localStorage.getItem("userId") || "";
-  const userName =
-    localStorage.getItem("userName") ||
-    localStorage.getItem("name") ||
-    "Patient";
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
 
   const fetchInbox = useCallback(async () => {
     if (!userId) return;
@@ -92,30 +83,25 @@ export default function PatientInbox() {
   }, [fetchInbox]);
 
   // open viewer, mark as read immediately
-// open viewer, mark as read immediately (optimistic)
-const openMessage = async (msg) => {
-  setSelectedMessage(msg);
+  // open viewer, mark as read immediately (optimistic)
+  const openMessage = async (msg) => {
+    setSelectedMessage(msg);
 
-  if (!msg.readAt) {
-    // Optimistic local update so UI changes immediately
-    const nowIso = new Date().toISOString();
-    setMessages((prev) =>
-      prev.map((m) => (m.id === msg.id ? { ...m, readAt: nowIso } : m))
-    );
+    if (!msg.readAt) {
+      // Optimistic local update so UI changes immediately
+      const nowIso = new Date().toISOString();
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, readAt: nowIso } : m)));
 
-    try {
-      // If your backend expects userId, keep body; if it expects query, move it to { params: { userId } }
-      await api.patch(`/patient/messages/read/${msg.id}`, { userId });
-    } catch (err) {
-      // Roll back if the server rejects, though this is usually non-critical
-      console.warn("Mark read failed:", err?.response?.data || err);
-      setMessages((prev) =>
-        prev.map((m) => (m.id === msg.id ? { ...m, readAt: null } : m))
-      );
+      try {
+        // If your backend expects userId, keep body; if it expects query, move it to { params: { userId } }
+        await api.patch(`/patient/messages/read/${msg.id}`, { userId });
+      } catch (err) {
+        // Roll back if the server rejects, though this is usually non-critical
+        console.warn("Mark read failed:", err?.response?.data || err);
+        setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, readAt: null } : m)));
+      }
     }
-  }
-};
-
+  };
 
   const handleReply = async () => {
     if (!replyContent.trim() || !selectedMessage) return;
@@ -177,12 +163,14 @@ const openMessage = async (msg) => {
         <Topbar userName={userName} />
 
         <div className="p-6">
-                          <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
+          <img
+            src="/images/logo/Asset3.png"
+            alt="HealthBridge"
+            style={{ width: 120, height: "auto" }}
+            onError={(e) => {
+              e.currentTarget.src = PLACEHOLDER_LOGO;
+            }} // fallback if missing
+          />
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-[var(--text-main)]">Patient Inbox</h1>
           </div>
@@ -204,51 +192,51 @@ const openMessage = async (msg) => {
                   </tr>
                 </thead>
                 <tbody>
-                                        
-                      {messages.map((msg) => {
-                        const isRead = !!msg.readAt;
-                        return (
-                          <tr
-                            key={msg.id}
-                            className={`border-b border-[var(--border)] hover:bg-[var(--bg-main)] transition cursor-pointer ${
-                              isRead ? "text-[var(--text-soft)]" : "font-semibold text-[var(--text-main)]"
-                            }`}
-                            onClick={() => openMessage(msg)}
+                  {messages.map((msg) => {
+                    const isRead = !!msg.readAt;
+                    return (
+                      <tr
+                        key={msg.id}
+                        className={`border-b border-[var(--border)] hover:bg-[var(--bg-main)] transition cursor-pointer ${
+                          isRead
+                            ? "text-[var(--text-soft)]"
+                            : "font-semibold text-[var(--text-main)]"
+                        }`}
+                        onClick={() => openMessage(msg)}
+                      >
+                        <td className="p-3">
+                          {msg.sender?.firstName
+                            ? `${msg.sender.firstName} ${msg.sender.lastName || ""}`
+                            : msg.sender?.name || "Unknown"}
+                        </td>
+                        <td className="p-3 truncate max-w-xs">{msg.content}</td>
+                        <td className="p-3">{new Date(msg.createdAt).toLocaleString()}</td>
+
+                        {/* Status */}
+                        <td className="p-3 text-center">
+                          {isRead ? (
+                            <FaEnvelopeOpen className="text-green-400 mx-auto" />
+                          ) : (
+                            <FaEnvelope className="text-[var(--text-soft)] mx-auto" />
+                          )}
+                        </td>
+
+                        {/* Actions (unchanged, but keep stopPropagation on trash) */}
+                        <td className="p-3 text-center">
+                          <button
+                            title="Delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              requestDelete(msg.id);
+                            }}
+                            className="hover:scale-110 transition"
                           >
-                            <td className="p-3">
-                              {msg.sender?.firstName
-                                ? `${msg.sender.firstName} ${msg.sender.lastName || ""}`
-                                : msg.sender?.name || "Unknown"}
-                            </td>
-                            <td className="p-3 truncate max-w-xs">{msg.content}</td>
-                            <td className="p-3">{new Date(msg.createdAt).toLocaleString()}</td>
-
-                            {/* Status */}
-                            <td className="p-3 text-center">
-                              {isRead ? (
-                                <FaEnvelopeOpen className="text-green-400 mx-auto" />
-                              ) : (
-                                <FaEnvelope className="text-[var(--text-soft)] mx-auto" />
-                              )}
-                            </td>
-
-                            {/* Actions (unchanged, but keep stopPropagation on trash) */}
-                            <td className="p-3 text-center">
-                              <button
-                                title="Delete"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  requestDelete(msg.id);
-                                }}
-                                className="hover:scale-110 transition"
-                              >
-                                <FaTrash className="text-red-400 inline-block" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-
+                            <FaTrash className="text-red-400 inline-block" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -258,12 +246,14 @@ const openMessage = async (msg) => {
             <div className="fixed inset-0 bg-[var(--bg-main)]/95 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-black p-6 relative">
                 {/* Close button */}
-                                <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
+                <img
+                  src="/images/logo/Asset3.png"
+                  alt="HealthBridge"
+                  style={{ width: 120, height: "auto" }}
+                  onError={(e) => {
+                    e.currentTarget.src = PLACEHOLDER_LOGO;
+                  }} // fallback if missing
+                />
                 <button
                   onClick={() => setSelectedMessage(null)}
                   className="absolute top-3 right-3 text-gray-600 hover:text-red-500"
@@ -274,7 +264,8 @@ const openMessage = async (msg) => {
                 {/* Header with inline delete */}
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-[#190366]">
-                    From {selectedMessage.sender?.firstName
+                    From{" "}
+                    {selectedMessage.sender?.firstName
                       ? `${selectedMessage.sender.firstName} ${selectedMessage.sender.lastName || ""}`
                       : selectedMessage.sender?.name || "Unknown"}
                   </h2>

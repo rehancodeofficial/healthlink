@@ -17,7 +17,7 @@ exports.generateAIResponse = async (userMessage) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-      You are a smart medical assistant for "CureVirtual".
+      You are a smart medical assistant for "Health Bridge".
       User Message: "${userMessage}"
 
       Task:

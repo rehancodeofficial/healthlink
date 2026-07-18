@@ -1,7 +1,7 @@
 /**
  * ============================================
  * COMPREHENSIVE API DOCUMENTATION
- * CureVirtual Backend API Routes
+ * HealthBridge Backend API Routes
  * ============================================
  */
 

@@ -14,7 +14,7 @@ const PLACEHOLDER_LOGO =
       <rect width='200' height='50' fill='#027906'/>
       <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
             font-size='16' font-family='Arial, Helvetica, sans-serif'
-            fill='white'>CureVirtual</text>
+            fill='white'>HealthBridge</text>
     </svg>`
   );
 
@@ -31,7 +31,7 @@ function ViewModal({ open, onClose, item }) {
         </button>
         <img
           src="/images/logo/Asset3.png"
-          alt="CureVirtual"
+          alt="HealthBridge"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             if (typeof PLACEHOLDER_LOGO !== "undefined") e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -419,7 +419,7 @@ export default function PharmacyPrescriptions() {
             <div className="flex items-center gap-4">
               <img
                 src="/images/logo/Asset3.png"
-                alt="CureVirtual"
+                alt="HealthBridge"
                 style={{ width: 120 }}
                 onError={(e) => {
                   e.currentTarget.src = PLACEHOLDER_LOGO;

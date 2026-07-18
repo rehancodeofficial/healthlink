@@ -1,5 +1,5 @@
 // ============================================
-// CUREVIRTUAL V2.0 - NEW SCHEMA ADDITIONS
+// HealthBridge V2.0 - NEW SCHEMA ADDITIONS
 // ============================================
 // This file contains all new models to be added to the main schema.prisma
 // Copy these models into your main schema.prisma file

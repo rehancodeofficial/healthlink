@@ -21,7 +21,9 @@ export default function PatientSelectPharmacy() {
       setLoading(true);
       const params = { q: q || undefined };
       if (lat && lng && radiusKm) {
-        params.lat = lat; params.lng = lng; params.radiusKm = radiusKm;
+        params.lat = lat;
+        params.lng = lng;
+        params.radiusKm = radiusKm;
       }
       const r = await api.get("/pharmacy/list", { params });
       const items = r.data?.data?.items || r.data?.data || [];
@@ -33,14 +35,16 @@ export default function PatientSelectPharmacy() {
     }
   }, [q, lat, lng, radiusKm]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const choose = async (pharmacyId) => {
     try {
       await api.post("/pharmacy/patient/select", { patientId: userId, pharmacyId });
       setMsg("✅ Selected!");
       setTimeout(() => setMsg(""), 2000);
-    } catch(err) {
+    } catch (err) {
       console.error(err);
       setMsg(err?.response?.data?.error || "❌ Failed to select pharmacy");
       setTimeout(() => setMsg(""), 2500);
@@ -54,21 +58,40 @@ export default function PatientSelectPharmacy() {
         <Topbar userName={userName} />
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <img src="/images/logo/Asset3.png" alt="CureVirtual" style={{ width: 120 }} />
+            <img src="/images/logo/Asset3.png" alt="HealthBridge" style={{ width: 120 }} />
             <h1 className="text-3xl font-bold text-[var(--text-main)]">Select Pharmacy</h1>
             <div>{msg}</div>
           </div>
 
           <div className="bg-[var(--bg-glass)] rounded-2xl p-4 mb-4 grid gap-3 sm:grid-cols-5">
-            <input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Search name/city/state"
-                   className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]" />
-            <input value={lat} onChange={(e)=>setLat(e.target.value)} placeholder="Lat"
-                   className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]" />
-            <input value={lng} onChange={(e)=>setLng(e.target.value)} placeholder="Lng"
-                   className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]" />
-            <input type="number" value={radiusKm} onChange={(e)=>setRadiusKm(e.target.value)} placeholder="Radius km"
-                   className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]" />
-            <button onClick={load} className="px-3 py-2 bg-[#027906] hover:bg-[#190366] rounded">Apply</button>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search name/city/state"
+              className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]"
+            />
+            <input
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="Lat"
+              className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]"
+            />
+            <input
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              placeholder="Lng"
+              className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]"
+            />
+            <input
+              type="number"
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(e.target.value)}
+              placeholder="Radius km"
+              className="px-3 py-2 rounded bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--text-main)]"
+            />
+            <button onClick={load} className="px-3 py-2 bg-[#027906] hover:bg-[#190366] rounded">
+              Apply
+            </button>
           </div>
 
           {loading ? (
@@ -77,14 +100,21 @@ export default function PatientSelectPharmacy() {
             <div className="text-[var(--text-muted)]">No pharmacies found.</div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {list.map(p => (
+              {list.map((p) => (
                 <div key={p.id} className="bg-[var(--bg-glass)] rounded-2xl p-4">
                   <div className="text-xl font-semibold">{p.displayName || "Pharmacy"}</div>
                   <div className="text-[var(--text-soft)]">{p.address}</div>
-                  <div className="text-[var(--text-soft)]">{[p.city, p.state, p.country].filter(Boolean).join(", ")}</div>
-                  <div className="text-[var(--text-muted)] text-sm mt-2">{p.services?.slice(0,120)}</div>
+                  <div className="text-[var(--text-soft)]">
+                    {[p.city, p.state, p.country].filter(Boolean).join(", ")}
+                  </div>
+                  <div className="text-[var(--text-muted)] text-sm mt-2">
+                    {p.services?.slice(0, 120)}
+                  </div>
                   <div className="mt-4 flex justify-end">
-                    <button onClick={()=>choose(p.id)} className="px-4 py-2 bg-[#027906] hover:bg-[#190366] rounded">
+                    <button
+                      onClick={() => choose(p.id)}
+                      className="px-4 py-2 bg-[#027906] hover:bg-[#190366] rounded"
+                    >
                       Select
                     </button>
                   </div>

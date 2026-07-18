@@ -38,10 +38,14 @@ export default function Home() {
             onClick={() => navigate("/")}
           >
             <div className="bg-[var(--bg-glass)] p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-sm">
-              <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8 md:w-9 md:h-9" />
+              <img
+                src="/images/logo/Asset3.png"
+                alt="Logo"
+                className="w-8 h-8 md:w-9 md:h-9"
+              />
             </div>
             <span className="text-lg md:text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
-              CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+              HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
             </span>
           </div>
 
@@ -90,7 +94,9 @@ export default function Home() {
         {/* Mobile Menu - Enhanced Dropdown with improved touch targets and animation */}
         <div
           className={`lg:hidden absolute top-full left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-3xl border-b border-[var(--border)] shadow-2xl transition-all duration-300 origin-top overflow-hidden ${
-            isMobileMenuOpen ? "opacity-100 max-h-[500px] visible" : "opacity-0 max-h-0 invisible"
+            isMobileMenuOpen
+              ? "opacity-100 max-h-[500px] visible"
+              : "opacity-0 max-h-0 invisible"
           }`}
         >
           <div className="flex flex-col p-6 space-y-3">
@@ -154,12 +160,12 @@ export default function Home() {
             <div className="space-y-4 md:space-y-5">
               <img
                 src="/images/logo/Asset3.png"
-                alt="CureVirtual Logo"
+                alt="HealthBridge Logo"
                 className="w-24 md:w-28 h-auto mx-auto lg:mx-0 drop-shadow-2xl animate-in zoom-in duration-500"
               />
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[var(--text-main)] leading-[1.0] tracking-tighter uppercase whitespace-nowrap lg:whitespace-normal">
-                CURE <br className="hidden lg:block" />
-                <span className="text-gradient">VIRTUAL</span>
+                HEALTH <br className="hidden lg:block" />
+                <span className="text-gradient">BRIDGE</span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl font-black text-[var(--brand-orange)] tracking-[0.05em] uppercase italic opacity-90">
                 Healthcare Simplified to You
@@ -167,8 +173,9 @@ export default function Home() {
             </div>
 
             <p className="text-base md:text-lg text-[var(--text-soft)] max-w-xl leading-relaxed font-medium mx-auto lg:mx-0 opacity-80">
-              Experience medical consultation with zero boundaries. Connect with world-class
-              specialists instantly through our high-performance virtual clinic.
+              Experience medical consultation with zero boundaries. Connect with
+              world-class specialists instantly through our high-performance
+              virtual clinic.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 md:pt-6">
@@ -188,13 +195,21 @@ export default function Home() {
 
             <div className="flex items-center justify-center lg:justify-start gap-8 md:gap-12 pt-8 md:pt-10 opacity-70">
               <div className="text-center">
-                <p className="text-2xl md:text-3xl font-black text-[var(--brand-blue)]">24/7</p>
-                <p className="text-[10px] font-black uppercase tracking-widest">Support</p>
+                <p className="text-2xl md:text-3xl font-black text-[var(--brand-blue)]">
+                  24/7
+                </p>
+                <p className="text-[10px] font-black uppercase tracking-widest">
+                  Support
+                </p>
               </div>
               <div className="w-px h-10 bg-[var(--border)]"></div>
               <div className="text-center">
-                <p className="text-2xl md:text-3xl font-black text-[var(--brand-green)]">100%</p>
-                <p className="text-[10px] font-black uppercase tracking-widest">Secure</p>
+                <p className="text-2xl md:text-3xl font-black text-[var(--brand-green)]">
+                  100%
+                </p>
+                <p className="text-[10px] font-black uppercase tracking-widest">
+                  Secure
+                </p>
               </div>
             </div>
           </div>
@@ -226,7 +241,10 @@ export default function Home() {
       </section>
 
       {/* Features - Compact Grid */}
-      <section id="features" className="py-20 md:py-24 relative bg-[var(--bg-main)]">
+      <section
+        id="features"
+        className="py-20 md:py-24 relative bg-[var(--bg-main)]"
+      >
         <div className="page-container">
           <div className="text-center mb-12 md:mb-20 space-y-4 md:space-y-6">
             <h2 className="text-xs font-black text-[var(--brand-orange)] uppercase tracking-[0.4em] animate-pulse">
@@ -273,8 +291,9 @@ export default function Home() {
               Patient-first <br /> technology.
             </h3>
             <p className="text-lg md:text-xl text-[var(--text-soft)] leading-relaxed font-medium opacity-80">
-              We've re-engineered the telemedicine workflow from the ground up. CureVirtual isn't
-              just a video tool; it's a complete medical ecosystem.
+              We've re-engineered the telemedicine workflow from the ground up.
+              HealthBridge isn't just a video tool; it's a complete medical
+              ecosystem.
             </p>
             <div className="grid grid-cols-2 gap-4 md:gap-8">
               <div className="p-6 md:p-8 glass !rounded-[2rem] border-[var(--border)] hover:-translate-y-2 transition-transform duration-500">
@@ -311,10 +330,14 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-[var(--bg-glass)] p-2 rounded-xl shadow-sm border border-[var(--border)]">
-                <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+                <img
+                  src="/images/logo/Asset3.png"
+                  alt="Logo"
+                  className="w-8 h-8"
+                />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
-                CURE<span className="text-[var(--brand-blue)]">VIRTUAL</span>
+                HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
               </span>
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] md:ml-4">
@@ -323,13 +346,22 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">
-            <a href="#features" className="hover:text-[var(--brand-green)] transition-colors">
+            <a
+              href="#features"
+              className="hover:text-[var(--brand-green)] transition-colors"
+            >
               Features
             </a>
-            <a href="#about" className="hover:text-[var(--brand-blue)] transition-colors">
+            <a
+              href="#about"
+              className="hover:text-[var(--brand-blue)] transition-colors"
+            >
               About Us
             </a>
-            <a href="#contact" className="hover:text-[var(--brand-orange)] transition-colors">
+            <a
+              href="#contact"
+              className="hover:text-[var(--brand-orange)] transition-colors"
+            >
               Contact
             </a>
           </div>
@@ -354,7 +386,8 @@ function FeatureCard({ icon, title, text, color }) {
   const dynamicColor = {
     green: "hover:border-[var(--brand-green)] hover:bg-[var(--brand-green)]/5",
     blue: "hover:border-[var(--brand-blue)] hover:bg-[var(--brand-blue)]/5",
-    orange: "hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5",
+    orange:
+      "hover:border-[var(--brand-orange)] hover:bg-[var(--brand-orange)]/5",
   }[color];
 
   return (
@@ -366,8 +399,12 @@ function FeatureCard({ icon, title, text, color }) {
       >
         {icon}
       </div>
-      <h4 className="text-xl font-black text-[var(--text-main)] mb-4 tracking-tight">{title}</h4>
-      <p className="text-sm font-medium text-[var(--text-soft)] leading-relaxed">{text}</p>
+      <h4 className="text-xl font-black text-[var(--text-main)] mb-4 tracking-tight">
+        {title}
+      </h4>
+      <p className="text-sm font-medium text-[var(--text-soft)] leading-relaxed">
+        {text}
+      </p>
     </div>
   );
 }

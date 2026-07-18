@@ -1,5 +1,5 @@
 -- ============================================
--- CUREVIRTUAL - RLS SECURITY PATCH (FINAL)
+-- HealthBridge - RLS SECURITY PATCH (FINAL)
 -- Run this in your Supabase SQL Editor
 -- ============================================
 

@@ -1,11 +1,11 @@
 SUPER ADMIN CREDENTIALS:
 -----------------------
-Email: superadmin@curevirtual.com
-Password: Curevirtual@123
+Email: superadmin@HealthBridge.com
+Password: HealthBridge@123
 Role: SUPERADMIN
 
 OTHER USERS (Password: 123456):
 -------------------------------
-admin@curevirtual.com
-support@curevirtual.com
+admin@HealthBridge.com
+support@HealthBridge.com
 

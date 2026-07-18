@@ -12,17 +12,17 @@ const { Server } = require("socket.io");
 
 // ✅ Global Allowed Origins (Moved up for Socket.io)
 const allowedOrigins = [
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual-2.vercel.app",
-  "https://curevirtual.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
+  "https://HealthBridge.vercel.app",
   "https://cure-virtual-2-git-main-briamstechnologies.vercel.app",
-  "https://curevirtual-2-production.up.railway.app",
-  "https://curevirtual-2-production-ee33.up.railway.app",
-  "https://curevirtual-2-production-ee33.up.railway.app",
+  "https://HealthBridge-2-production.up.railway.app",
+  "https://HealthBridge-2-production-ee33.up.railway.app",
+  "https://HealthBridge-2-production-ee33.up.railway.app",
   "https://bite-dash-railway-app.up.railway.app", // Added based on context if needed, but sticking to existing pattern
   process.env.FRONTEND_URL,
   process.env.RAILWAY_STATIC_URL,
@@ -36,7 +36,7 @@ const io = new Server(server, {
     credentials: true,
   },
   transports: ["websocket"], // 🚀 Force WebSockets only
-  pingTimeout: 60000,        // Increase timeout for better stability
+  pingTimeout: 60000, // Increase timeout for better stability
   pingInterval: 25000,
 });
 
@@ -69,7 +69,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
@@ -192,7 +192,7 @@ app.use("/api/support", supportRoutes);
 app.post(
   "/api/subscription/stripe/webhook",
   express.raw({ type: "application/json" }),
-  subscriptionRoutes.stripeWebhook
+  subscriptionRoutes.stripeWebhook,
 );
 
 // ✅ MESSAGES (Unified)
@@ -220,8 +220,12 @@ app.get("/api/debug/env", (_req, res) => {
     DATABASE_URL: process.env.DATABASE_URL ? "✅ SET" : "❌ MISSING",
     DIRECT_URL: process.env.DIRECT_URL ? "✅ SET" : "⚠️ NOT SET",
     JWT_SECRET: process.env.JWT_SECRET ? "✅ SET" : "❌ MISSING",
-    EMAIL_USER: process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : "❌ MISSING",
-    GMAIL_USER: process.env.GMAIL_USER ? `✅ ${process.env.GMAIL_USER}` : "not set",
+    EMAIL_USER: process.env.EMAIL_USER
+      ? `✅ ${process.env.EMAIL_USER}`
+      : "❌ MISSING",
+    GMAIL_USER: process.env.GMAIL_USER
+      ? `✅ ${process.env.GMAIL_USER}`
+      : "not set",
     EMAIL_PASS: process.env.EMAIL_PASS ? "✅ SET" : "❌ MISSING",
     GMAIL_PASS: process.env.GMAIL_PASS ? "✅ SET" : "not set",
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || "gmail (default)",
@@ -236,7 +240,9 @@ app.use((err, req, res, _next) => {
 
   // Custom response for CORS or other well-known errors
   if (err.message === "Not allowed by CORS") {
-    return res.status(403).json({ success: false, message: "CORS policy violation" });
+    return res
+      .status(403)
+      .json({ success: false, message: "CORS policy violation" });
   }
 
   res.status(err.status || 500).json({

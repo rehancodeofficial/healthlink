@@ -23,7 +23,7 @@ The EmailOTP model has been added to Prisma schema. Run migration:
 
 ```bash
 # Inside Docker container
-docker exec curevirtual2-backend-1 npx prisma migrate dev --name add_email_otp
+docker exec HealthBridge2-backend-1 npx prisma migrate dev --name add_email_otp
 
 # Or stop and rebuild
 docker-compose down
@@ -47,7 +47,7 @@ EMAIL_PORT=587
 EMAIL_SECURE=false
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-16-char-app-password
-FROM_EMAIL=noreply@curevirtual.com
+FROM_EMAIL=noreply@HealthBridge.com
 ```
 
 #### Option B: SendGrid (Recommended for Production)
@@ -59,7 +59,7 @@ FROM_EMAIL=noreply@curevirtual.com
 ```env
 EMAIL_PROVIDER=sendgrid
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FROM_EMAIL=noreply@curevirtual.com
+FROM_EMAIL=noreply@HealthBridge.com
 ```
 
 ### 3. Backend API Endpoints
@@ -203,7 +203,7 @@ docker-compose up -d
 2. **Register a new user:**
 
 ```bash
-curl -X POST https://curevirtual-2-production-ee33.up.railway.app/api/auth/register \
+curl -X POST https://HealthBridge-2-production-ee33.up.railway.app/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Test User",
@@ -218,7 +218,7 @@ curl -X POST https://curevirtual-2-production-ee33.up.railway.app/api/auth/regis
 4. **Verify the OTP:**
 
 ```bash
-curl -X POST https://curevirtual-2-production-ee33.up.railway.app/api/otp/verify \
+curl -X POST https://HealthBridge-2-production-ee33.up.railway.app/api/otp/verify \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -257,7 +257,7 @@ For production, set up a cron job to clean expired OTPs:
 
 ```bash
 # Add to crontab (runs every hour)
-0 * * * * curl -X DELETE https://curevirtual-2-production-ee33.up.railway.app/api/otp/cleanup
+0 * * * * curl -X DELETE https://HealthBridge-2-production-ee33.up.railway.app/api/otp/cleanup
 ```
 
 Or use a Node.js scheduler in your backend:
@@ -296,7 +296,7 @@ cron.schedule("0 * * * *", async () => {
 3. Check Docker container logs:
 
 ```bash
-docker logs curevirtual2-backend-1
+docker logs HealthBridge2-backend-1
 ```
 
 ### Email not sending (SendGrid)
@@ -312,15 +312,15 @@ docker logs curevirtual2-backend-1
 3. Check database for OTP record:
 
 ```bash
-docker exec curevirtual2-db-1 mysql -u root -prootpassword curevirtual_db -e "SELECT * FROM EmailOTP ORDER BY createdAt DESC LIMIT 5;"
+docker exec HealthBridge2-db-1 mysql -u root -prootpassword HealthBridge_db -e "SELECT * FROM EmailOTP ORDER BY createdAt DESC LIMIT 5;"
 ```
 
 ### Database migration issues
 
 ```bash
 # Reset and reapply migrations
-docker exec curevirtual2-backend-1 npx prisma migrate reset --force
-docker exec curevirtual2-backend-1 npx prisma migrate dev
+docker exec HealthBridge2-backend-1 npx prisma migrate reset --force
+docker exec HealthBridge2-backend-1 npx prisma migrate dev
 ```
 
 ## 📝 API Error Codes

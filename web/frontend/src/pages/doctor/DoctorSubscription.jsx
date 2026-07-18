@@ -117,7 +117,7 @@ export default function DoctorSubscription() {
         <div className="p-6 space-y-6">
           <img
             src="/images/logo/Asset3.png"
-            alt="CureVirtual"
+            alt="HealthBridge"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_LOGO;

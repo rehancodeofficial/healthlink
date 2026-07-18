@@ -30,7 +30,7 @@ export default function PatientPrescriptions() {
         <rect width='200' height='50' fill='#027906'/>
         <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
               font-size='16' font-family='Arial, Helvetica, sans-serif'
-              fill='white'>CureVirtual</text>
+              fill='white'>HealthBridge</text>
       </svg>`
     );
 
@@ -95,7 +95,7 @@ export default function PatientPrescriptions() {
       pdf.rect(0, 0, pageWidth, 22, "F");
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(16);
-      pdf.text("CureVirtual — Prescription", 10, 14);
+      pdf.text("HealthBridge — Prescription", 10, 14);
 
       // Footer
       const footerY = pageHeight - 10;
@@ -130,7 +130,7 @@ export default function PatientPrescriptions() {
         <div className="flex justify-between items-center mb-6">
           <img
             src="/images/logo/Asset3.png"
-            alt="CureVirtual"
+            alt="HealthBridge"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -166,11 +166,11 @@ export default function PatientPrescriptions() {
                       className="border-b border-[var(--border)] hover:bg-[var(--bg-glass)] transition"
                     >
                       <td className="p-3">
-                        {p.doctor?.user ? `${p.doctor.user.firstName} ${p.doctor.user.lastName}` : "N/A"}
+                        {p.doctor?.user
+                          ? `${p.doctor.user.firstName} ${p.doctor.user.lastName}`
+                          : "N/A"}
                       </td>
-                      <td className="p-3">
-                        {p.pharmacy?.displayName || "N/A"}
-                      </td>
+                      <td className="p-3">{p.pharmacy?.displayName || "N/A"}</td>
                       <td className="p-3">{p.medication}</td>
                       <td className="p-3">{p.dosage}</td>
                       <td className="p-3">{p.frequency}</td>
@@ -214,7 +214,7 @@ export default function PatientPrescriptions() {
             </button>
             <img
               src="/images/logo/Asset3.png"
-              alt="CureVirtual"
+              alt="HealthBridge"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -231,7 +231,7 @@ export default function PatientPrescriptions() {
                 <div className="flex items-center gap-3">
                   <img
                     src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
+                    alt="HealthBridge"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => {
                       e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -251,7 +251,9 @@ export default function PatientPrescriptions() {
                   <p className="text-sm">
                     Dr:{" "}
                     <span className="font-semibold">
-                      {selectedPrescription?.doctor?.user ? `${selectedPrescription.doctor.user.firstName} ${selectedPrescription.doctor.user.lastName}` : "N/A"}
+                      {selectedPrescription?.doctor?.user
+                        ? `${selectedPrescription.doctor.user.firstName} ${selectedPrescription.doctor.user.lastName}`
+                        : "N/A"}
                     </span>
                   </p>
                 </div>
@@ -260,7 +262,9 @@ export default function PatientPrescriptions() {
               <div className="grid grid-cols-1 gap-2">
                 <p>
                   <span className="font-semibold">Patient:</span>{" "}
-                  {selectedPrescription?.patient?.user ? `${selectedPrescription.patient.user.firstName} ${selectedPrescription.patient.user.lastName}` : "—"}
+                  {selectedPrescription?.patient?.user
+                    ? `${selectedPrescription.patient.user.firstName} ${selectedPrescription.patient.user.lastName}`
+                    : "—"}
                 </p>
                 <p>
                   <span className="font-semibold">Patient ID:</span>{" "}

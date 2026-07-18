@@ -15,10 +15,7 @@ export default function PatientSendMessage() {
 
   const role = "PATIENT";
   const userId = localStorage.getItem("userId") || "";
-  const userName =
-    localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
-
-
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Patient";
 
   // Load doctors and pharmacies for dropdown
   useEffect(() => {
@@ -26,15 +23,17 @@ export default function PatientSendMessage() {
       try {
         const [docsRes, pharRes] = await Promise.all([
           api.get("/patient/doctors/all"),
-          api.get("/pharmacy/list")
+          api.get("/pharmacy/list"),
         ]);
-        
+
         const docs = Array.isArray(docsRes.data) ? docsRes.data : docsRes.data?.data || [];
         const phars = pharRes.data?.data?.items || pharRes.data?.items || [];
-        
+
         const doctorRecipients = docs.map((d) => ({
           id: d.user?.id || d.id, // we want the user id for messaging
-          name: d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : (d.name || "Unnamed Doctor"),
+          name: d.user
+            ? `${d.user.firstName} ${d.user.lastName}`.trim()
+            : d.name || "Unnamed Doctor",
           type: "DOCTOR",
           email: d.user?.email || d.email || "",
         }));
@@ -68,8 +67,8 @@ export default function PatientSendMessage() {
     setSending(true);
     try {
       await api.post("/patient/messages/send", {
-        senderId: userId,     // patient userId
-        receiverId,           // doctor userId
+        senderId: userId, // patient userId
+        receiverId, // doctor userId
         content,
       });
       setSuccess("Message sent successfully!");
@@ -90,12 +89,14 @@ export default function PatientSendMessage() {
         <Topbar userName={userName} />
 
         <div className="p-6">
-                          <img
-                    src="/images/logo/Asset3.png"
-                    alt="CureVirtual"
-                    style={{ width: 120, height: "auto" }}
-                    onError={(e) => { e.currentTarget.src = PLACEHOLDER_LOGO; }} // fallback if missing
-                  />
+          <img
+            src="/images/logo/Asset3.png"
+            alt="HealthBridge"
+            style={{ width: 120, height: "auto" }}
+            onError={(e) => {
+              e.currentTarget.src = PLACEHOLDER_LOGO;
+            }} // fallback if missing
+          />
           <h1 className="text-2xl font-bold mb-6 text-[#FFFFFF]">Send Message</h1>
 
           <form
@@ -114,21 +115,25 @@ export default function PatientSendMessage() {
                   required
                 >
                   <option value="">-- Choose Recipient --</option>
-                  
+
                   <optgroup label="Doctors">
-                    {recipients.filter(r => r.type === "DOCTOR").map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} {d.email ? `(${d.email})` : ""}
-                      </option>
-                    ))}
+                    {recipients
+                      .filter((r) => r.type === "DOCTOR")
+                      .map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} {d.email ? `(${d.email})` : ""}
+                        </option>
+                      ))}
                   </optgroup>
 
                   <optgroup label="Pharmacies">
-                    {recipients.filter(r => r.type === "PHARMACY").map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} {p.email ? `(${p.email})` : ""}
-                      </option>
-                    ))}
+                    {recipients
+                      .filter((r) => r.type === "PHARMACY")
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} {p.email ? `(${p.email})` : ""}
+                        </option>
+                      ))}
                   </optgroup>
                 </select>
               )}

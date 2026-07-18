@@ -3,7 +3,7 @@
 # OTP System Test Script
 # This script tests the OTP email verification system
 
-API_URL="https://curevirtual-2-production-ee33.up.railway.app/api"
+API_URL="https://HealthBridge-2-production-ee33.up.railway.app/api"
 TEST_EMAIL="test-$(date +%s)@example.com"
 
 echo "🧪 Testing OTP Email Verification System"
@@ -78,7 +78,7 @@ echo ""
 
 # Test 4: Check database for OTP
 echo -e "${YELLOW}Test 4: Check database for OTP${NC}"
-docker exec curevirtual2-db-1 mysql -u root -prootpassword curevirtual_db \
+docker exec HealthBridge2-db-1 mysql -u root -prootpassword HealthBridge_db \
   -e "SELECT id, email, otp, verified, expiresAt FROM EmailOTP WHERE email='$TEST_EMAIL' ORDER BY createdAt DESC LIMIT 1;" 2>/dev/null
 
 echo ""

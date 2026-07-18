@@ -18,7 +18,7 @@ function DoctorViewModal({ open, onClose, doctor }) {
       <div className="bg-[var(--bg-card)] p-8 rounded-2xl shadow-xl w-full max-w-3xl relative text-[var(--text-main)]">
         <img
           src="/images/logo/Asset3.png"
-          alt="CureVirtual"
+          alt="HealthBridge"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -36,18 +36,41 @@ function DoctorViewModal({ open, onClose, doctor }) {
 
         <div className="grid md:grid-cols-2 gap-4 text-[var(--text-soft)]">
           <div>
-            <p><strong>Name:</strong> {d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : "—"}</p>
-            <p><strong>Email:</strong> {d.user?.email || "—"}</p>
-            <p><strong>Specialization:</strong> {d.specialization || "—"}</p>
-            <p><strong>Qualifications:</strong> {d.qualifications || "—"}</p>
-            <p><strong>Experience:</strong> {d.yearsOfExperience != null ? `${d.yearsOfExperience} yrs` : "—"}</p>
-            <p><strong>Consultation Fee:</strong> {d.consultationFee != null ? `$${Number(d.consultationFee).toFixed(2)}` : "—"}</p>
+            <p>
+              <strong>Name:</strong>{" "}
+              {d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : "—"}
+            </p>
+            <p>
+              <strong>Email:</strong> {d.user?.email || "—"}
+            </p>
+            <p>
+              <strong>Specialization:</strong> {d.specialization || "—"}
+            </p>
+            <p>
+              <strong>Qualifications:</strong> {d.qualifications || "—"}
+            </p>
+            <p>
+              <strong>Experience:</strong>{" "}
+              {d.yearsOfExperience != null ? `${d.yearsOfExperience} yrs` : "—"}
+            </p>
+            <p>
+              <strong>Consultation Fee:</strong>{" "}
+              {d.consultationFee != null ? `$${Number(d.consultationFee).toFixed(2)}` : "—"}
+            </p>
           </div>
           <div>
-            <p><strong>License #:</strong> {d.licenseNumber || "—"}</p>
-            <p><strong>Hospital:</strong> {d.hospitalAffiliation || "—"}</p>
-            <p><strong>Languages:</strong> {langs.length ? langs.join(", ") : "—"}</p>
-            <p className="mt-2"><strong>Availability:</strong></p>
+            <p>
+              <strong>License #:</strong> {d.licenseNumber || "—"}
+            </p>
+            <p>
+              <strong>Hospital:</strong> {d.hospitalAffiliation || "—"}
+            </p>
+            <p>
+              <strong>Languages:</strong> {langs.length ? langs.join(", ") : "—"}
+            </p>
+            <p className="mt-2">
+              <strong>Availability:</strong>
+            </p>
             <div className="text-sm opacity-90 whitespace-pre-wrap">
               {availability
                 ? Object.entries(availability)
@@ -63,7 +86,10 @@ function DoctorViewModal({ open, onClose, doctor }) {
         </div>
 
         <div className="flex justify-end mt-6">
-          <button onClick={onClose} className="px-4 py-2 bg-[var(--bg-glass)] hover:bg-white/20 rounded text-[var(--text-main)]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-[var(--bg-glass)] hover:bg-white/20 rounded text-[var(--text-main)]"
+          >
             Close
           </button>
         </div>
@@ -139,7 +165,7 @@ export default function MyDoctors() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <img
               src="/images/logo/Asset3.png"
-              alt="CureVirtual"
+              alt="HealthBridge"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -172,9 +198,14 @@ export default function MyDoctors() {
                 </thead>
                 <tbody>
                   {filtered.map((d) => (
-                    <tr key={d.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-glass)] transition">
+                    <tr
+                      key={d.id}
+                      className="border-b border-[var(--border)] hover:bg-[var(--bg-glass)] transition"
+                    >
                       <td className="p-3">
-                        <div className="font-semibold">{d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : "—"}</div>
+                        <div className="font-semibold">
+                          {d.user ? `${d.user.firstName} ${d.user.lastName}`.trim() : "—"}
+                        </div>
                         <div className="text-xs text-[var(--text-soft)]">{d.user?.email}</div>
                       </td>
                       <td className="p-3">{d.specialization || "—"}</td>
@@ -182,7 +213,9 @@ export default function MyDoctors() {
                         {d.yearsOfExperience != null ? `${d.yearsOfExperience} yrs` : "—"}
                       </td>
                       <td className="p-3">
-                        {d.consultationFee != null ? `$${Number(d.consultationFee).toFixed(2)}` : "—"}
+                        {d.consultationFee != null
+                          ? `$${Number(d.consultationFee).toFixed(2)}`
+                          : "—"}
                       </td>
                       <td className="p-3">
                         <div className="flex justify-center">

@@ -14,8 +14,8 @@ const PLACEHOLDER_LOGO =
       <rect width='200' height='50' fill='#027906'/>
       <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
             font-size='16' font-family='Arial, Helvetica, sans-serif'
-            fill='white'>CureVirtual</text>
-    </svg>`
+            fill='white'>HealthBridge</text>
+    </svg>`,
   );
 
 function ViewModal({ open, onClose, item }) {
@@ -31,10 +31,11 @@ function ViewModal({ open, onClose, item }) {
         </button>
         <img
           src="/images/logo/Asset3.png"
-          alt="CureVirtual"
+          alt="HealthBridge"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
-            if (typeof PLACEHOLDER_LOGO !== "undefined") e.currentTarget.src = PLACEHOLDER_LOGO;
+            if (typeof PLACEHOLDER_LOGO !== "undefined")
+              e.currentTarget.src = PLACEHOLDER_LOGO;
           }}
         />
         <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">
@@ -46,7 +47,9 @@ function ViewModal({ open, onClose, item }) {
             {[item?.patient?.user?.firstName, item?.patient?.user?.lastName]
               .filter(Boolean)
               .join(" ") || "Unknown"}{" "}
-            <span className="text-xs opacity-50">({item?.patient?.user?.email})</span>
+            <span className="text-xs opacity-50">
+              ({item?.patient?.user?.email})
+            </span>
           </p>
           <p>
             <strong>Doctor:</strong>{" "}
@@ -74,7 +77,9 @@ function ViewModal({ open, onClose, item }) {
           )}
           <p>
             <strong>Dispatch Status:</strong>{" "}
-            <span className="bg-green-500 px-2 py-1 rounded text-xs">{item.dispatchStatus}</span>
+            <span className="bg-green-500 px-2 py-1 rounded text-xs">
+              {item.dispatchStatus}
+            </span>
           </p>
         </div>
       </div>
@@ -99,8 +104,12 @@ function CreateModal({ open, onClose, onSuccess }) {
   useEffect(() => {
     if (open) {
       // Load dropdowns
-      api.get("/pharmacy/doctors-list").then((res) => setDoctors(res.data?.data || []));
-      api.get("/pharmacy/patients-list").then((res) => setPatients(res.data?.data || []));
+      api
+        .get("/pharmacy/doctors-list")
+        .then((res) => setDoctors(res.data?.data || []));
+      api
+        .get("/pharmacy/patients-list")
+        .then((res) => setPatients(res.data?.data || []));
     }
   }, [open]);
 
@@ -125,7 +134,9 @@ function CreateModal({ open, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.error || "Failed to create prescription");
+      toast.error(
+        err?.response?.data?.error || "Failed to create prescription",
+      );
     } finally {
       setLoading(false);
     }
@@ -140,10 +151,14 @@ function CreateModal({ open, onClose, onSuccess }) {
         >
           ✖
         </button>
-        <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">Create Prescription</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">
+          Create Prescription
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Patient *</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Patient *
+            </label>
             <select
               name="patientId"
               value={formData.patientId}
@@ -159,7 +174,9 @@ function CreateModal({ open, onClose, onSuccess }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Doctor *</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Doctor *
+            </label>
             <select
               name="doctorId"
               value={formData.doctorId}
@@ -175,7 +192,9 @@ function CreateModal({ open, onClose, onSuccess }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Medication *</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Medication *
+            </label>
             <input
               name="medication"
               value={formData.medication}
@@ -185,7 +204,9 @@ function CreateModal({ open, onClose, onSuccess }) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-[var(--text-muted)]">Dosage</label>
+              <label className="block text-sm text-[var(--text-muted)]">
+                Dosage
+              </label>
               <input
                 name="dosage"
                 value={formData.dosage}
@@ -194,7 +215,9 @@ function CreateModal({ open, onClose, onSuccess }) {
               />
             </div>
             <div>
-              <label className="block text-sm text-[var(--text-muted)]">Frequency</label>
+              <label className="block text-sm text-[var(--text-muted)]">
+                Frequency
+              </label>
               <input
                 name="frequency"
                 value={formData.frequency}
@@ -204,7 +227,9 @@ function CreateModal({ open, onClose, onSuccess }) {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Duration</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Duration
+            </label>
             <input
               name="duration"
               value={formData.duration}
@@ -213,7 +238,9 @@ function CreateModal({ open, onClose, onSuccess }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Notes</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Notes
+            </label>
             <textarea
               name="notes"
               value={formData.notes}
@@ -275,10 +302,14 @@ function EditModal({ open, onClose, item, onSave }) {
         >
           ✖
         </button>
-        <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">Edit Prescription</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">
+          Edit Prescription
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Medication</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Medication
+            </label>
             <input
               name="medication"
               value={formData.medication}
@@ -287,7 +318,9 @@ function EditModal({ open, onClose, item, onSave }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Dosage</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Dosage
+            </label>
             <input
               name="dosage"
               value={formData.dosage}
@@ -296,7 +329,9 @@ function EditModal({ open, onClose, item, onSave }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Frequency</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Frequency
+            </label>
             <input
               name="frequency"
               value={formData.frequency}
@@ -305,7 +340,9 @@ function EditModal({ open, onClose, item, onSave }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Duration</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Duration
+            </label>
             <input
               name="duration"
               value={formData.duration}
@@ -314,7 +351,9 @@ function EditModal({ open, onClose, item, onSave }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)]">Notes</label>
+            <label className="block text-sm text-[var(--text-muted)]">
+              Notes
+            </label>
             <textarea
               name="notes"
               value={formData.notes}
@@ -337,7 +376,10 @@ function EditModal({ open, onClose, item, onSave }) {
 export default function PharmacyPrescriptions() {
   const role = "PHARMACY";
   const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Pharmacy";
+  const userName =
+    localStorage.getItem("userName") ||
+    localStorage.getItem("name") ||
+    "Pharmacy";
 
   const [searchParams] = useSearchParams();
   const urlStatus = searchParams.get("status") || "";
@@ -376,7 +418,9 @@ export default function PharmacyPrescriptions() {
 
   const setDispatch = async (id, next) => {
     try {
-      await api.patch(`/pharmacy/prescriptions/${id}/status`, { dispatchStatus: next });
+      await api.patch(`/pharmacy/prescriptions/${id}/status`, {
+        dispatchStatus: next,
+      });
       toast.success(`Status updated to ${next}`);
       load();
     } catch (err) {
@@ -386,7 +430,8 @@ export default function PharmacyPrescriptions() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this prescription?")) return;
+    if (!window.confirm("Are you sure you want to delete this prescription?"))
+      return;
     try {
       await api.delete(`/pharmacy/prescriptions/${id}`);
       setList(list.filter((item) => item.id !== id));
@@ -419,7 +464,7 @@ export default function PharmacyPrescriptions() {
             <div className="flex items-center gap-4">
               <img
                 src="/images/logo/Asset3.png"
-                alt="CureVirtual"
+                alt="HealthBridge"
                 style={{ width: 120 }}
                 onError={(e) => {
                   e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -470,7 +515,9 @@ export default function PharmacyPrescriptions() {
           {loading ? (
             <p className="text-[var(--text-soft)]">Loading…</p>
           ) : list.length === 0 ? (
-            <div className="text-[var(--text-muted)]">No prescriptions found.</div>
+            <div className="text-[var(--text-muted)]">
+              No prescriptions found.
+            </div>
           ) : (
             <div className="bg-[var(--bg-glass)] rounded-2xl p-6 shadow overflow-x-auto">
               <table className="w-full border-collapse text-left">
@@ -563,7 +610,8 @@ export default function PharmacyPrescriptions() {
                               Dispense
                             </button>
                           )}
-                          {(p.dispatchStatus === "SENT" || p.dispatchStatus === "ACKNOWLEDGED") && (
+                          {(p.dispatchStatus === "SENT" ||
+                            p.dispatchStatus === "ACKNOWLEDGED") && (
                             <button
                               className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
                               onClick={() => setDispatch(p.id, "REJECTED")}
@@ -589,7 +637,11 @@ export default function PharmacyPrescriptions() {
         item={editItem}
         onSave={handleSaveEdit}
       />
-      <CreateModal open={createOpen} onClose={() => setCreateOpen(false)} onSuccess={load} />
+      <CreateModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSuccess={load}
+      />
 
       <ToastContainer position="top-right" theme="dark" />
     </div>

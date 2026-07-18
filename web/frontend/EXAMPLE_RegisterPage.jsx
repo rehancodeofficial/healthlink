@@ -9,7 +9,7 @@ import OTPVerification from "../components/OTPVerification";
 import "./RegisterPage.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://curevirtual-2-production-ee33.up.railway.app/api";
+  import.meta.env.VITE_API_BASE_URL || "https://HealthBridge-2-production-ee33.up.railway.app/api";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ const RegisterPage = () => {
     <div className="register-container">
       <div className="register-card">
         <h2>Create Account</h2>
-        <p className="register-subtitle">Join CureVirtual today</p>
+        <p className="register-subtitle">Join HealthBridge today</p>
 
         <form onSubmit={handleRegister}>
           <div className="form-group">

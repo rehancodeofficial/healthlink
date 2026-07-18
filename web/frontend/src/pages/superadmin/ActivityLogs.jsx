@@ -167,7 +167,7 @@ export default function ActivityLogs() {
     if (!logs.length) return toast.error("No telemetry data to export.");
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("CureVirtual - System Audit Trail", 14, 20);
+    doc.text("HealthBridge - System Audit Trail", 14, 20);
     doc.setFontSize(10);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
     doc.text(`Total Logs: ${totalLogs}`, 14, 34);

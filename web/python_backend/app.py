@@ -24,7 +24,7 @@ def get_doctors_data():
     doctors_info = ""
     try:
         # Get doctor data from the internal Node.js API
-        response = requests.get('https://curevirtual-2-production-ee33.up.railway.app/api/internal/doctors', timeout=5)
+        response = requests.get('https://HealthBridge-2-production-ee33.up.railway.app/api/internal/doctors', timeout=5)
         if response.status_code == 200:
             doctors = response.json()
             print(f"Fetched {len(doctors)} doctors from database")
@@ -61,7 +61,7 @@ def chat():
 
         # specific prompt for medical chatbot
         prompt = f"""
-        You are a highly experienced and compassionate AI Medical Assistant for "CureVirtual". 
+        You are a highly experienced and compassionate AI Medical Assistant for "HealthBridge". 
         Your goal is to provide preliminary health guidance and connect patients with the right specialists.
 
         Context:

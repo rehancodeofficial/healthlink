@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: curevirtual-backend
+    container_name: HealthBridge-backend
     ports:
       - "5001:5001"
     env_file:
@@ -23,11 +23,11 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: curevirtual-frontend
+    container_name: HealthBridge-frontend
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_BASE_URL=https://curevirtual-2-production-ee33.up.railway.app/api
+      - VITE_API_BASE_URL=https://HealthBridge-2-production-ee33.up.railway.app/api
     depends_on:
       - backend
     # volumes:

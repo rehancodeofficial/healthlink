@@ -7,25 +7,31 @@ const axios = require("axios");
 async function testDirectUpdate() {
   try {
     // Login first
-    const loginRes = await axios.post("https://curevirtual-2-production-ee33.up.railway.app/api/auth/login", {
-      email: "rehan.dev1514@gmail.com",
-      password: "123123",
-    });
+    const loginRes = await axios.post(
+      "https://HealthBridge-2-production-ee33.up.railway.app/api/auth/login",
+      {
+        email: "rehan.dev1514@gmail.com",
+        password: "123123",
+      },
+    );
 
     const token = loginRes.data.token;
     console.log("✅ Logged in, token:", token.substring(0, 20) + "...");
 
     // Get profile to get userId
-    const profileRes = await axios.get("https://curevirtual-2-production-ee33.up.railway.app/api/patient/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const profileRes = await axios.get(
+      "https://HealthBridge-2-production-ee33.up.railway.app/api/patient/profile",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
     const userId = profileRes.data.data.userId;
     console.log("✅ Got userId:", userId);
 
     // Try update
     const updateRes = await axios.put(
-      "https://curevirtual-2-production-ee33.up.railway.app/api/patient/profile",
+      "https://HealthBridge-2-production-ee33.up.railway.app/api/patient/profile",
       {
         userId: userId,
         dateOfBirth: "1995-05-15",
@@ -37,7 +43,7 @@ async function testDirectUpdate() {
       },
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
 
     console.log("✅ Update successful!");

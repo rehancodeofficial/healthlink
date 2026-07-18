@@ -194,7 +194,7 @@ async function ensureUser({ email, name, role, passwordHash }) {
 /** ---- Seed ------------------------------------------------------------- */
 
 async function main() {
-  console.log('🌱 Seeding CureVirtual…');
+  console.log('🌱 Seeding Health Bridge…');
 
   // bcrypt hash for "123456"
   const passwordHash = await bcrypt.hash('123456', 10);
@@ -202,10 +202,10 @@ async function main() {
   // 1) System / subscription settings (if those models exist)
   await safeUpsert('systemSetting', {
     where: { id: 1 },
-    update: { systemName: 'CureVirtual', themeColor: '#027906' },
+    update: { systemName: 'Health Bridge', themeColor: '#027906' },
     create: {
       id: 1,
-      systemName: 'CureVirtual',
+      systemName: 'Health Bridge',
       themeColor: '#027906',
       defaultFee: 20,
     },

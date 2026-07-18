@@ -17,10 +17,7 @@ const calcAnnual = (m) => {
 
 export default function SubscriptionSettings() {
   const role = "ADMIN";
-  const adminName =
-    localStorage.getItem("userName") ||
-    localStorage.getItem("name") ||
-    "Admin";
+  const adminName = localStorage.getItem("userName") || localStorage.getItem("name") || "Admin";
 
   const [loading, setLoading] = useState(false); // no hard gate
   const [saving, setSaving] = useState(false);
@@ -131,24 +128,20 @@ export default function SubscriptionSettings() {
           <div className="flex items-center justify-between">
             <img
               src="/images/logo/Asset3.png"
-              alt="CureVirtual"
+              alt="HealthBridge"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;
               }}
             />
-            <h1 className="text-3xl font-bold text-[var(--text-main)]">
-              Subscription Settings
-            </h1>
+            <h1 className="text-3xl font-bold text-[var(--text-main)]">Subscription Settings</h1>
           </div>
 
           {/* Current Prices (USD only) */}
           <div className="bg-[var(--bg-glass)] backdrop-blur-md rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Current Prices (USD)</h2>
-              {loading && (
-                <span className="text-xs text-[var(--text-soft)]">Syncing…</span>
-              )}
+              {loading && <span className="text-xs text-[var(--text-soft)]">Syncing…</span>}
             </div>
 
             <div className="overflow-x-auto">

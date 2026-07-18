@@ -13,20 +13,24 @@ export const SocketProvider = ({ children }) => {
   // Derive socket URL from API base URL (strip /api suffix)
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL ||
-    "https://curevirtual-2-production-ee33.up.railway.app/api";
+    "https://HealthBridge-2-production-ee33.up.railway.app/api";
   const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
-
 
   useEffect(() => {
     // Get user info from localStorage
     const userId = localStorage.getItem("userId");
     const role = localStorage.getItem("role");
-    const name = localStorage.getItem("userName") || localStorage.getItem("name") || "User";
+    const name =
+      localStorage.getItem("userName") ||
+      localStorage.getItem("name") ||
+      "User";
     const token = localStorage.getItem("token");
     const isTokenValid = token && token !== "undefined" && token !== "null";
 
     if (!userId || !role || !isTokenValid) {
-      console.warn("⚠️ No user credentials or token found. Socket connection delayed.");
+      console.warn(
+        "⚠️ No user credentials or token found. Socket connection delayed.",
+      );
       setConnectionState("disconnected");
       return;
     }
@@ -63,25 +67,28 @@ export const SocketProvider = ({ children }) => {
     // Connection error (Handles "Token expired" or "Authentication required")
     newSocket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error.message);
-      
-      const isAuthError = 
-        error.message === "Token expired" || 
-        error.message === "Authentication required" || 
+
+      const isAuthError =
+        error.message === "Token expired" ||
+        error.message === "Authentication required" ||
         error.message === "Invalid token";
 
       if (isAuthError) {
         console.warn("🔒 Auth error detected. Logging out...");
-        
+
         // Stop reconnecting
         newSocket.disconnect();
-        
+
         // Clear storage
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
         localStorage.removeItem("role");
-        
+
         // Redirect to login if not already there
-        if (!window.location.pathname.includes("/login") && !window.location.pathname.includes("/register")) {
+        if (
+          !window.location.pathname.includes("/login") &&
+          !window.location.pathname.includes("/register")
+        ) {
           window.location.href = "/login?reason=session_expired";
         }
       } else {
@@ -92,7 +99,9 @@ export const SocketProvider = ({ children }) => {
 
     // Reconnect attempt
     newSocket.on("reconnect_attempt", (attemptNumber) => {
-      console.log(`🔄 Reconnection attempt ${attemptNumber}/${maxReconnectAttempts}`);
+      console.log(
+        `🔄 Reconnection attempt ${attemptNumber}/${maxReconnectAttempts}`,
+      );
       setConnectionState("reconnecting");
     });
 
@@ -135,5 +144,9 @@ export const SocketProvider = ({ children }) => {
     connectionState,
   };
 
-  return <SocketContext.Provider value={contextValue}>{children}</SocketContext.Provider>;
+  return (
+    <SocketContext.Provider value={contextValue}>
+      {children}
+    </SocketContext.Provider>
+  );
 };

@@ -4,7 +4,9 @@
 
 import https from "https";
 
-const BASE_URL = process.env.API_URL || "https://curevirtual-2-production-ee33.up.railway.app";
+const BASE_URL =
+  process.env.API_URL ||
+  "https://HealthBridge-2-production-ee33.up.railway.app";
 
 function post(path, body) {
   return new Promise((resolve, reject) => {
@@ -44,7 +46,10 @@ async function run() {
 
   // --- Test 1: Missing email/password ---
   const t1 = await post("/api/auth/register", {});
-  console.assert(t1.status === 400, `❌ Test 1 failed: expected 400, got ${t1.status}`);
+  console.assert(
+    t1.status === 400,
+    `❌ Test 1 failed: expected 400, got ${t1.status}`,
+  );
   console.log(`✅ Test 1 (missing fields): ${t1.status} — ${t1.body.error}`);
 
   // --- Test 2: Valid registration ---
@@ -71,7 +76,9 @@ async function run() {
     if (msg.includes("check your email") || msg.includes("confirm")) {
       console.log("   ✅ Email confirmation message present — fix confirmed!");
     } else {
-      console.warn("   ⚠️  Message doesn't mention email confirmation — check the backend.");
+      console.warn(
+        "   ⚠️  Message doesn't mention email confirmation — check the backend.",
+      );
     }
   } else {
     console.error(`   ❌ Registration failed: ${JSON.stringify(t2.body)}`);
@@ -80,7 +87,7 @@ async function run() {
   // --- Test 3: Duplicate registration ---
   if (t2.status === 201) {
     const t3 = await post("/api/auth/register", {
-      email: uniqueEmail,   // same email
+      email: uniqueEmail, // same email
       password: "TestPass123!",
       firstName: "Dupe",
       lastName: "User",

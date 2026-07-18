@@ -1,23 +1,25 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config();
+require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
-  { apiVersion: 'v1' }
+  { apiVersion: "v1" },
 );
 
 exports.generateAIResponse = async (userMessage) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not defined in environment variables.");
+      throw new Error(
+        "GEMINI_API_KEY is not defined in environment variables.",
+      );
     }
 
     // Using gemini-2.5-flash as it is supported in v1
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-      You are a smart medical assistant for "CureVirtual".
+      You are a smart medical assistant for "HealthBridge".
       User Message: "${userMessage}"
 
       Task:
@@ -40,22 +42,27 @@ exports.generateAIResponse = async (userMessage) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
+
     // Clean up potential markdown code blocks and extra chatter
-    let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    
+    let cleanText = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
     // Find first { and last } to isolate JSON if AI added chatter
-    const firstBrace = cleanText.indexOf('{');
-    const lastBrace = cleanText.lastIndexOf('}');
+    const firstBrace = cleanText.indexOf("{");
+    const lastBrace = cleanText.lastIndexOf("}");
     if (firstBrace !== -1 && lastBrace !== -1) {
       cleanText = cleanText.substring(firstBrace, lastBrace + 1);
     }
-    
+
     try {
       return JSON.parse(cleanText);
     } catch (parseError) {
       console.error("Failed to parse AI response:", cleanText);
-      throw new Error(`Invalid AI response format: ${cleanText.substring(0, 100)}`);
+      throw new Error(
+        `Invalid AI response format: ${cleanText.substring(0, 100)}`,
+      );
     }
   } catch (error) {
     console.error("Gemini Service Error:", error);

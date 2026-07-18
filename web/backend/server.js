@@ -1,6 +1,6 @@
 // Polyfill for Headers, Fetch, and Request (required for Supabase SDK on Node < 18)
-if (typeof global.Headers === 'undefined') {
-  const { Headers, Request, Response, fetch } = require('node-fetch-native');
+if (typeof global.Headers === "undefined") {
+  const { Headers, Request, Response, fetch } = require("node-fetch-native");
   global.Headers = Headers;
   global.Request = Request;
   global.Response = Response;
@@ -22,13 +22,12 @@ const { Server } = require("socket.io");
 
 // ✅ Global Allowed Origins (Moved up for Socket.io)
 const allowedOrigins = [
-  "https://curevirtual-2.vercel.app", // Keep for local development
+  "https://HealthBridge-2.vercel.app", // Keep for local development
   process.env.FRONTEND_URL,
   process.env.APP_BASE_URL,
   process.env.CORS_ORIGIN,
-  "https://curevirtual-2.vercel.app",
+  "https://HealthBridge-2.vercel.app",
 ].filter(Boolean);
-
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -68,7 +67,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
@@ -191,7 +190,7 @@ app.use("/api/support", supportRoutes);
 app.post(
   "/api/subscription/stripe/webhook",
   express.raw({ type: "application/json" }),
-  subscriptionRoutes.stripeWebhook
+  subscriptionRoutes.stripeWebhook,
 );
 
 // ✅ MESSAGES (Unified)
@@ -219,8 +218,12 @@ app.get("/api/debug/env", (_req, res) => {
     DATABASE_URL: process.env.DATABASE_URL ? "✅ SET" : "❌ MISSING",
     DIRECT_URL: process.env.DIRECT_URL ? "✅ SET" : "⚠️ NOT SET",
     JWT_SECRET: process.env.JWT_SECRET ? "✅ SET" : "❌ MISSING",
-    EMAIL_USER: process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : "❌ MISSING",
-    GMAIL_USER: process.env.GMAIL_USER ? `✅ ${process.env.GMAIL_USER}` : "not set",
+    EMAIL_USER: process.env.EMAIL_USER
+      ? `✅ ${process.env.EMAIL_USER}`
+      : "❌ MISSING",
+    GMAIL_USER: process.env.GMAIL_USER
+      ? `✅ ${process.env.GMAIL_USER}`
+      : "not set",
     EMAIL_PASS: process.env.EMAIL_PASS ? "✅ SET" : "❌ MISSING",
     GMAIL_PASS: process.env.GMAIL_PASS ? "✅ SET" : "not set",
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || "gmail (default)",
@@ -235,7 +238,9 @@ app.use((err, req, res, _next) => {
 
   // Custom response for CORS or other well-known errors
   if (err.message === "Not allowed by CORS") {
-    return res.status(403).json({ success: false, message: "CORS policy violation" });
+    return res
+      .status(403)
+      .json({ success: false, message: "CORS policy violation" });
   }
 
   res.status(err.status || 500).json({

@@ -2,27 +2,31 @@ require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
 const prisma = require("./prisma/prismaClient");
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: { autoRefreshToken: false, persistSession: false },
+  },
+);
 
 const accounts = [
   {
-    email: "superadmin@curevirtual.com",
-    password: "Curevirtual@123",
+    email: "superadmin@HealthBridge.com",
+    password: "HealthBridge@123",
     role: "SUPERADMIN",
     firstName: "Super",
     lastName: "Admin",
   },
   {
-    email: "admin@curevirtual.com",
+    email: "admin@HealthBridge.com",
     password: "123456",
     role: "ADMIN",
     firstName: "Admin",
     lastName: "User",
   },
   {
-    email: "support@curevirtual.com",
+    email: "support@HealthBridge.com",
     password: "123456",
     role: "SUPPORT",
     firstName: "Support",
@@ -35,55 +39,65 @@ async function main() {
     console.log(`\n--- Processing ${account.email} (${account.role}) ---`);
 
     // Step 1: Check if user already exists in Supabase Auth
-    const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
-    if (listError) throw new Error("Failed to list users: " + listError.message);
+    const { data: listData, error: listError } =
+      await supabase.auth.admin.listUsers();
+    if (listError)
+      throw new Error("Failed to list users: " + listError.message);
 
     console.log(`  [Auth] Total users in Auth: ${listData.users.length}`);
-    console.log(`  [Auth] Existing emails: ${listData.users.map((u) => u.email).join(", ")}`);
+    console.log(
+      `  [Auth] Existing emails: ${listData.users.map((u) => u.email).join(", ")}`,
+    );
 
     let authUser = listData.users.find((u) => u.email === account.email);
 
     if (!authUser) {
       // Check if Prisma user exists and try to find in Auth by that ID
-      const existingPrismaUser = await prisma.user.findUnique({ where: { email: account.email } });
+      const existingPrismaUser = await prisma.user.findUnique({
+        where: { email: account.email },
+      });
       if (existingPrismaUser) {
         console.log(
-          `  [DB] Found existing user in DB with ID: ${existingPrismaUser.id}. Checking Auth for this ID...`
+          `  [DB] Found existing user in DB with ID: ${existingPrismaUser.id}. Checking Auth for this ID...`,
         );
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
-          existingPrismaUser.id
-        );
+        const { data: userData, error: userError } =
+          await supabase.auth.admin.getUserById(existingPrismaUser.id);
         if (userData && userData.user) {
           console.log(`  [Auth] Found user by ID in Auth!`);
           authUser = userData.user;
         } else {
           console.log(
-            `  [Auth] User not found in Auth by ID ${existingPrismaUser.id}. Error: ${userError?.message}`
+            `  [Auth] User not found in Auth by ID ${existingPrismaUser.id}. Error: ${userError?.message}`,
           );
         }
       }
     }
 
     if (authUser) {
-      console.log(`  [Auth] User already exists, updating password + Confirm...`);
-      const { data: updated, error: updateErr } = await supabase.auth.admin.updateUserById(
-        authUser.id,
-        {
+      console.log(
+        `  [Auth] User already exists, updating password + Confirm...`,
+      );
+      const { data: updated, error: updateErr } =
+        await supabase.auth.admin.updateUserById(authUser.id, {
           password: account.password,
           email_confirm: true,
-        }
-      );
-      if (updateErr) throw new Error("Failed to update auth user: " + updateErr.message);
+        });
+      if (updateErr)
+        throw new Error("Failed to update auth user: " + updateErr.message);
       authUser = updated.user;
     } else {
       console.log(`  [Auth] Creating new Supabase auth user...`);
-      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-        email: account.email,
-        password: account.password,
-        email_confirm: true,
-      });
+      const { data: created, error: createErr } =
+        await supabase.auth.admin.createUser({
+          email: account.email,
+          password: account.password,
+          email_confirm: true,
+        });
       if (createErr) {
-        console.error(`  [Auth] Create user error details:`, JSON.stringify(createErr, null, 2));
+        console.error(
+          `  [Auth] Create user error details:`,
+          JSON.stringify(createErr, null, 2),
+        );
         throw new Error("Failed to create auth user: " + createErr.message);
       }
       authUser = created.user;

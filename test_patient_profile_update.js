@@ -5,7 +5,7 @@
 
 const axios = require("axios");
 
-const BASE_URL = "https://curevirtual-2-production-ee33.up.railway.app/api";
+const BASE_URL = "https://HealthBridge-2-production-ee33.up.railway.app/api";
 const TEST_EMAIL = "rehan.dev1514@gmail.com";
 const TEST_PASSWORD = "123123";
 
@@ -29,7 +29,11 @@ async function testProfileUpdate() {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("✅ Current profile fetched");
-    console.log("   Current data:", JSON.stringify(profileRes.data.data, null, 2), "\n");
+    console.log(
+      "   Current data:",
+      JSON.stringify(profileRes.data.data, null, 2),
+      "\n",
+    );
 
     // Step 3: Update profile
     console.log("3️⃣  Updating profile with new data...");
@@ -50,12 +54,20 @@ async function testProfileUpdate() {
       insuranceMemberId: "INS-98765",
     };
 
-    const updateRes = await axios.put(`${BASE_URL}/patient/profile`, updateData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const updateRes = await axios.put(
+      `${BASE_URL}/patient/profile`,
+      updateData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
     console.log("✅ Profile updated successfully");
-    console.log("   Updated data:", JSON.stringify(updateRes.data.data, null, 2), "\n");
+    console.log(
+      "   Updated data:",
+      JSON.stringify(updateRes.data.data, null, 2),
+      "\n",
+    );
 
     // Step 4: Verify the update
     console.log("4️⃣  Verifying the update...");
@@ -68,12 +80,28 @@ async function testProfileUpdate() {
 
     // Check key fields
     const checks = [
-      { field: "dateOfBirth", expected: "1995-05-15", actual: updatedProfile.user?.dateOfBirth?.split("T")[0] },
-      { field: "gender", expected: "MALE", actual: updatedProfile.user?.gender },
-      { field: "bloodGroup", expected: "A_POSITIVE", actual: updatedProfile.bloodGroup },
+      {
+        field: "dateOfBirth",
+        expected: "1995-05-15",
+        actual: updatedProfile.user?.dateOfBirth?.split("T")[0],
+      },
+      {
+        field: "gender",
+        expected: "MALE",
+        actual: updatedProfile.user?.gender,
+      },
+      {
+        field: "bloodGroup",
+        expected: "A_POSITIVE",
+        actual: updatedProfile.bloodGroup,
+      },
       { field: "height", expected: 180, actual: updatedProfile.height },
       { field: "weight", expected: 75, actual: updatedProfile.weight },
-      { field: "address", expected: "123 Health Street, Wellness City", actual: updatedProfile.address },
+      {
+        field: "address",
+        expected: "123 Health Street, Wellness City",
+        actual: updatedProfile.address,
+      },
     ];
 
     console.log("\n📊 Verification Results:");
@@ -81,7 +109,9 @@ async function testProfileUpdate() {
     checks.forEach(({ field, expected, actual }) => {
       const passed = String(expected) === String(actual);
       allPassed = allPassed && passed;
-      console.log(`   ${passed ? "✅" : "❌"} ${field}: ${actual} ${passed ? "==" : "!="} ${expected}`);
+      console.log(
+        `   ${passed ? "✅" : "❌"} ${field}: ${actual} ${passed ? "==" : "!="} ${expected}`,
+      );
     });
 
     console.log("\n" + "=".repeat(50));
@@ -91,7 +121,6 @@ async function testProfileUpdate() {
       console.log("⚠️  SOME TESTS FAILED. Please review the results above.");
     }
     console.log("=".repeat(50));
-
   } catch (error) {
     console.error("\n❌ Test failed:");
     if (error.response) {

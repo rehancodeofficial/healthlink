@@ -72,7 +72,7 @@ export default function VideoLobby() {
         </div>
 
         <p className="mt-12 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">
-          CureVirtual Secure Video Consultation
+          HealthBridge Secure Video Consultation
         </p>
       </div>
     </div>
