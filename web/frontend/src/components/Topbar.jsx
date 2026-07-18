@@ -129,15 +129,7 @@ export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIs
           </div>
         </div>
 
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2.5 md:p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all shadow-sm active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          title="Toggle Theme"
-          aria-label="Toggle theme"
-        >
-          {theme === "light" ? <FaMoon className="w-4 h-4" /> : <FaSun className="w-4 h-4" />}
-        </button>
+
 
         {/* Notifications */}
         <div

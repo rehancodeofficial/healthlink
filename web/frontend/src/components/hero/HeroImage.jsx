@@ -22,22 +22,19 @@ export default function HeroImage() {
       {/* Centered Ambient Glow */}
       <div className="absolute inset-[-30px] bg-gradient-to-tr from-[var(--hb-red-glow)] to-[var(--hb-green-glow)] -z-10 blur-[90px] rounded-full pointer-events-none opacity-50 animate-[pulse_8s_ease-in-out_infinite_alternate]" />
 
-      {/* Main Image Frame */}
+      {/* Cutout Image of Doctors with Transparent Blend Effect */}
       <motion.div
-        initial={{ opacity: 0, scale: 1.04 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
-        className="glass-clay p-3 relative overflow-hidden rounded-[var(--r-xl)] border border-[var(--glass-border)] shadow-2xl"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
+        className="relative max-w-[700px] mx-auto pointer-events-none flex justify-center"
       >
-        <div className="relative rounded-[calc(var(--r-xl)-12px)] overflow-hidden aspect-[16/10]">
-          <img
-            src="/images/clinicians.png"
-            alt="Clinicians team serving clinics"
-            className="w-full h-full object-cover select-none"
-          />
-          {/* Subtle inset vignette overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
-        </div>
+        <img
+          src="/images/clinicians.png"
+          alt="Pakistani medical team clinicians"
+          className="w-[85%] h-auto select-none mix-blend-multiply rounded-full"
+          style={{borderRadius: "50%"}}
+        />
       </motion.div>
 
       {/* Left Floating Card - Trusted by Clinics */}

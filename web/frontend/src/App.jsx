@@ -112,6 +112,12 @@ const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/public/About"));
+const Services = lazy(() => import("./pages/public/Services"));
+const Doctors = lazy(() => import("./pages/public/Doctors"));
+const Appointments = lazy(() => import("./pages/public/Appointments"));
+const Resources = lazy(() => import("./pages/public/Resources"));
+const Contact = lazy(() => import("./pages/public/Contact"));
 import Chatbot from "./components/Chatbot";
 
 /* ================================
@@ -153,6 +159,12 @@ export default function App() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/doctors" element={<Doctors />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

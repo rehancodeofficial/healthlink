@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function NavLink({ href, children, isHovered, onHover, onLeave }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
       className="relative px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)] focus:rounded-xl"
@@ -16,6 +17,6 @@ export default function NavLink({ href, children, isHovered, onHover, onLeave })
         />
       )}
       <span className="relative z-10">{children}</span>
-    </a>
+    </Link>
   );
 }

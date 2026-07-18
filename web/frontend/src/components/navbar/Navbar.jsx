@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { FaBars, FaTimes, FaArrowRight } from "react-icons/fa";
 import NavLink from "./NavLink";
-import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -14,7 +13,16 @@ export default function Navbar() {
   const { scrollY } = useScroll();
   const navHeight = useTransform(scrollY, [0, 80], [72, 64]);
   const navMargin = useTransform(scrollY, [0, 80], [24, 16]);
-  const borderOpacity = useTransform(scrollY, [0, 80], [0.55, 0.85]);
+
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: "Services", path: "/services" },
+    { name: "Doctors", path: "/doctors" },
+    { name: "Appointments", path: "/appointments" },
+    { name: "Resources", path: "/resources" },
+    { name: "Contact", path: "/contact" }
+  ];
 
   return (
     <motion.nav
@@ -35,38 +43,23 @@ export default function Navbar() {
 
       {/* Center Navigation links */}
       <div
-        className="hidden md:flex items-center gap-2 justify-self-center"
+        className="hidden md:flex items-center gap-1 justify-self-center"
         onMouseLeave={() => setHoveredIndex(null)}
       >
-        <NavLink
-          href="#features"
-          isHovered={hoveredIndex === 0}
-          onHover={() => setHoveredIndex(0)}
-          onLeave={() => {}}
-        >
-          Features
-        </NavLink>
-        <NavLink
-          href="#about"
-          isHovered={hoveredIndex === 1}
-          onHover={() => setHoveredIndex(1)}
-          onLeave={() => {}}
-        >
-          About
-        </NavLink>
-        <NavLink
-          href="#contact"
-          isHovered={hoveredIndex === 2}
-          onHover={() => setHoveredIndex(2)}
-          onLeave={() => {}}
-        >
-          Contact
-        </NavLink>
+        {navLinks.map((link, idx) => (
+          <NavLink
+            key={link.name}
+            href={link.path}
+            isHovered={hoveredIndex === idx}
+            onHover={() => setHoveredIndex(idx)}
+            onLeave={() => {}}
+          >
+            {link.name}
+          </NavLink>
+        ))}
       </div>
 
       <div className="flex items-center gap-3.5 justify-self-end">
-        <ThemeToggle />
-
         {/* Ghost Sign In */}
         <button
           onClick={() => navigate("/login")}
@@ -75,14 +68,14 @@ export default function Navbar() {
           Sign In
         </button>
 
-        {/* Primary Join Portal button in Clay */}
+        {/* Primary Book Appointment button in Clay */}
         <motion.button
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/appointments")}
           className="btn-clay-primary px-6 py-2.5 text-xs font-bold uppercase tracking-wider hidden md:flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)]"
           whileHover={{ y: -2, scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
         >
-          Join Portal
+          Book Appointment
         </motion.button>
 
         {/* Mobile menu trigger */}
@@ -106,30 +99,17 @@ export default function Navbar() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-[calc(100%+12px)] left-0 right-0 glass-clay overflow-hidden p-5 flex flex-col gap-3 md:hidden z-40 border border-[var(--glass-border)] shadow-2xl"
           >
-            <a
-              href="#features"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="clay-pressed px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] flex justify-between items-center"
-            >
-              <span>Features</span>
-              <FaArrowRight size={10} className="opacity-50" />
-            </a>
-            <a
-              href="#about"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="clay-pressed px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] flex justify-between items-center"
-            >
-              <span>About</span>
-              <FaArrowRight size={10} className="opacity-50" />
-            </a>
-            <a
-              href="#contact"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="clay-pressed px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] flex justify-between items-center"
-            >
-              <span>Contact</span>
-              <FaArrowRight size={10} className="opacity-50" />
-            </a>
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="clay-pressed px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] flex justify-between items-center"
+              >
+                <span>{link.name}</span>
+                <FaArrowRight size={10} className="opacity-50" />
+              </Link>
+            ))}
             <div className="h-px bg-[var(--glass-border)] my-2 opacity-50"></div>
             <button
               onClick={() => {
@@ -142,12 +122,12 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => {
-                navigate("/register");
+                navigate("/appointments");
                 setIsMobileMenuOpen(false);
               }}
               className="btn-clay-primary py-3.5 w-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
             >
-              Join Portal <FaArrowRight size={10} />
+              Book Appointment <FaArrowRight size={10} />
             </button>
           </motion.div>
         )}
