@@ -71,13 +71,14 @@ export default function Hero() {
             <FaArrowRight size={12} />
           </motion.button>
 
-          <button
+          <motion.button
             onClick={() => navigate("/login")}
-            className="px-9 py-4 text-sm font-bold uppercase tracking-wider text-[var(--hb-ink-soft)] hover:text-[var(--hb-ink)] active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)] focus:rounded-xl relative group"
+            className="px-9 py-4 text-sm font-semibold uppercase tracking-wider border-2 border-[var(--hb-red)] text-[var(--hb-red)] bg-transparent rounded-2xl flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)] active:scale-95 transition-all"
+            whileHover={{ y: -2, scale: 1.015 }}
+            whileTap={{ scale: 0.98 }}
           >
             <span>Book Demo</span>
-            <span className="absolute bottom-3 left-9 right-9 h-0.5 bg-[var(--hb-cream-deep)] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-          </button>
+          </motion.button>
         </motion.div>
 
         {/* Hero Image Component with float widgets (Centered) */}
