@@ -90,7 +90,7 @@ export default function PatientSendMessage() {
 
         <div className="p-6">
           <img
-            src="/images/logo/Asset3.png"
+            src="/logo.png"
             alt="HealthBridge"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {

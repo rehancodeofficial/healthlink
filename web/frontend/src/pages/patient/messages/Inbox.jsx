@@ -164,7 +164,7 @@ export default function PatientInbox() {
 
         <div className="p-6">
           <img
-            src="/images/logo/Asset3.png"
+            src="/logo.png"
             alt="HealthBridge"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {
@@ -247,7 +247,7 @@ export default function PatientInbox() {
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-black p-6 relative">
                 {/* Close button */}
                 <img
-                  src="/images/logo/Asset3.png"
+                  src="/logo.png"
                   alt="HealthBridge"
                   style={{ width: 120, height: "auto" }}
                   onError={(e) => {

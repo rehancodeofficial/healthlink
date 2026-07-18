@@ -99,7 +99,7 @@ export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIs
 
       {/* Logo and Welcome - Desktop */}
       <div className="hidden lg:flex flex-1 max-w-md items-center gap-3">
-        <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+        <img src="/logo.png" alt="Logo" className="w-8 h-8" />
         <h1 className="text-xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-left-4 duration-500">
           Welcome back,{" "}
           <span className="text-emerald-300">{userName ? userName.split(" ")[0] : "User"}</span>
@@ -108,7 +108,7 @@ export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIs
 
       {/* Mobile Logo - Center aligned on mobile/tablet */}
       <div className="flex lg:hidden flex-1 items-center justify-center">
-        <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+        <img src="/logo.png" alt="Logo" className="w-8 h-8" />
       </div>
 
       {/* Right section */}

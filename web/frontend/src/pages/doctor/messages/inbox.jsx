@@ -157,7 +157,7 @@ export default function DoctorInbox() {
     <DashboardLayout role="DOCTOR" user={user}>
       <div className="p-6 min-h-screen bg-[var(--bg-main)]/90 text-[var(--text-main)]">
         <img
-          src="/images/logo/Asset3.png"
+          src="/logo.png"
           alt="HealthBridge"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
@@ -242,7 +242,7 @@ export default function DoctorInbox() {
               {/* Header + inline delete */}
               <div className="flex items-center justify-between">
                 <img
-                  src="/images/logo/Asset3.png"
+                  src="/logo.png"
                   alt="HealthBridge"
                   style={{ width: 120, height: "auto" }}
                   onError={(e) => {

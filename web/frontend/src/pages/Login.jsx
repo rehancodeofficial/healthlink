@@ -151,7 +151,7 @@ export default function Login() {
 
             <div className="mb-8">
               <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-6 border border-[var(--border)] shadow-2xl">
-                <img src="/images/logo/Asset3.png" alt="Logo" className="w-10 h-10" />
+                <img src="/logo.png" alt="Logo" className="w-10 h-10" />
                 <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
                   HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
                 </span>
@@ -178,7 +178,7 @@ export default function Login() {
           <div className="mb-8 md:mb-10">
             {/* Mobile Branding */}
             <div className="md:hidden flex items-center gap-2 mb-6 opacity-80">
-              <img src="/images/logo/Asset3.png" alt="Logo" className="w-6 h-6" />
+              <img src="/logo.png" alt="Logo" className="w-6 h-6" />
               <span className="text-sm font-black tracking-tighter text-[var(--text-main)] uppercase">
                 HEALTH<span className="text-[var(--brand-blue)]">BRIDGE</span>
               </span>

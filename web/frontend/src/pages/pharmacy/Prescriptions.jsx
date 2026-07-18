@@ -30,7 +30,7 @@ function ViewModal({ open, onClose, item }) {
           ✖
         </button>
         <img
-          src="/images/logo/Asset3.png"
+          src="/logo.png"
           alt="HealthBridge"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
@@ -418,7 +418,7 @@ export default function PharmacyPrescriptions() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <img
-                src="/images/logo/Asset3.png"
+                src="/logo.png"
                 alt="HealthBridge"
                 style={{ width: 120 }}
                 onError={(e) => {

@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
+const PLACEHOLDER_LOGO = "/logo.png";
 
 const fmtUSD = (n) => (typeof n === "number" && !Number.isNaN(n) ? `$${n.toFixed(2)}` : "—");
 
@@ -113,7 +113,7 @@ export default function PatientSubscription() {
 
         <div className="p-6 space-y-6">
           <img
-            src="/images/logo/Asset3.png"
+            src="/logo.png"
             alt="HealthBridge"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {

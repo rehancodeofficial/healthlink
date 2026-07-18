@@ -48,7 +48,7 @@ export default function Home() {
             onClick={() => navigate("/")}
           >
             <div className="bg-[var(--bg-card)] p-2 rounded-xl group-hover:scale-105 transition-transform shadow-md border border-[var(--border)]">
-              <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+              <img src="/logo.png" alt="Logo" className="w-8 h-8" />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase">
               HEALTH<span className="text-[var(--brand-primary)]">BRIDGE</span>
@@ -159,7 +159,7 @@ export default function Home() {
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--bg-glass)] border border-[var(--border)] text-[var(--brand-secondary)] text-[11px] font-semibold tracking-wider uppercase">
               <span className="h-2 w-2 rounded-full bg-[var(--brand-accent)] animate-pulse"></span>
-              ✨ AI Powered Clinic Management
+              AI Powered Clinic Management
             </div>
 
             {/* Headline */}
@@ -396,7 +396,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-[var(--bg-glass)] p-2 rounded-xl shadow-sm border border-[var(--border)]">
-                <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+                <img src="/logo.png" alt="Logo" className="w-8 h-8" />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
                 HEALTH<span className="text-[var(--brand-primary)]">BRIDGE</span>

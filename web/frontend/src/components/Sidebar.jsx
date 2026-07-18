@@ -191,7 +191,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
               className="bg-white/10 p-2 rounded-xl shadow-lg cursor-pointer shrink-0 border border-white/10 backdrop-blur-sm"
               onClick={() => setOpen(!open)}
             >
-              <img src="/images/logo/Asset3.png" alt="Logo" className="w-8 h-8" />
+              <img src="/logo.png" alt="Logo" className="w-8 h-8" />
             </div>
             {open && (
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">

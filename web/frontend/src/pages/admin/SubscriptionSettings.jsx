@@ -6,7 +6,7 @@ import api from "../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const PLACEHOLDER_LOGO = "/images/logo/Asset3.png";
+const PLACEHOLDER_LOGO = "/logo.png";
 
 // 10.5-month annualization (12 months with discount)
 const calcAnnual = (m) => {
@@ -127,7 +127,7 @@ export default function SubscriptionSettings() {
         <div className="p-6 space-y-6">
           <div className="flex items-center justify-between">
             <img
-              src="/images/logo/Asset3.png"
+              src="/logo.png"
               alt="HealthBridge"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
