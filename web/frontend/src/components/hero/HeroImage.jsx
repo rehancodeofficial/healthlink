@@ -28,7 +28,7 @@ export default function HeroImage() {
         <img
           src="/images/clinicians.png"
           alt="Pakistani medical team clinicians"
-          className="w-[85%] h-auto select-none relative z-10 translate-y-1"
+          className="w-[120%] h-auto select-none relative z-10 translate-y-1.5"
         />
       </div>
 
