@@ -21,7 +21,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative flex flex-col pt-32 pb-0 overflow-hidden select-none">
+    <section className="relative flex flex-col pt-16 pb-0 overflow-hidden select-none">
       <div className="max-w-4xl mx-auto px-6 w-full flex flex-col items-center text-center gap-7">
         
         {/* Eyebrow Badge (Centered) */}

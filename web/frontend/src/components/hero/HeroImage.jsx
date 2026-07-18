@@ -18,6 +18,9 @@ export default function HeroImage() {
         </svg>
       </div>
 
+      {/* White silhouette mask to block globe lines behind doctors' bodies */}
+      <div className="absolute bottom-0 w-[55%] h-[80%] bg-white rounded-t-[180px] z-5 pointer-events-none" />
+
       {/* Cutout Image of Doctors with Transparent Blend Effect (layered in front, sitting exactly on the bottom border joining stats band) */}
       <img
         src="/images/clinicians.png"
