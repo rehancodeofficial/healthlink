@@ -114,8 +114,8 @@ export default function Home() {
         <div className="page-container max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 border-t border-[var(--border)] pt-12">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="clay-pressed p-1.5 rounded-xl shadow-sm border border-[var(--border)]">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8" />
+              <div className="clay-pressed p-1.5 rounded-full shadow-sm border border-[var(--border)] overflow-hidden flex items-center justify-center">
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 mix-blend-multiply" />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
                 HEALTH<span className="text-[var(--brand-primary)]">BRIDGE</span>

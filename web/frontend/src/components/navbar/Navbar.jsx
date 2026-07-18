@@ -33,8 +33,8 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 glass-clay mx-4 md:mx-8 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-6 transition-all duration-300 select-none"
     >
       <div className="flex items-center gap-3 cursor-pointer group justify-self-start" onClick={() => navigate("/")}>
-        <div className="clay-pressed p-1.5 rounded-xl group-hover:scale-105 transition-transform shadow-md">
-          <img src="/logo.png" alt="Logo" className="w-7 h-7" />
+        <div className="clay-pressed p-1.5 rounded-full group-hover:scale-105 transition-transform shadow-md overflow-hidden flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-7 h-7 mix-blend-multiply" />
         </div>
         <span className="text-base font-black tracking-tighter uppercase text-[var(--hb-ink)]">
           HEALTH<span className="text-[var(--hb-red)]">BRIDGE</span>

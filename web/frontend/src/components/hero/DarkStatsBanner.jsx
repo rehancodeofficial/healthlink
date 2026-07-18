@@ -3,7 +3,7 @@ import { motion, useInView, animate } from "framer-motion";
 
 export default function DarkStatsBanner() {
   return (
-    <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-[var(--hb-ink)] text-[#FAFAF8] py-16 md:py-20 overflow-hidden select-none border-t border-b border-[var(--hb-ink)]/10">
+    <section className="relative z-20 w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-[var(--hb-ink)] text-[#FAFAF8] py-10 md:py-12 overflow-hidden select-none border-t border-b border-[var(--hb-ink)]/10">
       
       {/* Low opacity dot grid overlay */}
       <div className="absolute inset-0 bg-grid opacity-[0.03] pointer-events-none" />
