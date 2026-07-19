@@ -97,9 +97,9 @@ export default function Home() {
           </div>
           <div className="lg:w-1/2 w-full">
             <img
-              src="/images/about.jpeg"
+              src="/images/about.png"
               className="rounded-[2rem] shadow-2xl border border-[var(--border)] w-full object-cover h-[400px] hover:scale-[1.01] transition-transform duration-700"
-              alt="Modern Hospital"
+              alt="Modern Hospital Telemedicine Suite"
             />
           </div>
         </div>
