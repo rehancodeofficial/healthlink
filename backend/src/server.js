@@ -39,7 +39,7 @@ const io = new Server(server, {
 });
 
 // Socket Authentication Middleware
-const socketAuth = require("./middleware/socketAuth");
+const socketAuth = require("./middlewares/socketAuth");
 io.use(socketAuth);
 
 // Initialize Socket Handler
