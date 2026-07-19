@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 
 export default function HeroHeadline() {
-  const line1 = "Healthcare Management";
-  const line2 = "Built for Modern Clinics";
+  const eyebrow = "Telemedicine, Redefined";
+  const line1 = "Quality Healthcare,";
+  const line2 = "One Video Call Away.";
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -34,6 +35,12 @@ export default function HeroHeadline() {
       animate="visible"
       className="space-y-2 text-center select-none"
     >
+      <motion.p
+        variants={itemVariants}
+        className="text-xs font-black uppercase tracking-[0.3em] text-[var(--hb-red)] mb-2"
+      >
+        {eyebrow}
+      </motion.p>
       <motion.h1
         variants={itemVariants}
         className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[var(--hb-ink)] leading-[1.05] tracking-tighter"

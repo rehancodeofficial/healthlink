@@ -19,10 +19,10 @@ export default function DarkStatsBanner() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-6 text-center">
-          <CounterTile value="12,000+" label="Patients Managed" />
-          <CounterTile value="250+" label="Clinics Connected" />
-          <CounterTile value="99.99%" label="Uptime SLA" />
-          <CounterTile value="AI Active" label="Assistant Active" />
+          <CounterTile value="500+" label="Licensed Doctors" />
+          <CounterTile value="50,000+" label="Consultations Completed" />
+          <CounterTile value="4.8/5" label="Average Patient Rating" />
+          <CounterTile value="24/7" label="Available Round-the-Clock" />
         </div>
 
       </div>

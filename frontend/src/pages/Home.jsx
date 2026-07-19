@@ -1,111 +1,263 @@
-import { FaClock, FaMobileAlt, FaVideo } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { 
+  FaCalendarCheck, 
+  FaVideo, 
+  FaPrescription, 
+  FaUserCheck, 
+  FaShieldAlt, 
+  FaHistory, 
+  FaClock, 
+  FaArrowRight, 
+  FaStethoscope, 
+  FaHeartbeat, 
+  FaChild, 
+  FaUserMd, 
+  FaBrain, 
+  FaAppleAlt, 
+  FaUserNurse, 
+  FaHeadphones 
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar/Navbar";
 import Hero from "../components/hero/Hero";
 import DarkStatsBanner from "../components/hero/DarkStatsBanner";
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const specialties = [
+    { name: "General Physician", desc: "Fevers, infections, everyday illness", icon: <FaStethoscope className="text-[var(--hb-red)]" /> },
+    { name: "Dermatology", desc: "Skin, hair, and nail concerns", icon: <FaHeartbeat className="text-emerald-500" /> },
+    { name: "Pediatrics", desc: "Child health, from newborns to teens", icon: <FaChild className="text-blue-500" /> },
+    { name: "Gynecology", desc: "Women's health, private and judgment-free", icon: <FaUserNurse className="text-purple-500" /> },
+    { name: "Mental Health", desc: "Therapy and psychiatric consultations", icon: <FaBrain className="text-indigo-500" /> },
+    { name: "Nutrition", desc: "Diet plans built around your health goals", icon: <FaAppleAlt className="text-amber-500" /> },
+    { name: "Internal Medicine", desc: "Chronic condition management", icon: <FaUserMd className="text-teal-500" /> },
+    { name: "ENT", desc: "Ear, nose, throat, and sinus issues", icon: <FaHeadphones className="text-rose-500" /> }
+  ];
+
+  const whyUs = [
+    { title: "Verified specialists", text: "Every doctor is licensed, credentialed, and reviewed before joining the platform.", icon: <FaUserCheck className="text-[var(--hb-red)]" /> },
+    { title: "Real-time video consultations", text: "HD, encrypted video and audio consults with zero lag.", icon: <FaVideo className="text-emerald-500" /> },
+    { title: "Digital prescriptions", text: "E-prescriptions sent directly to your preferred pharmacy.", icon: <FaPrescription className="text-blue-500" /> },
+    { title: "Complete medical history", text: "All your visits, prescriptions, and reports in one secure dashboard.", icon: <FaHistory className="text-purple-500" /> },
+    { title: "Round-the-clock access", text: "Talk to a doctor at 2 AM or 2 PM — we don't close.", icon: <FaClock className="text-amber-500" /> }
+  ];
+
+  const faqs = [
+    { q: "Is a video consultation as effective as an in-person visit?", a: "For most non-emergency concerns — consultations, prescriptions, follow-ups, and specialist advice — yes. Doctors will always recommend in-person care when needed." },
+    { q: "Are my prescriptions valid at any pharmacy?", a: "Yes, e-prescriptions issued through HealthLink are valid at any licensed pharmacy." },
+    { q: "Is my health data private?", a: "Yes. All consultations and records are encrypted with bank-grade security and accessible only to you and your treating doctor." },
+    { q: "How fast can I see a doctor?", a: "Average wait time from booking to consultation is under 5 minutes for general care." }
+  ];
+
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] relative overflow-hidden transition-all duration-300">
-      {/* Background patterns */}
       <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none -z-20"></div>
 
-      {/* Floating ambient blobs */}
       <div className="blur-blob-red top-[-100px] left-[-50px]"></div>
       <div className="blur-blob-green top-[250px] right-[-100px]"></div>
 
-      {/* Primary Inset Navbar */}
       <Navbar />
 
-      {/* Glass-Claymorphism Hero Layout */}
       <Hero />
 
-      {/* Full-width Dark Stats Band */}
       <DarkStatsBanner />
 
-      {/* Features - Compact Grid */}
-      <section
-        id="features"
-        className="py-24 relative bg-[var(--bg-main)] border-t border-[var(--border)]"
-      >
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 relative bg-[var(--bg-main)] border-t border-[var(--border)]">
         <div className="page-container max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-black text-[var(--brand-primary)] uppercase tracking-[0.4em] animate-pulse">
-              Our Capabilities
+            <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.4em]">
+              Simple Workflow
             </h2>
             <h3 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
-              Everything you need for health.
+              Get care in 3 simple steps
             </h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={<FaClock className="text-[var(--brand-secondary)]" />}
-              title="24/7 Availability"
-              text="Instant connectivity with licensed medical practitioners around the clock."
-              color="emerald"
-            />
-            <FeatureCard
-              icon={<FaMobileAlt className="text-[var(--brand-primary)]" />}
-              title="Native Mobility"
-              text="Optimized for every device to ensure care is always within reach."
-              color="red"
-            />
-            <FeatureCard
-              icon={<FaVideo className="text-[var(--brand-primary)]" />}
-              title="HD Consult"
-              text="Encrypted, crystal-clear video calls for deep-dive medical sessions."
-              color="slate"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="glass-clay p-8 rounded-3xl space-y-4 relative hover:-translate-y-1 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--hb-red)]/10 text-[var(--hb-red)] font-black text-xl flex items-center justify-center border border-[var(--hb-red)]/20">
+                1
+              </div>
+              <h4 className="text-xl font-bold tracking-tight">Book your slot</h4>
+              <p className="text-sm text-[var(--text-soft)] leading-relaxed font-medium">
+                Choose a doctor by specialty, availability, or rating, and pick a time that works for you.
+              </p>
+            </div>
+
+            <div className="glass-clay p-8 rounded-3xl space-y-4 relative hover:-translate-y-1 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 font-black text-xl flex items-center justify-center border border-emerald-500/20">
+                2
+              </div>
+              <h4 className="text-xl font-bold tracking-tight">Consult online</h4>
+              <p className="text-sm text-[var(--text-soft)] leading-relaxed font-medium">
+                Join a secure video call from any device. No downloads, no waiting rooms.
+              </p>
+            </div>
+
+            <div className="glass-clay p-8 rounded-3xl space-y-4 relative hover:-translate-y-1 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 font-black text-xl flex items-center justify-center border border-blue-500/20">
+                3
+              </div>
+              <h4 className="text-xl font-bold tracking-tight">Get treated</h4>
+              <p className="text-sm text-[var(--text-soft)] leading-relaxed font-medium">
+                Receive your diagnosis, e-prescription, and follow-up plan instantly in your dashboard.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* About - Premium Section */}
-      <section
-        id="about"
-        className="py-24 bg-[var(--bg-glass)] backdrop-blur-sm border-t border-[var(--border)]"
-      >
-        <div className="page-container max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
-          <div className="lg:w-1/2 space-y-8 text-center lg:text-left">
-            <h2 className="text-gradient font-black text-xs uppercase tracking-[0.3em]">
-              The Ecosystem
+      {/* Specialties Preview */}
+      <section id="specialties" className="py-24 bg-[var(--bg-glass)] backdrop-blur-sm border-t border-[var(--border)]">
+        <div className="page-container max-w-7xl mx-auto space-y-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em] mb-2">
+                Specialist Care
+              </h2>
+              <h3 className="text-4xl md:text-5xl font-black tracking-tighter">
+                Care for what's actually going on
+              </h3>
+            </div>
+            <button
+              onClick={() => navigate("/doctors")}
+              className="px-6 py-3 rounded-2xl border-2 border-[var(--hb-ink)] font-bold text-xs uppercase tracking-wider hover:bg-[var(--hb-ink)] hover:text-white transition-all flex items-center gap-2 self-start"
+            >
+              <span>View All Doctors</span>
+              <FaArrowRight size={10} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {specialties.map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => navigate(`/doctors?specialty=${encodeURIComponent(item.name)}`)}
+                className="glass-clay p-6 rounded-3xl hover:-translate-y-1.5 transition-all cursor-pointer group border border-[var(--border)]"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[var(--bg-main)] border border-[var(--border)] flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  {item.icon}
+                </div>
+                <h4 className="text-base font-bold tracking-tight mb-1">{item.name}</h4>
+                <p className="text-xs text-[var(--text-soft)] opacity-80 leading-relaxed font-medium">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why HealthLink */}
+      <section id="why-us" className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)]">
+        <div className="page-container max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+          <div className="lg:w-1/2 space-y-8">
+            <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
+              Why HealthLink
             </h2>
-            <h3 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">
-              Patient-first technology.
+            <h3 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+              Care built around you
             </h3>
-            <p className="text-lg text-[var(--text-soft)] leading-relaxed font-medium opacity-80">
-              We've re-engineered the telemedicine workflow from the ground up. Health Link isn't
-              just a video tool; it's a complete medical ecosystem.
+            <p className="text-base text-[var(--text-soft)] leading-relaxed font-medium">
+              We've re-engineered the telemedicine workflow from the ground up. HealthLink isn't just a video tool; it's a complete medical ecosystem built around what actually slows people down.
             </p>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-6 glass-clay hover:-translate-y-1 transition-transform duration-500">
-                <p className="text-3xl md:text-4xl font-black text-[var(--brand-secondary)] mb-2">
-                  100k+
-                </p>
-                <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">
-                  Users Served
-                </p>
-              </div>
-              <div className="p-6 glass-clay hover:-translate-y-1 transition-transform duration-500">
-                <p className="text-3xl md:text-4xl font-black text-[var(--brand-primary)] mb-2">
-                  99.9%
-                </p>
-                <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">
-                  Uptime Record
-                </p>
-              </div>
+
+            <div className="space-y-4">
+              {whyUs.map((item, idx) => (
+                <div key={idx} className="glass-clay p-4 rounded-2xl flex items-start gap-4 border border-[var(--border)]">
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-main)] border border-[var(--border)] mt-0.5">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold tracking-tight">{item.title}</h4>
+                    <p className="text-xs text-[var(--text-soft)] leading-relaxed font-medium mt-0.5">{item.text}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
           <div className="lg:w-1/2 w-full">
             <img
               src="/images/about.png"
-              className="rounded-[2rem] shadow-2xl border border-[var(--border)] w-full object-cover h-[400px] hover:scale-[1.01] transition-transform duration-700"
+              className="rounded-[2.5rem] shadow-2xl border border-[var(--border)] w-full object-cover h-[520px] hover:scale-[1.01] transition-transform duration-700"
               alt="Modern Hospital Telemedicine Suite"
             />
           </div>
         </div>
       </section>
 
-      {/* Simple Footer */}
+      {/* Testimonial Strip */}
+      <section className="py-20 bg-[var(--hb-ink)] text-white relative overflow-hidden select-none">
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
+          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-[var(--hb-red)]">
+            Trusted by Thousands of Patients
+          </h2>
+          <blockquote className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-snug">
+            "I got a same-day consultation and my prescription was at the pharmacy before I even left my chair."
+          </blockquote>
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--hb-ink-soft)]">
+            Verified Patient Review
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ Preview */}
+      <section className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)]">
+        <div className="page-container max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-3">
+            <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
+              FAQ Preview
+            </h2>
+            <h3 className="text-3xl md:text-4xl font-black tracking-tighter">
+              Common questions
+            </h3>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="glass-clay p-6 rounded-3xl space-y-2 border border-[var(--border)]">
+                <h4 className="text-base font-bold text-[var(--hb-ink)] tracking-tight">{faq.q}</h4>
+                <p className="text-xs text-[var(--text-soft)] leading-relaxed font-medium opacity-90">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => navigate("/resources")}
+              className="text-xs font-black uppercase tracking-widest text-[var(--hb-red)] hover:underline inline-flex items-center gap-2"
+            >
+              <span>See All FAQs in Resources</span>
+              <FaArrowRight size={10} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Band */}
+      <section className="py-24 bg-[var(--bg-glass)] backdrop-blur-md border-t border-[var(--border)] text-center relative overflow-hidden">
+        <div className="max-w-3xl mx-auto px-6 space-y-8 relative z-10">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tighter leading-tight">
+            Your next doctor's visit doesn't need a waiting room
+          </h2>
+          <p className="text-base sm:text-lg text-[var(--text-soft)] font-medium max-w-xl mx-auto">
+            Book a consultation in under 2 minutes. No app download required — book from any browser.
+          </p>
+          <motion.button
+            onClick={() => navigate("/appointments")}
+            className="btn-clay-primary px-10 py-4 text-sm font-semibold uppercase tracking-wider inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)]"
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <span>Book Your First Consultation</span>
+            <FaArrowRight size={14} />
+          </motion.button>
+        </div>
+      </section>
+
+      {/* Footer */}
       <footer id="contact" className="py-16 border-t border-[var(--border)]">
         <div className="page-container max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 border-t border-[var(--border)] pt-12">
           <div className="flex flex-col md:flex-row items-center gap-4">
@@ -114,49 +266,36 @@ export default function Home() {
                 <img src="/logo.png" alt="Logo" className="w-8 h-8 mix-blend-multiply" />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
-                HEALTH<span className="text-[var(--brand-primary)]">LINK</span>
+                HEALTH<span className="text-[var(--hb-red)]">LINK</span>
               </span>
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] md:ml-4">
-              &copy; 2025 ALL SYSTEMS NOMINAL
+              &copy; 2026 HEALTHLINK. ALL RIGHTS RESERVED.
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">
-            <a href="#features" className="hover:text-[var(--brand-primary)] transition-colors">
-              Features
+            <a href="/about" className="hover:text-[var(--hb-red)] transition-colors">
+              About
             </a>
-            <a href="#about" className="hover:text-[var(--brand-secondary)] transition-colors">
-              About Us
+            <a href="/services" className="hover:text-[var(--hb-red)] transition-colors">
+              Services
             </a>
-            <a href="#contact" className="hover:text-[var(--brand-primary)] transition-colors">
+            <a href="/doctors" className="hover:text-[var(--hb-red)] transition-colors">
+              Doctors
+            </a>
+            <a href="/appointments" className="hover:text-[var(--hb-red)] transition-colors">
+              Appointments
+            </a>
+            <a href="/resources" className="hover:text-[var(--hb-red)] transition-colors">
+              Resources
+            </a>
+            <a href="/contact" className="hover:text-[var(--hb-red)] transition-colors">
               Contact
             </a>
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, text, color }) {
-  const dynamicColor = {
-    emerald: "hover:border-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)]/5",
-    red: "hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5",
-    slate: "hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5",
-  }[color];
-
-  return (
-    <div
-      className={`glass-clay group p-8 hover:-translate-y-1 transition-all cursor-default border-[var(--border)] ${dynamicColor} h-full flex flex-col`}
-    >
-      <div
-        className={`h-14 w-14 rounded-2xl bg-[var(--bg-main)] border border-[var(--border)] flex items-center justify-center text-2xl mb-6 group-hover:scale-105 transition-all shadow-inner`}
-      >
-        {icon}
-      </div>
-      <h4 className="text-lg font-bold text-[var(--text-main)] mb-3 tracking-tight">{title}</h4>
-      <p className="text-sm font-medium text-[var(--text-soft)] leading-relaxed">{text}</p>
     </div>
   );
 }

@@ -32,10 +32,9 @@ export default function Hero() {
           variants={fadeInVariants}
           initial="hidden"
           animate="visible"
-          className="text-base sm:text-lg md:text-xl text-[var(--hb-ink-soft)] max-w-[560px] leading-relaxed font-medium mx-auto opacity-90"
+          className="text-base sm:text-lg md:text-xl text-[var(--hb-ink-soft)] max-w-[620px] leading-relaxed font-medium mx-auto opacity-90"
         >
-          Manage appointments, patients, prescriptions, billing, staff, and AI-assisted
-          healthcare—one platform.
+          Connect with licensed doctors in minutes. Get diagnosed, prescribed, and cared for — without leaving home.
         </motion.p>
 
         {/* CTA Buttons (Centered) */}
@@ -47,22 +46,22 @@ export default function Hero() {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <motion.button
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/appointments")}
             className="btn-clay-primary px-9 py-4 text-sm font-semibold uppercase tracking-wider flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)]"
             whileHover={{ y: -2, scale: 1.015 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span>Start Free</span>
+            <span>Book an Appointment</span>
             <FaArrowRight size={12} />
           </motion.button>
 
           <motion.button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/doctors")}
             className="px-9 py-4 text-sm font-semibold uppercase tracking-wider border-2 border-[var(--hb-red)] text-[var(--hb-red)] bg-transparent rounded-2xl flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)] active:scale-95 transition-all"
             whileHover={{ y: -2, scale: 1.015 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span>Book Demo</span>
+            <span>Find a Doctor</span>
           </motion.button>
         </motion.div>
 
