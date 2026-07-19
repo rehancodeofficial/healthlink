@@ -20,7 +20,7 @@ export default function Doctors() {
       reviews: "142",
       languages: "English, Urdu",
       nextAvailable: "Today, 3:00 PM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/amara.png"
     },
     {
       id: 2,
@@ -32,7 +32,7 @@ export default function Doctors() {
       reviews: "98",
       languages: "English, Urdu, Punjabi",
       nextAvailable: "Today, 4:30 PM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/bilal.png"
     },
     {
       id: 3,
@@ -44,7 +44,7 @@ export default function Doctors() {
       reviews: "210",
       languages: "English, Urdu",
       nextAvailable: "Today, 2:00 PM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/farhan.png"
     },
     {
       id: 4,
@@ -56,7 +56,7 @@ export default function Doctors() {
       reviews: "176",
       languages: "English, Urdu",
       nextAvailable: "Tomorrow, 11:00 AM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/sara.png"
     },
     {
       id: 5,
@@ -68,7 +68,7 @@ export default function Doctors() {
       reviews: "320",
       languages: "English, Urdu",
       nextAvailable: "Today, 5:15 PM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/tariq.png"
     },
     {
       id: 6,
@@ -80,7 +80,7 @@ export default function Doctors() {
       reviews: "115",
       languages: "English, Urdu",
       nextAvailable: "Tomorrow, 2:30 PM",
-      img: "/images/clinicians.png"
+      img: "/images/doctors/zainab.png"
     }
   ];
 

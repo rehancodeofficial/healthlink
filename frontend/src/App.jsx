@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "./context/UserContext";
 import { SocketProvider } from "./context/SocketContext";
 
+import ScrollToTop from "./components/ScrollToTop";
 import api from "./Lib/api";
 import "./App.css";
 
