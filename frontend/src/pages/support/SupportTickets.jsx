@@ -284,7 +284,7 @@ export default function SupportTickets() {
                 onClick={() => setSelected(null)}
                 className="h-10 w-10 rounded-full hover:bg-[var(--bg-glass)] flex items-center justify-center text-[var(--text-muted)] transition-colors"
               >
-                ✕
+                
               </button>
             </div>
 

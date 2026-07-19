@@ -13,7 +13,7 @@ export default function IncomingCallModal() {
     if (!socket) return;
 
     const onIncomingCall = (data) => {
-      console.log("🔔 Incoming call received:", data);
+      console.log(" Incoming call received:", data);
       setCallData(data);
       setCountdown(60);
 

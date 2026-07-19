@@ -54,7 +54,7 @@ router.post("/tickets", verifyToken, async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ POST /support/tickets error:", err);
+    console.error(" POST /support/tickets error:", err);
     return res.status(500).json({ error: "Failed to create ticket" });
   }
 });
@@ -93,7 +93,7 @@ router.get("/tickets/my", verifyToken, async (req, res) => {
       })),
     });
   } catch (err) {
-    console.error("❌ GET /support/tickets/my error:", err);
+    console.error(" GET /support/tickets/my error:", err);
     return res.status(500).json({ error: "Failed to fetch tickets" });
   }
 });
@@ -128,7 +128,7 @@ router.get("/tickets/:id", verifyToken, async (req, res) => {
 
     return res.json({ success: true, data: ticket });
   } catch (err) {
-    console.error("❌ GET /support/tickets/:id error:", err);
+    console.error(" GET /support/tickets/:id error:", err);
     return res.status(500).json({ error: "Failed to fetch ticket" });
   }
 });
@@ -161,7 +161,7 @@ router.post("/tickets/:id/replies", verifyToken, async (req, res) => {
 
     return res.status(201).json({ success: true, data: created });
   } catch (err) {
-    console.error("❌ POST /support/tickets/:id/replies error:", err);
+    console.error(" POST /support/tickets/:id/replies error:", err);
     return res.status(500).json({ error: "Failed to add reply" });
   }
 });
@@ -192,7 +192,7 @@ router.put("/tickets/:id/status", verifyToken, requireRole(["SUPPORT", "ADMIN", 
       },
     });
   } catch (err) {
-    console.error("❌ PUT /support/tickets/:id/status error:", err);
+    console.error(" PUT /support/tickets/:id/status error:", err);
     return res.status(500).json({ error: "Failed to update status" });
   }
 });
@@ -241,7 +241,7 @@ router.get("/tickets", verifyToken, requireRole(["SUPPORT", "ADMIN", "SUPERADMIN
       })),
     });
   } catch (err) {
-    console.error("❌ GET /support/tickets (all) error:", err);
+    console.error(" GET /support/tickets (all) error:", err);
     res.status(500).json({ error: "Failed to fetch tickets" });
   }
 });

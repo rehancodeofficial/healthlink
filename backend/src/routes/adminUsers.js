@@ -6,7 +6,7 @@ const { verifyToken, requireRole } = require("../middleware/rbac.js");
 const prisma = require("../prisma/prismaClient");
 const router = express.Router();
 
-// ✅ Utility: Add to activity log
+//  Utility: Add to activity log
 async function addLog(actorId, actorRole, action, entity) {
   try {
     await prisma.activityLog.create({
@@ -17,7 +17,7 @@ async function addLog(actorId, actorRole, action, entity) {
   }
 }
 
-// ✅ GET all users (Admins + Support)
+//  GET all users (Admins + Support)
 router.get(
   "/",
   verifyToken,
@@ -56,7 +56,7 @@ router.get(
   },
 );
 
-// ✅ POST create new Admin or Support
+//  POST create new Admin or Support
 router.post(
   "/",
   verifyToken,
@@ -76,7 +76,7 @@ router.post(
           firstName: xss(firstName),
           lastName: xss(lastName),
           email: xss(email),
-          password: "123456", // ❗ hash in production
+          password: "123456", //  hash in production
           role,
           dateOfBirth: new Date("1970-01-01"),
           gender: "PREFER_NOT_TO_SAY",
@@ -98,7 +98,7 @@ router.post(
   },
 );
 
-// ✅ PATCH suspend Admin/Support
+//  PATCH suspend Admin/Support
 router.patch(
   "/:id/suspend",
   verifyToken,
@@ -127,7 +127,7 @@ router.patch(
   },
 );
 
-// ✅ DELETE Admin/Support
+//  DELETE Admin/Support
 router.delete(
   "/:id",
   verifyToken,

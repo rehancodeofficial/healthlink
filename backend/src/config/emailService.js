@@ -19,11 +19,11 @@ const RESOLVED_EMAIL_PASS = process.env.EMAIL_PASS || process.env.GMAIL_PASS;
 console.log("[EMAIL-SERVICE] Config:", {
   provider: EMAIL_PROVIDER,
   emailUser: RESOLVED_EMAIL_USER
-    ? `✅ ${RESOLVED_EMAIL_USER}`
-    : "❌ MISSING (set EMAIL_USER or GMAIL_USER)",
+    ? ` ${RESOLVED_EMAIL_USER}`
+    : " MISSING (set EMAIL_USER or GMAIL_USER)",
   emailPass: RESOLVED_EMAIL_PASS
-    ? "✅ SET"
-    : "❌ MISSING (set EMAIL_PASS or GMAIL_PASS)",
+    ? " SET"
+    : " MISSING (set EMAIL_PASS or GMAIL_PASS)",
   fromEmail: FROM_EMAIL,
 });
 
@@ -41,7 +41,7 @@ if (EMAIL_PROVIDER === "gmail") {
 
   if (!RESOLVED_EMAIL_USER || !RESOLVED_EMAIL_PASS) {
     console.error(
-      "[EMAIL-SERVICE] ❌ Gmail transporter NOT created — EMAIL_USER/GMAIL_USER or EMAIL_PASS/GMAIL_PASS is missing in Railway env vars!",
+      "[EMAIL-SERVICE]  Gmail transporter NOT created — EMAIL_USER/GMAIL_USER or EMAIL_PASS/GMAIL_PASS is missing in Railway env vars!",
     );
   } else {
     transporter = nodemailer.createTransport({
@@ -65,7 +65,7 @@ if (EMAIL_PROVIDER === "gmail") {
       socketTimeout: 30000, // 30s
     });
     console.log(
-      `📧 Gmail SMTP Transporter initialized (Port: ${port}, Secure: ${secure}). Host: ${host}, User: ${RESOLVED_EMAIL_USER}`,
+      ` Gmail SMTP Transporter initialized (Port: ${port}, Secure: ${secure}). Host: ${host}, User: ${RESOLVED_EMAIL_USER}`,
     );
   }
 }
@@ -100,9 +100,9 @@ async function sendOTPViaSendGrid(email, otp) {
 
   try {
     await sgMail.send(msg);
-    console.log(`✅ OTP email sent to ${email} via SendGrid`);
+    console.log(` OTP email sent to ${email} via SendGrid`);
   } catch (error) {
-    console.error("❌ SendGrid error:", error.response?.body || error);
+    console.error(" SendGrid error:", error.response?.body || error);
     throw new Error("Failed to send email via SendGrid");
   }
 }
@@ -143,9 +143,9 @@ async function sendOTPViaGmail(email, otp) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`✅ OTP email sent to ${email} via Gmail`);
+    console.log(` OTP email sent to ${email} via Gmail`);
   } catch (error) {
-    console.error("❌ Gmail error details:", JSON.stringify(error, null, 2));
+    console.error(" Gmail error details:", JSON.stringify(error, null, 2));
     throw new Error(`Failed to send email via Gmail: ${error.message}`);
   }
 }
@@ -157,16 +157,16 @@ async function sendOTPViaGmail(email, otp) {
 async function verifySMTPConnection() {
   if (EMAIL_PROVIDER !== "gmail" || !transporter) {
     console.error(
-      "❌ SMTP Health Check Failed: Gmail provider not configured.",
+      " SMTP Health Check Failed: Gmail provider not configured.",
     );
     return false;
   }
   try {
     await transporter.verify();
-    console.log("✅ SMTP Health Check Passed: Gmail SMTP is ready.");
+    console.log(" SMTP Health Check Passed: Gmail SMTP is ready.");
     return true;
   } catch (error) {
-    console.error("❌ SMTP Health Check Failed:", error.message);
+    console.error(" SMTP Health Check Failed:", error.message);
     return false;
   }
 }
@@ -186,25 +186,25 @@ async function sendWithRetry(mailOptions, maxRetries = 3) {
     const timestamp = new Date().toISOString();
     try {
       console.log(
-        `[${timestamp}] 📧 SMTP Attempt ${attempts}/${maxRetries} for: ${mailOptions.to}`,
+        `[${timestamp}]  SMTP Attempt ${attempts}/${maxRetries} for: ${mailOptions.to}`,
       );
 
       if (!transporter) throw new Error("SMTP Transporter not initialized.");
 
       const info = await transporter.sendMail(mailOptions);
       console.log(
-        `[${timestamp}] ✅ Email Sent Successfully: ${info.messageId}`,
+        `[${timestamp}]  Email Sent Successfully: ${info.messageId}`,
       );
       return;
     } catch (error) {
       console.error(
-        `[${timestamp}] ❌ SMTP Attempt ${attempts} Failed:`,
+        `[${timestamp}]  SMTP Attempt ${attempts} Failed:`,
         error.message,
       );
 
       if (attempts >= maxRetries) {
         console.error(
-          `[${timestamp}] 🚨 ALERT: Email failed after ${maxRetries} attempts for: ${mailOptions.to}`,
+          `[${timestamp}]  ALERT: Email failed after ${maxRetries} attempts for: ${mailOptions.to}`,
         );
         throw new Error(
           `Email delivery ultimately failed after ${maxRetries} attempts.`,
@@ -212,7 +212,7 @@ async function sendWithRetry(mailOptions, maxRetries = 3) {
       }
 
       console.log(
-        `[${timestamp}] ⏳ Waiting ${delay / 1000}s before next retry...`,
+        `[${timestamp}]  Waiting ${delay / 1000}s before next retry...`,
       );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -257,7 +257,7 @@ async function sendRegistrationEmail(email, firstName) {
  * @returns {Promise<void>}
  */
 async function sendOTPEmail(email, otp) {
-  console.log(`📧 Dispatching OTP email to ${email}...`);
+  console.log(` Dispatching OTP email to ${email}...`);
 
   const mailOptions = {
     from: `"HealthLink" <${RESOLVED_EMAIL_USER || FROM_EMAIL}>`,

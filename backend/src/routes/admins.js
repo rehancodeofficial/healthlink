@@ -1,14 +1,14 @@
 const express = require("express");
 const xss = require("xss");
-const { verifyToken, requireRole } = require("../middleware/rbac"); // ✅ Correct import
+const { verifyToken, requireRole } = require("../middleware/rbac"); //  Correct import
 const prisma = require("../prisma/prismaClient.js");
 
 const router = express.Router();
 
-// ✅ Apply verification to all routes
+//  Apply verification to all routes
 router.use(verifyToken);
 
-// ✅ Utility for creating logs
+//  Utility for creating logs
 async function addLog(actorId, actorRole, action, entity) {
   try {
     await prisma.activityLog.create({
@@ -19,8 +19,8 @@ async function addLog(actorId, actorRole, action, entity) {
   }
 }
 
-// ✅ Get all admins (filter by role optional)
-// ✅ Get all admins (exclude SUPERADMIN)
+//  Get all admins (filter by role optional)
+//  Get all admins (exclude SUPERADMIN)
 router.get("/", requireRole("SUPERADMIN"), async (req, res) => {
   try {
     const { role } = req.query;
@@ -56,7 +56,7 @@ router.get("/", requireRole("SUPERADMIN"), async (req, res) => {
   }
 });
 
-// ✅ Create new admin
+//  Create new admin
 router.post("/", requireRole("SUPERADMIN"), async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -68,7 +68,7 @@ router.post("/", requireRole("SUPERADMIN"), async (req, res) => {
         firstName: xss(firstName),
         lastName: xss(lastName),
         email: xss(email),
-        password: "123456", // ❗ hash in production
+        password: "123456", //  hash in production
         role,
         dateOfBirth: new Date("1970-01-01"),
         gender: "PREFER_NOT_TO_SAY",
@@ -88,7 +88,7 @@ router.post("/", requireRole("SUPERADMIN"), async (req, res) => {
   }
 });
 
-// ✅ Edit admin
+//  Edit admin
 router.put("/:id", requireRole("SUPERADMIN"), async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -118,7 +118,7 @@ router.put("/:id", requireRole("SUPERADMIN"), async (req, res) => {
   }
 });
 
-// ✅ Suspend admin
+//  Suspend admin
 router.patch("/:id/suspend", requireRole("SUPERADMIN"), async (req, res) => {
   try {
     const admin = await prisma.user.update({
@@ -141,7 +141,7 @@ router.patch("/:id/suspend", requireRole("SUPERADMIN"), async (req, res) => {
   }
 });
 
-// ✅ Delete admin
+//  Delete admin
 router.delete("/:id", requireRole("SUPERADMIN"), async (req, res) => {
   try {
     const admin = await prisma.user.delete({
@@ -162,7 +162,7 @@ router.delete("/:id", requireRole("SUPERADMIN"), async (req, res) => {
 });
 
 /**
- * ✅ Get all appointments (admin view)
+ *  Get all appointments (admin view)
  * GET /api/admin/appointments
  */
 router.get("/appointments", async (_req, res) => {
@@ -185,13 +185,13 @@ router.get("/appointments", async (_req, res) => {
 
     res.json(appointments);
   } catch (err) {
-    console.error("❌ Error fetching appointments:", err);
+    console.error(" Error fetching appointments:", err);
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 });
 
 /**
- * ✅ Update appointment status (Approve / Cancel / Complete)
+ *  Update appointment status (Approve / Cancel / Complete)
  * PATCH /api/admin/appointments/:id
  */
 router.patch("/appointments/:id", async (req, res) => {
@@ -205,12 +205,12 @@ router.patch("/appointments/:id", async (req, res) => {
     });
     res.json(updated);
   } catch (err) {
-    console.error("❌ Error updating appointment:", err);
+    console.error(" Error updating appointment:", err);
     res.status(500).json({ error: "Failed to update appointment" });
   }
 });
 
-// ✅ Fetch users (optionally by role)
+//  Fetch users (optionally by role)
 router.get("/users", async (req, res) => {
   try {
     const { role } = req.query;
@@ -228,7 +228,7 @@ router.get("/users", async (req, res) => {
 
     res.json(users);
   } catch (err) {
-    console.error("❌ Admin /users error:", err);
+    console.error(" Admin /users error:", err);
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });

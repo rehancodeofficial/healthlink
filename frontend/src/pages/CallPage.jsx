@@ -43,7 +43,7 @@ const CallPage = () => {
 
         setAppointment(data);
       } catch (err) {
-        console.error("❌ Failed to fetch appointment:", err);
+        console.error(" Failed to fetch appointment:", err);
         const msg = err.response?.data?.error || "Failed to load appointment details";
         setError(msg);
         toast.error(msg);
@@ -89,7 +89,7 @@ const CallPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-6">
         <div className="bg-red-900/20 p-8 rounded-2xl border border-red-500/50 max-w-md w-full text-center">
-          <div className="text-4xl mb-4">⚠️</div>
+          <div className="text-4xl mb-4"></div>
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
           <p className="text-gray-400 mb-6">{error}</p>
           <button

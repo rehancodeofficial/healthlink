@@ -10,8 +10,6 @@ const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 // Import RBAC middleware
 const { verifyToken, requireRole } = require("../middleware/rbac");
 
-/* ----------------------------- helpers ----------------------------- */
-
 const computeStatus = (row) => {
   if (!row) return "NONE";
   const now = new Date();
@@ -81,7 +79,6 @@ async function ensureSettings() {
   });
 }
 
-/* -------------------------- ADMIN & GENERAL ------------------------- */
 /**
  * GET prices (supports both admin + role-specific callers)
  *
@@ -152,7 +149,7 @@ async function getPricesHandler(req, res) {
       },
     });
   } catch (err) {
-    console.error("❌ GET prices error:", err);
+    console.error(" GET prices error:", err);
     return res
       .status(500)
       .json({ error: "Failed to load subscription prices" });
@@ -217,14 +214,13 @@ async function putPricesHandler(req, res) {
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("❌ PUT prices error:", err);
+    console.error(" PUT prices error:", err);
     return res
       .status(500)
       .json({ error: "Failed to save subscription prices" });
   }
 }
 
-/* ----------- wire both canonical + compatibility routes ----------- */
 // Canonical admin + role-aware
 router.get("/prices", verifyToken, getPricesHandler);
 router.put(
@@ -237,7 +233,6 @@ router.put(
 // Compatibility (older code may call these)
 router.get("/settings", getPricesHandler);
 
-/* ----------------------------- STATS & LIST ----------------------------- */
 /* GET /api/subscribers/stats */
 router.get(
   "/stats",
@@ -277,7 +272,7 @@ router.get(
         },
       });
     } catch (err) {
-      console.error("❌ /subscribers/stats error:", err);
+      console.error(" /subscribers/stats error:", err);
       return res.status(500).json({ error: "Failed to load stats" });
     }
   },
@@ -367,13 +362,12 @@ router.get(
         data: { total, page: Number(page), pageSize: take, items },
       });
     } catch (err) {
-      console.error("❌ /subscribers/list error:", err);
+      console.error(" /subscribers/list error:", err);
       return res.status(500).json({ error: "Failed to load list" });
     }
   },
 );
 
-/* ----------------------- USER STATUS & HISTORY ---------------------- */
 // GET /api/subscription/status?userId=UUID
 router.get("/status", verifyToken, async (req, res) => {
   try {
@@ -397,7 +391,7 @@ router.get("/status", verifyToken, async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ status error:", err);
+    console.error(" status error:", err);
     return res
       .status(500)
       .json({ error: "Failed to load subscription status" });
@@ -418,7 +412,7 @@ router.get("/", verifyToken, async (req, res) => {
     const data = list.map((s) => ({ ...s, computedStatus: computeStatus(s) }));
     return res.json({ data });
   } catch (err) {
-    console.error("❌ history error:", err);
+    console.error(" history error:", err);
     return res.status(500).json({ error: "Failed to load subscriptions" });
   }
 });
@@ -437,12 +431,11 @@ router.get("/history", verifyToken, async (req, res) => {
     const data = list.map((s) => ({ ...s, computedStatus: computeStatus(s) }));
     return res.json({ data });
   } catch (err) {
-    console.error("❌ history error:", err);
+    console.error(" history error:", err);
     return res.status(500).json({ error: "Failed to load subscriptions" });
   }
 });
 
-/* ------------------------ ADMIN: force status ----------------------- */
 // PATCH /api/subscription/id/status
 router.patch(
   "/:id/status",
@@ -486,7 +479,7 @@ router.patch(
 
       return res.json({ success: true, data: updated });
     } catch (err) {
-      console.error("❌ /subscription/:id/status error:", err);
+      console.error(" /subscription/:id/status error:", err);
       return res
         .status(500)
         .json({ error: "Failed to update subscription status" });
@@ -494,7 +487,6 @@ router.patch(
   },
 );
 
-/* ------------------------ STRIPE CHECKOUT FLOW ---------------------- */
 // POST /api/subscription/stripe/checkout  { userId, plan: "MONTHLY"|"YEARLY" }
 router.post("/stripe/checkout", verifyToken, async (req, res) => {
   try {
@@ -533,10 +525,10 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
     const successUrl = `${origin}/${roleSlug}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${origin}/${roleSlug}/subscription?status=cancel`;
 
-    // ✅ MOCK CHECKOUT for invalid/placeholder keys
+    //  MOCK CHECKOUT for invalid/placeholder keys
     // If the price ID looks fake (contains * or X), bypass Stripe and create subscription directly.
     if (!priceId || priceId.includes("****") || priceId.includes("XXXX")) {
-      console.log("⚠️  Mocking checkout for Price ID:", priceId);
+      console.log("  Mocking checkout for Price ID:", priceId);
       const mockSessionId = "mock_" + Date.now();
 
       const now = new Date();
@@ -586,12 +578,11 @@ router.post("/stripe/checkout", verifyToken, async (req, res) => {
 
     return res.json({ url: session.url });
   } catch (err) {
-    console.error("❌ stripe checkout error:", err);
+    console.error(" stripe checkout error:", err);
     return res.status(500).json({ error: "Failed to start checkout" });
   }
 });
 
-/* ---------------------------- STRIPE WEBHOOK ---------------------------- */
 /**
  * Mounted in server.js with:
  * app.post("/api/subscription/stripe/webhook", express.raw({ type: "application/json" }), subscriptionRoutes.stripeWebhook)
@@ -608,7 +599,7 @@ async function stripeWebhook(req, res) {
       process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err.message);
+    console.error(" Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -625,7 +616,7 @@ async function stripeWebhook(req, res) {
           sub = await stripe.subscriptions.retrieve(subscriptionId);
         } catch (e) {
           console.warn(
-            "⚠️ Could not retrieve subscription from Stripe:",
+            " Could not retrieve subscription from Stripe:",
             e?.message,
           );
         }
@@ -691,11 +682,10 @@ async function stripeWebhook(req, res) {
 
     res.json({ received: true });
   } catch (err) {
-    console.error("❌ Webhook handler error:", err);
+    console.error(" Webhook handler error:", err);
     res.status(500).json({ error: "Webhook handler failed" });
   }
 }
 
-/* ---------------------------- exports ---------------------------- */
 module.exports = router;
 module.exports.stripeWebhook = stripeWebhook;

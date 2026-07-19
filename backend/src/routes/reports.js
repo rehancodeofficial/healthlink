@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = require("../prisma/prismaClient");
 const router = express.Router();
 
-// ✅ System Reports Summary
+//  System Reports Summary
 router.get("/summary", async (req, res) => {
   try {
     const [

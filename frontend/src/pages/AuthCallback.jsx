@@ -27,7 +27,7 @@ export default function AuthCallback() {
           return;
         }
 
-        console.log("✅ Email verified. Syncing with backend...");
+        console.log(" Email verified. Syncing with backend...");
 
         // Sync with backend
         const response = await api.post("/auth/register-success", {
@@ -84,7 +84,7 @@ export default function AuthCallback() {
         )}
         {status === "success" && (
           <>
-            <div className="text-7xl mb-6">✅</div>
+            <div className="text-7xl mb-6"></div>
             <p className="text-2xl font-bold text-[var(--brand-green)]">
               Email verified successfully!
             </p>
@@ -93,7 +93,7 @@ export default function AuthCallback() {
         )}
         {status === "error" && (
           <>
-            <div className="text-7xl mb-6">❌</div>
+            <div className="text-7xl mb-6"></div>
             <p className="text-2xl font-bold text-red-500">Verification failed</p>
             <p className="text-sm text-[var(--text-soft)] mt-4">
               Please try registering again or contact support.

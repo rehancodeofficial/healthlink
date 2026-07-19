@@ -53,11 +53,6 @@ function buildDoctorFilters(q) {
   return where;
 }
 
-/** ============================
- *  GET /api/patient/doctors/all
- *  Public list for Patients (with filters)
- *  Query: search, specialization, minExperience, maxExperience, minFee, maxFee, language
- *  ============================ */
 router.get("/doctors/all", async (req, res) => {
   try {
     const where = buildDoctorFilters(req.query);
@@ -73,17 +68,11 @@ router.get("/doctors/all", async (req, res) => {
     });
     return res.json({ data: doctors });
   } catch (err) {
-    console.error("❌ list all doctors:", err);
+    console.error(" list all doctors:", err);
     return res.status(500).json({ error: "Failed to load doctors" });
   }
 });
 
-
-/** =========================================
- *  GET /api/patient/doctors (assigned)
- *  Query: patientUserId
- *  Returns only doctors assigned to the patient
- *  ========================================= */
 router.get("/doctors", verifyToken, async (req, res) => {
   try {
     let { patientUserId } = req.query;
@@ -113,17 +102,11 @@ router.get("/doctors", verifyToken, async (req, res) => {
     const doctors = links.map((l) => l.doctor);
     return res.json({ data: doctors });
   } catch (err) {
-    console.error("❌ list assigned doctors:", err);
+    console.error(" list assigned doctors:", err);
     return res.status(500).json({ error: "Failed to load assigned doctors" });
   }
 });
 
-
-/** =========================================
- *  POST /api/patient/doctors/assign
- *  Body: { patientUserId, doctorProfileId }
- *  Creates link if not exists (idempotent)
- *  ========================================= */
 router.post("/doctors/assign", verifyToken, async (req, res) => {
   try {
     const { patientUserId, doctorProfileId } = req.body || {};
@@ -151,7 +134,7 @@ router.post("/doctors/assign", verifyToken, async (req, res) => {
 
     return res.json({ success: true, linkId: link.id });
   } catch (err) {
-    console.error("❌ assign doctor:", err);
+    console.error(" assign doctor:", err);
     return res.status(500).json({ error: "Failed to assign doctor" });
   }
 });
@@ -172,7 +155,7 @@ router.delete("/patient/doctors/assign/:doctorProfileId", async (req, res) => {
     });
     return res.json({ success: true });
   } catch (err) {
-    console.error("❌ unassign doctor:", err);
+    console.error(" unassign doctor:", err);
     return res.status(500).json({ error: "Failed to unassign doctor" });
   }
 });

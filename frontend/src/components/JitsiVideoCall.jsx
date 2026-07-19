@@ -225,7 +225,7 @@ export default function JitsiVideoCall({
         // Expose the API instance for advanced control
         if (onApiReadyRef.current) onApiReadyRef.current(api);
       } catch (err) {
-        console.error("❌ Failed to initialize Jitsi:", err);
+        console.error(" Failed to initialize Jitsi:", err);
         setError(err.message || "Failed to load video call");
         setLoading(false);
       }
@@ -279,7 +279,7 @@ export default function JitsiVideoCall({
             fontSize: 28,
           }}
         >
-          ⚠️
+          
         </div>
         <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Connection Error</h2>
         <p

@@ -54,7 +54,7 @@ export default function Register() {
 
     setSubmitting(true);
     isSubmittingRef.current = true;
-    console.log("[DEBUG] 📤 Sending SINGLE registration request to backend...");
+    console.log("[DEBUG]  Sending SINGLE registration request to backend...");
     try {
       const payload = {
         email: form.email.trim().toLowerCase(),
@@ -72,7 +72,7 @@ export default function Register() {
 
       const { data } = await api.post("/auth/register", payload);
 
-      console.log("[DEBUG] ✅ Registration API responded successfully:", data.message);
+      console.log("[DEBUG]  Registration API responded successfully:", data.message);
 
       if (data.requiresVerification) {
         setUserEmail(data.email || form.email.trim().toLowerCase());
@@ -85,14 +85,14 @@ export default function Register() {
         }, 2000);
       }
     } catch (err) {
-      console.error("[DEBUG] ❌ Registration error:", err);
+      console.error("[DEBUG]  Registration error:", err);
       const errorMsg =
         err?.response?.data?.error || err.message || "Registration failed. Please try again.";
       toast.error(errorMsg);
     } finally {
       setSubmitting(false);
       isSubmittingRef.current = false;
-      console.log("[DEBUG] 🔓 Submit lock released");
+      console.log("[DEBUG]  Submit lock released");
     }
   };
 

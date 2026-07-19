@@ -31,7 +31,7 @@ export default function SubscriptionSettings() {
   const [pharmacyYearlyUsd, setPharmacyYearlyUsd] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // ---------- helpers ----------
+  
   const toNumStr = (val) => {
     const n = Number(val);
     return Number.isFinite(n) ? String(n) : "";
@@ -48,7 +48,7 @@ export default function SubscriptionSettings() {
 
   const getUpdatedAt = (payload) => payload?.updatedAt || null;
 
-  // ---------- fetch prices ----------
+  
   const fetchPrices = useCallback(async () => {
     try {
       setLoading(true);
@@ -71,7 +71,7 @@ export default function SubscriptionSettings() {
     }
   }, []);
 
-  // ✅ load immediately on mount (no lazy gate)
+  //  load immediately on mount (no lazy gate)
   useEffect(() => {
     fetchPrices();
   }, [fetchPrices]);

@@ -5,9 +5,8 @@ const router = express.Router();
 const prisma = require("../prisma/prismaClient");
 const emailService = require("../services/emailService");
 
-// ==================================
-// 📅 Create a New Video Consultation
-// ==================================
+//  Create a New Video Consultation
+
 router.post("/doctor/video-consultations", async (req, res) => {
   try {
     const { doctorId, patientId, title, scheduledAt, durationMins, notes } =
@@ -17,7 +16,7 @@ router.post("/doctor/video-consultations", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ Resolve the DoctorProfile & PatientProfile IDs
+    //  Resolve the DoctorProfile & PatientProfile IDs
     const doctorProfile = await prisma.doctorProfile.findUnique({
       where: { userId: doctorId },
     });
@@ -33,10 +32,10 @@ router.post("/doctor/video-consultations", async (req, res) => {
       });
     }
 
-    // ✅ Generate a ZEGO room name
+    //  Generate a ZEGO room name
     const roomName = `consult-${crypto.randomUUID()}`;
 
-    // ✅ Create the consultation record
+    //  Create the consultation record
     const newConsultation = await prisma.videoConsultation.create({
       data: {
         doctorId: doctorProfile.id,
@@ -68,7 +67,7 @@ router.post("/doctor/video-consultations", async (req, res) => {
 
     res.json(newConsultation);
   } catch (err) {
-    console.error("❌ Error scheduling consultation:", err);
+    console.error(" Error scheduling consultation:", err);
     res.status(500).json({
       message: "Failed to schedule consultation",
       error: err.message,
@@ -76,9 +75,8 @@ router.post("/doctor/video-consultations", async (req, res) => {
   }
 });
 
-// ==================================
-// 📋 Get Doctor's Video Consultations
-// ==================================
+//  Get Doctor's Video Consultations
+
 router.get("/doctor/video-consultations", async (req, res) => {
   try {
     const doctorId = req.query.doctorId;
@@ -102,14 +100,13 @@ router.get("/doctor/video-consultations", async (req, res) => {
 
     res.json(consultations);
   } catch (err) {
-    console.error("❌ Error fetching consultations:", err);
+    console.error(" Error fetching consultations:", err);
     res.status(500).json({ message: "Failed to fetch consultations" });
   }
 });
 
-// ==================================
-// ❌ Cancel a Consultation
-// ==================================
+//  Cancel a Consultation
+
 router.patch("/doctor/video-consultations/:id/cancel", async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,9 +123,8 @@ router.patch("/doctor/video-consultations/:id/cancel", async (req, res) => {
   }
 });
 
-// ==================================
-// ✅ Mark as Completed
-// ==================================
+//  Mark as Completed
+
 router.patch("/doctor/video-consultations/:id/complete", async (req, res) => {
   try {
     const { id } = req.params;

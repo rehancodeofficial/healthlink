@@ -242,7 +242,7 @@ export default function DoctorAppointments() {
     }
   };
 
-  // ========== NEW: Start Video Call via API ==========
+  
   const handleStartCall = async (appt) => {
     try {
       setStartingCallId(appt.id);

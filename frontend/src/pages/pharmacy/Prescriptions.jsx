@@ -27,7 +27,7 @@ function ViewModal({ open, onClose, item }) {
           onClick={onClose}
           className="absolute top-3 right-4 text-[var(--text-soft)] text-xl"
         >
-          ✖
+          
         </button>
         <img
           src="/logo.png"
@@ -138,7 +138,7 @@ function CreateModal({ open, onClose, onSuccess }) {
           onClick={onClose}
           className="absolute top-3 right-4 text-[var(--text-soft)] text-xl"
         >
-          ✖
+          
         </button>
         <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">Create Prescription</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -273,7 +273,7 @@ function EditModal({ open, onClose, item, onSave }) {
           onClick={onClose}
           className="absolute top-3 right-4 text-[var(--text-soft)] text-xl"
         >
-          ✖
+          
         </button>
         <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">Edit Prescription</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

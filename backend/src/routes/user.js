@@ -27,7 +27,7 @@ router.get("/:id", verifyToken, async (req, res) => {
 
     return res.json({ data: user });
   } catch (e) {
-    console.error("❌ user profile error:", e);
+    console.error(" user profile error:", e);
     return res.status(500).json({ error: "Failed to load user intelligence" });
   }
 });
@@ -62,7 +62,7 @@ router.get("/", verifyToken, async (req, res) => {
 
     return res.json({ data: users });
   } catch (e) {
-    console.error("❌ users list error:", e);
+    console.error(" users list error:", e);
     return res.status(500).json({ error: "Failed to load users" });
   }
 });

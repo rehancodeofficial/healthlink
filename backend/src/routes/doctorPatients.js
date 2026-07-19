@@ -52,7 +52,6 @@ function buildPatientWhere(q, doctorProfileId) {
   return where;
 }
 
-
 /**
  * GET /api/doctor/patients
  * Query:
@@ -82,7 +81,7 @@ router.get("/patients", verifyToken, requireRole(["DOCTOR", "ADMIN", "SUPERADMIN
 
     return res.json({ data: patients });
   } catch (err) {
-    console.error("❌ /doctor/patients error:", err);
+    console.error(" /doctor/patients error:", err);
     return res.status(500).json({ error: "Failed to load patients" });
   }
 });

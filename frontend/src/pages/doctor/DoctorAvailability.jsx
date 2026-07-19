@@ -189,7 +189,7 @@ export default function DoctorAvailability() {
           {isSaved && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center fade-in">
               <div className="bg-[var(--brand-green)] text-white px-6 py-3 rounded-xl font-bold shadow-2xl animate-bounce">
-                ✅ Saved Successfully!
+                 Saved Successfully!
               </div>
             </div>
           )}

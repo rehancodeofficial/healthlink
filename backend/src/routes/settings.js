@@ -5,11 +5,11 @@ const { verifyToken, requireRole } = require("../middleware/rbac");
 
 const router = express.Router();
 
-// ✅ Apply verification (Superadmin only for settings)
+//  Apply verification (Superadmin only for settings)
 router.use(verifyToken);
 router.use(requireRole("SUPERADMIN"));
 
-// ✅ Fetch system settings
+//  Fetch system settings
 router.get("/", async (req, res) => {
   try {
     const settings = await prisma.systemSetting.findFirst();
@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Update system settings
+//  Update system settings
 router.put("/", async (req, res) => {
   try {
     const { systemName, themeColor, logoUrl, defaultFee, monthlyPlan, yearlyPlan } = req.body;

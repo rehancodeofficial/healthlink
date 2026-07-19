@@ -265,9 +265,6 @@ router.put("/profile", async (req, res) => {
   }
 });
 
-/* ==================================================
-   1) PATIENT DASHBOARD STATS
-   ================================================== */
 /**
  * GET /api/patient/stats
  * Strictly scoped to logged-in user (req.user?.id) or ?patientId=<User.id> for dev.
@@ -361,16 +358,13 @@ router.get("/stats", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ /api/patient/stats error:", err);
+    console.error(" /api/patient/stats error:", err);
     return res
       .status(500)
       .json({ success: false, error: "Failed to fetch patient stats" });
   }
 });
 
-/* ==================================================
-   2) PATIENT DIRECTORY (ADMIN/UTILITY)
-   ================================================== */
 /**
  * GET /api/patient/all?page=&limit=
  */
@@ -430,9 +424,6 @@ router.get("/all", async (req, res) => {
   }
 });
 
-/* ==================================================
-   3) APPOINTMENTS (USED BY MyAppointments.jsx)
-   ================================================== */
 /**
  * GET /api/patient/appointments?patientId=<User.id>
  */
@@ -459,7 +450,7 @@ router.get("/appointments", async (req, res) => {
 
     return res.json(items);
   } catch (err) {
-    console.error("❌ GET /patient/appointments error:", err);
+    console.error(" GET /patient/appointments error:", err);
     return res.status(500).json({ error: "Failed to load appointments" });
   }
 });
@@ -500,7 +491,7 @@ router.post("/appointments", async (req, res) => {
     if (!doctor)
       return res.status(404).json({ error: "Doctor profile not found" });
 
-    // ✅ VALIDATE AGAINST DOCTOR'S SCHEDULE
+    //  VALIDATE AGAINST DOCTOR'S SCHEDULE
     const apptDate = parseAsLocal(appointmentDate);
     const dayOfWeek = apptDate.getDay();
     const apptTime = `${String(apptDate.getHours()).padStart(2, "0")}:${String(apptDate.getMinutes()).padStart(2, "0")}`;
@@ -621,7 +612,7 @@ router.post("/appointments", async (req, res) => {
 
     return res.status(201).json(created);
   } catch (err) {
-    console.error("❌ POST /patient/appointments error:", err);
+    console.error(" POST /patient/appointments error:", err);
     return res.status(500).json({ error: "Failed to book appointment" });
   }
 });
@@ -635,21 +626,21 @@ router.patch("/appointments/:id/cancel", async (req, res) => {
     const userId =
       req.user?.id || req.query.patientId || req.body.patientId || null;
 
-    console.log("🔍 Cancel request - apptId:", apptId, "userId:", userId);
+    console.log(" Cancel request - apptId:", apptId, "userId:", userId);
 
     const appt = await prisma.appointment.findUnique({
       where: { id: apptId },
       select: { id: true, status: true, patientId: true },
     });
 
-    console.log("🔍 Found appointment:", appt);
+    console.log(" Found appointment:", appt);
 
     if (!appt) return res.status(404).json({ error: "Appointment not found" });
 
     if (userId) {
       const pid = await getPatientProfileIdByUserId(userId);
       console.log(
-        "🔍 Patient profile ID:",
+        " Patient profile ID:",
         pid,
         "Appointment patientId:",
         appt.patientId,
@@ -669,20 +660,17 @@ router.patch("/appointments/:id/cancel", async (req, res) => {
       data: { status: "CANCELLED" },
     });
 
-    console.log("✅ Appointment cancelled successfully:", updated.id);
+    console.log(" Appointment cancelled successfully:", updated.id);
     return res.json(updated);
   } catch (err) {
-    console.error("❌ PATCH /patient/appointments/:id/cancel error:", err);
-    console.error("❌ Error stack:", err.stack);
+    console.error(" PATCH /patient/appointments/:id/cancel error:", err);
+    console.error(" Error stack:", err.stack);
     return res
       .status(500)
       .json({ error: "Failed to cancel appointment", details: err.message });
   }
 });
 
-/* ==================================================
-   4) PRESCRIPTIONS — LIST for Patient
-   ================================================== */
 /**
  * GET /api/patient/prescriptions?patientId=<User.id>
  */
@@ -717,14 +705,11 @@ router.get("/prescriptions", async (req, res) => {
 
     return res.json(prescriptions);
   } catch (err) {
-    console.error("❌ GET /api/patient/prescriptions error:", err);
+    console.error(" GET /api/patient/prescriptions error:", err);
     return res.status(500).json({ error: "Failed to fetch prescriptions" });
   }
 });
 
-/* ==================================================
-   5) VIDEO CONSULTATIONS — LIST for Patient
-   ================================================== */
 /**
  * GET /api/patient/video-calls?patientId=<User.id>
  * NOTE: Prisma schema uses PatientProfile.id in VideoConsultation.patientId.
@@ -759,14 +744,11 @@ router.get("/video-calls", async (req, res) => {
 
     return res.json(calls);
   } catch (err) {
-    console.error("❌ GET /api/patient/video-calls error:", err);
+    console.error(" GET /api/patient/video-calls error:", err);
     return res.status(500).json({ error: "Failed to fetch video calls" });
   }
 });
 
-/* ==================================================
-   6) SUBSCRIPTION — STATUS / CHECKOUT / VERIFY / CANCEL
-   ================================================== */
 /**
  * GET /api/patient/subscription?patientId=<User.id>
  */
@@ -794,7 +776,7 @@ router.get("/subscription", async (req, res) => {
 
     return res.json({ success: true, data: { user, lastPayment } });
   } catch (err) {
-    console.error("❌ GET /api/patient/subscription error:", err);
+    console.error(" GET /api/patient/subscription error:", err);
     return res.status(500).json({ error: "Failed to load subscription" });
   }
 });
@@ -875,7 +857,7 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
     return res.json({ authorization_url: data.authorization_url, reference });
   } catch (err) {
     console.error(
-      "❌ POST /subscription/checkout/paystack error:",
+      " POST /subscription/checkout/paystack error:",
       err?.response?.data || err,
     );
     return res
@@ -933,7 +915,7 @@ router.get("/subscription/verify/paystack", async (req, res) => {
     return res.json({ status });
   } catch (err) {
     console.error(
-      "❌ GET /subscription/verify/paystack error:",
+      " GET /subscription/verify/paystack error:",
       err?.response?.data || err,
     );
     return res.status(500).json({ error: "Verification failed" });
@@ -991,7 +973,7 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
 
     return res.json({ url: session.url, session_id: session.id });
   } catch (err) {
-    console.error("❌ POST /subscription/checkout/stripe error:", err);
+    console.error(" POST /subscription/checkout/stripe error:", err);
     return res.status(500).json({ error: "Failed to init Stripe checkout" });
   }
 });
@@ -1036,7 +1018,7 @@ router.get("/subscription/verify/stripe", async (req, res) => {
 
     return res.json({ status, session });
   } catch (err) {
-    console.error("❌ GET /subscription/verify/stripe error:", err);
+    console.error(" GET /subscription/verify/stripe error:", err);
     return res.status(500).json({ error: "Stripe verification failed" });
   }
 });
@@ -1058,15 +1040,11 @@ router.post("/subscription/cancel", async (req, res) => {
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error("❌ POST /subscription/cancel error:", err);
+    console.error(" POST /subscription/cancel error:", err);
     return res.status(500).json({ error: "Failed to cancel subscription" });
   }
 });
 
-/* ==================================================
-   7) SINGLE PATIENT (UTILITY)
-   Keep LAST to avoid shadowing paths like /appointments
-   ================================================== */
 /**
  * GET /api/patient/profile/:id
  * (Changed from "/:id" to avoid greedy matching issues.)
@@ -1107,9 +1085,7 @@ router.get("/profile/:id", async (req, res) => {
   }
 });
 
-// ========================
 // PATIENT MESSAGES
-// ========================
 
 /**
  * GET /api/patient/messages/inbox?patientId=<User.id>
@@ -1142,7 +1118,7 @@ router.get("/messages/inbox", async (req, res) => {
 
     return res.json(msgs);
   } catch (err) {
-    console.error("❌ GET /patient/messages/inbox error:", err);
+    console.error(" GET /patient/messages/inbox error:", err);
     return res.status(500).json({ error: "Failed to fetch inbox" });
   }
 });
@@ -1186,7 +1162,7 @@ router.post("/messages/send", async (req, res) => {
 
     return res.status(201).json({ success: true, data: created });
   } catch (err) {
-    console.error("❌ POST /patient/messages/send error:", err);
+    console.error(" POST /patient/messages/send error:", err);
     return res.status(500).json({ error: "Failed to send message" });
   }
 });
@@ -1241,7 +1217,7 @@ router.delete("/messages/delete/:id", async (req, res) => {
     await prisma.message.delete({ where: { id } });
     return res.json({ success: true });
   } catch (err) {
-    console.error("❌ DELETE /patient/messages/delete/:id error:", err);
+    console.error(" DELETE /patient/messages/delete/:id error:", err);
     return res.status(500).json({ error: "Failed to delete message" });
   }
 });
@@ -1251,16 +1227,16 @@ router.delete("/messages/delete/:id", async (req, res) => {
 // PUT /api/patient/profile
 router.put("/profile", verifyToken, async (req, res) => {
   try {
-    console.log("🔍 PUT /profile - req.user:", req.user);
-    console.log("🔍 PUT /profile - req.body.userId:", req.body.userId);
+    console.log(" PUT /profile - req.user:", req.user);
+    console.log(" PUT /profile - req.body.userId:", req.body.userId);
 
     const userId = req.user?.id || req.body.userId;
-    console.log("🔍 PUT /profile BODY:", JSON.stringify(req.body, null, 2));
+    console.log(" PUT /profile BODY:", JSON.stringify(req.body, null, 2));
 
     const {
-      firstName, // ✅ Extract Name
-      lastName, // ✅ Extract Name
-      phone, // ✅ Extract Phone
+      firstName, //  Extract Name
+      lastName, //  Extract Name
+      phone, //  Extract Phone
       dateOfBirth,
       gender,
       bloodGroup,
@@ -1286,11 +1262,11 @@ router.put("/profile", verifyToken, async (req, res) => {
         ? medicalRecordNumber
         : null;
 
-    console.log("🔍 Extracted userId:", userId);
+    console.log(" Extracted userId:", userId);
 
     if (!userId) {
       console.error(
-        "❌ userId is missing - req.user:",
+        " userId is missing - req.user:",
         req.user,
         "req.body.userId:",
         req.body.userId,
@@ -1332,7 +1308,7 @@ router.put("/profile", verifyToken, async (req, res) => {
     const mappedGender = genderMap[gender] || gender;
 
     console.log(
-      "🔍 Mapped values - Blood:",
+      " Mapped values - Blood:",
       mappedBlood,
       "Gender:",
       mappedGender,
@@ -1340,9 +1316,9 @@ router.put("/profile", verifyToken, async (req, res) => {
 
     // Prepare User update data
     const userData = {
-      ...(firstName ? { firstName } : {}), // ✅ Update Name
-      ...(lastName ? { lastName } : {}), // ✅ Update Name
-      ...(phone ? { phone } : {}), // ✅ Update Phone
+      ...(firstName ? { firstName } : {}), //  Update Name
+      ...(lastName ? { lastName } : {}), //  Update Name
+      ...(phone ? { phone } : {}), //  Update Phone
       ...(dateOfBirth ? { dateOfBirth: new Date(dateOfBirth) } : {}),
       ...(mappedGender ? { gender: mappedGender } : {}),
     };
@@ -1413,7 +1389,7 @@ router.put("/profile", verifyToken, async (req, res) => {
     const updatedProfile =
       Object.keys(userData).length > 0 ? results[1] : results[0];
 
-    console.log("✅ Profile updated successfully for userId:", userId);
+    console.log(" Profile updated successfully for userId:", userId);
 
     // Return the consolidated profile
     const finalProfile = {
@@ -1423,7 +1399,7 @@ router.put("/profile", verifyToken, async (req, res) => {
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         email: updatedUser.email,
-        phone: updatedUser.phone, // ✅ Return Phone
+        phone: updatedUser.phone, //  Return Phone
         dateOfBirth: updatedUser.dateOfBirth,
         gender: updatedUser.gender,
       },
@@ -1438,8 +1414,8 @@ router.put("/profile", verifyToken, async (req, res) => {
 
     return res.json({ success: true, data: finalProfile });
   } catch (e) {
-    console.error("❌ patient profile PUT error:", e);
-    console.error("❌ Error stack:", e.stack);
+    console.error(" patient profile PUT error:", e);
+    console.error(" Error stack:", e.stack);
     // Prisma validation errors usually have a message property
     return res
       .status(500)
@@ -1482,10 +1458,6 @@ router.patch("/select-pharmacy", async (req, res) => {
 });
 
 module.exports = router;
-
-/* ==================================================
-   PHARMACY ORDERING & MANAGEMENT
-   ================================================== */
 
 /**
  * GET /api/patient/pharmacies
@@ -1592,10 +1564,6 @@ router.get("/profile/pharmacy", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch pharmacy" });
   }
 });
-
-/* ==================================================
-   PRESCRIPTION ORDERING
-   ================================================== */
 
 /**
  * POST /api/patient/pharmacy/order

@@ -69,12 +69,12 @@ router.post("/seed", async (req, res) => {
         .json({ error: "Unauthorized: Invalid seed secret" });
     }
 
-    console.log("🚀 Remote seed triggered...");
+    console.log(" Remote seed triggered...");
     await runSeed();
 
     res.json({ message: "Seed completed successfully" });
   } catch (error) {
-    console.error("❌ Remote seed error:", error);
+    console.error(" Remote seed error:", error);
     res.status(500).json({ error: "Seed failed", details: error.message });
   }
 });
@@ -102,7 +102,7 @@ router.post("/fix-schema", async (req, res) => {
     if (secret !== expectedSecret)
       return res.status(403).json({ error: "Unauthorized" });
 
-    console.log("🛠️ Manual schema fix triggered...");
+    console.log(" Manual schema fix triggered...");
 
     // Add missing cols to DoctorProfile
     await prisma.$executeRawUnsafe(
@@ -137,7 +137,7 @@ router.post("/fix-schema", async (req, res) => {
 
     res.json({ message: "Schema fix applied successfully" });
   } catch (error) {
-    console.error("❌ Schema fix error:", error);
+    console.error(" Schema fix error:", error);
     res.status(500).json({ error: error.message });
   }
 });

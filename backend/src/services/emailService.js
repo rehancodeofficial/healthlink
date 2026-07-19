@@ -26,7 +26,7 @@ const emailService = {
       });
     } else {
       console.warn(
-        "⚠️ Email service not configured (EMAIL_SERVICE, EMAIL_USER, EMAIL_PASS variables missing). Emails will be logged to console only.",
+        " Email service not configured (EMAIL_SERVICE, EMAIL_USER, EMAIL_PASS variables missing). Emails will be logged to console only.",
       );
     }
   },
@@ -36,7 +36,7 @@ const emailService = {
 
     if (!this.transporter) {
       console.log("==================================================");
-      console.log(`📧 [MOCK EMAIL] To: ${to}`);
+      console.log(` [MOCK EMAIL] To: ${to}`);
       console.log(`Subject: ${subject}`);
       console.log(`Body: ${text || html}`);
       console.log("==================================================");
@@ -52,10 +52,10 @@ const emailService = {
         text,
         html,
       });
-      console.log(`✅ Email sent to ${to}: ${info.messageId}`);
+      console.log(` Email sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      console.error(`❌ Failed to send email to ${to}:`, error);
+      console.error(` Failed to send email to ${to}:`, error);
       return { success: false, error };
     }
   },

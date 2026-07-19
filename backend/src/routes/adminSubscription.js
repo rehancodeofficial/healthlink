@@ -35,7 +35,7 @@ router.get("/subscription-prices", async (_req, res) => {
     });
   } catch (err) {
     console.error(
-      "❌ GET /admin/subscription-prices error:",
+      " GET /admin/subscription-prices error:",
       err?.message,
       err
     );
@@ -84,7 +84,7 @@ router.put("/subscription-prices", async (req, res) => {
     });
   } catch (err) {
     console.error(
-      "❌ PUT /admin/subscription-prices error:",
+      " PUT /admin/subscription-prices error:",
       err?.message,
       err
     );
@@ -121,7 +121,7 @@ router.get("/subscribers", async (req, res) => {
 
     return res.json({ success: true, data });
   } catch (err) {
-    console.error("❌ GET /admin/subscribers", err);
+    console.error(" GET /admin/subscribers", err);
     return res.status(500).json({ error: "Failed to fetch subscribers" });
   }
 });
@@ -145,7 +145,7 @@ router.put("/subscribers/:userId/deactivate", async (req, res) => {
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("❌ PUT /admin/subscribers/:userId/deactivate", err);
+    console.error(" PUT /admin/subscribers/:userId/deactivate", err);
     return res.status(500).json({ error: "Failed to deactivate" });
   }
 });

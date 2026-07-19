@@ -37,7 +37,7 @@ function DoctorViewModal({ open, onClose, doctor, onAssign, isAssigned }) {
           className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-main)] text-2xl transition"
           aria-label="Close modal"
         >
-          ✖
+          
         </button>
 
         <div className="flex items-center gap-4 mb-8">

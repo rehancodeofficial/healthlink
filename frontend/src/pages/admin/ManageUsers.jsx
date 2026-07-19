@@ -77,7 +77,7 @@ export default function ManageUsers() {
 
   const handleDeleteUser = async (id) => {
     if (
-      !window.confirm("⚠️ IRREVERSIBLE ACTION: Permanently purge this identity from central core?")
+      !window.confirm(" IRREVERSIBLE ACTION: Permanently purge this identity from central core?")
     )
       return;
     try {

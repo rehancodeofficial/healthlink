@@ -97,7 +97,7 @@ export default function SuperadminSendMessage() {
                     disabled={loading}
                   >
                     <option value="">Select Identity Node</option>
-                    <option value="ALL">📢 Global Broadcast (All Nodes)</option>
+                    <option value="ALL"> Global Broadcast (All Nodes)</option>
                     {users.map((u) => (
                       <option key={`${u.type}-${u.id}`} value={u.id}>
                         {u.name} [{u.role}]

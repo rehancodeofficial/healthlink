@@ -6,7 +6,6 @@ import api from "../../../Lib/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-/* -------- Small confirm dialog (prompt modal) -------- */
 function ConfirmDialog({
   open,
   title = "Are you sure?",

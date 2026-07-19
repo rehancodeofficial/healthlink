@@ -29,7 +29,7 @@ function DoctorViewModal({ open, onClose, doctor }) {
           className="absolute top-3 right-4 text-[var(--text-soft)] text-xl"
           aria-label="Close modal"
         >
-          ✖
+          
         </button>
 
         <h2 className="text-2xl font-semibold mb-6 text-[var(--text-main)]">Doctor Profile</h2>

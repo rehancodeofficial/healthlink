@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================
-   🌿 HealthLink Ultra-Premium Design System
-   ========================================== */
-
 :root {
   /* Base radius */
   --r-sm: 14px;
@@ -184,10 +180,6 @@ body {
   @apply max-w-7xl mx-auto px-6 w-full;
 }
 
-/* ==========================================
-   📱 MOBILE-FIRST RESPONSIVE OPTIMIZATIONS
-   ========================================== */
-
 /* Reduced motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -277,10 +269,6 @@ html {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
-
-/* ==========================================
-   ✨ World-Class SaaS Design Additions
-   ========================================== */
 
 /* Inter Font Override */
 html,

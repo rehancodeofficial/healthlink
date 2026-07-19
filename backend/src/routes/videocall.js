@@ -5,9 +5,6 @@ const crypto = require("crypto");
 const prisma = require("../prisma/prismaClient");
 const { verifyToken, requireRole } = require("../middleware/rbac.js");
 
-/* ============================
-   Helpers: Profile Resolution
-============================ */
 async function resolveDoctorProfileId({ doctorId, doctorUserId, callerUserId, role }) {
   // Prefer explicit DoctorProfile.id
   if (doctorId) {
@@ -82,20 +79,6 @@ async function resolvePatientProfileId({ patientId, patientUserId, callerUserId,
   return null;
 }
 
-/* ==========================================
-   1) CREATE / SCHEDULE A VIDEO CONSULTATION
-   POST /api/videocall/create
-   Body (flexible):
-     role: "DOCTOR" | "PATIENT"
-     userId: <caller User.id>
-     doctorId: DoctorProfile.id OR Doctor User.id
-     doctorUserId?: Doctor User.id (alt)
-     patientId: PatientProfile.id OR Patient User.id
-     patientUserId?: Patient User.id (alt)
-     scheduledAt: ISO
-     durationMins?: number
-     title?, notes? (optional, ignored for now)
-========================================== */
 router.post("/create", verifyToken, async (req, res) => {
   try {
     const {
@@ -161,10 +144,6 @@ router.post("/create", verifyToken, async (req, res) => {
   }
 });
 
-/* ==========================================
-   2) LIST CONSULTATIONS (Doctor or Patient)
-   GET /api/videocall/list?userId=...&role=DOCTOR|PATIENT
-========================================== */
 router.get("/list", verifyToken, async (req, res) => {
   try {
     const { userId, role } = req.query;
@@ -204,31 +183,22 @@ router.get("/list", verifyToken, async (req, res) => {
 
     return res.json({ success: true, data: consults });
   } catch (err) {
-    console.error("❌ Error fetching consultations:", err);
+    console.error(" Error fetching consultations:", err);
     return res.status(500).json({ error: "Failed to fetch consultations" });
   }
 });
 
-/* ==========================================
-   3) GENERATE ZEGO ROOM NAME
-   Returns a unique, secure room name for ZEGO
-========================================== */
 router.post("/room-name", verifyToken, async (req, res) => {
   try {
-    // ✅ Generate a ZEGO room name
+    //  Generate a ZEGO room name
     const roomName = `consult-${crypto.randomUUID()}`;
     return res.json({ success: true, roomName });
   } catch (err) {
-    console.error("❌ Error generating room name:", err);
+    console.error(" Error generating room name:", err);
     return res.status(500).json({ error: "Failed to generate room name" });
   }
 });
 
-/* ==========================================
-   4) UPDATE STATUS
-   PUT /api/videocall/status/:id
-   Body: { status: "SCHEDULED"|"ONGOING"|"COMPLETED"|"CANCELLED" }
-========================================== */
 router.put("/status/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -265,15 +235,11 @@ router.put("/status/:id", verifyToken, async (req, res) => {
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("❌ Error updating consultation status:", err);
+    console.error(" Error updating consultation status:", err);
     return res.status(500).json({ error: "Failed to update consultation" });
   }
 });
 
-/* ==========================================
-   5) CANCEL (soft status update)
-   PATCH /api/videocall/cancel/:id
-========================================== */
 router.patch("/cancel/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -287,16 +253,11 @@ router.patch("/cancel/:id", verifyToken, async (req, res) => {
     });
     return res.json({ success: true, data: cancelled });
   } catch (err) {
-    console.error("❌ Error cancelling consultation:", err);
+    console.error(" Error cancelling consultation:", err);
     return res.status(500).json({ error: "Failed to cancel consultation" });
   }
 });
 
-/* ==========================================
-   6) RESCHEDULE
-   PATCH /api/videocall/reschedule/:id
-   Body: { scheduledAt?, durationMins? }
-========================================== */
 router.patch("/reschedule/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -328,7 +289,7 @@ router.patch("/reschedule/:id", verifyToken, async (req, res) => {
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("❌ Error rescheduling consultation:", err);
+    console.error(" Error rescheduling consultation:", err);
     return res.status(500).json({ error: "Failed to reschedule consultation" });
   }
 });

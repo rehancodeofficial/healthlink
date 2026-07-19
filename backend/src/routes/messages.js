@@ -9,9 +9,8 @@ const {
 
 const router = express.Router();
 
-// ------------------------------------------------------------------
 // Constants & helpers
-// ------------------------------------------------------------------
+
 const PAGE_SIZE_DEFAULT = 20;
 const VALID_FOLDERS = new Set(["inbox", "sent", "unread", "all"]);
 
@@ -135,16 +134,14 @@ async function listMessages(req, res) {
       folder: folder.toUpperCase(),
     });
   } catch (e) {
-    console.error("❌ messages list error:", e);
+    console.error(" messages list error:", e);
     return res.status(500).json({ error: "Failed to load messages" });
   }
 }
 
-// ------------------------------------------------------------------
 // Routes
-// ------------------------------------------------------------------
 
-// ✅ Get all contacts for messaging (All users in User table)
+//  Get all contacts for messaging (All users in User table)
 router.get("/contacts/all", verifyToken, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
@@ -164,7 +161,7 @@ router.get("/contacts/all", verifyToken, async (req, res) => {
 
     return res.json({ data: all });
   } catch (err) {
-    console.error("❌ Failed to fetch contacts:", err);
+    console.error(" Failed to fetch contacts:", err);
     return res.status(500).json({ error: "Failed to fetch contacts" });
   }
 });
@@ -179,7 +176,7 @@ router.get("/unread-count", verifyToken, async (req, res) => {
     });
     return res.json({ data: { count } });
   } catch (err) {
-    console.error("❌ unread count error:", err);
+    console.error(" unread count error:", err);
     return res.status(500).json({ error: "Failed to fetch unread count" });
   }
 });
@@ -207,7 +204,7 @@ router.post("/mark-read", verifyToken, async (req, res) => {
     });
     return res.json({ success: true, updated: result.count });
   } catch (e) {
-    console.error("❌ mark-read error:", e);
+    console.error(" mark-read error:", e);
     return res.status(500).json({ error: "Failed to mark as read" });
   }
 });
@@ -223,7 +220,7 @@ router.patch("/:id/read", verifyToken, async (req, res) => {
     });
     return res.json({ data: msg });
   } catch (e) {
-    console.error("❌ mark single read error:", e);
+    console.error(" mark single read error:", e);
     return res.status(500).json({ error: "Failed to mark message read" });
   }
 });
@@ -317,12 +314,12 @@ router.post("/send", verifyToken, async (req, res) => {
 
     return res.json({ data: formattedMsg });
   } catch (e) {
-    console.error("❌ send message error:", e);
+    console.error(" send message error:", e);
     return res.status(500).json({ error: "Failed to send message" });
   }
 });
 
-// ✅ Delete a message: DELETE /api/messages/:id
+//  Delete a message: DELETE /api/messages/:id
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -346,7 +343,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
     await prisma.message.delete({ where: { id } });
     return res.json({ success: true, message: "Message deleted successfully" });
   } catch (e) {
-    console.error("❌ delete message error:", e);
+    console.error(" delete message error:", e);
     return res.status(500).json({ error: "Failed to delete message" });
   }
 });

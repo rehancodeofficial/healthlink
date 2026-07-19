@@ -7,7 +7,6 @@ const jwt = require("jsonwebtoken");
 
 const authenticatePharmacy = [verifyToken, requireRole(["PHARMACY", "SUPERADMIN", "ADMIN"])];
 
-/* --------------------------- helpers --------------------------- */
 const toNullIfBlank = (v) =>
   v === undefined || v === null || String(v).trim() === "" ? null : String(v).trim();
 
@@ -25,9 +24,6 @@ function inferUserId(req) {
   return null;
 }
 
-/* ================================================================
-   DASHBOARD STATS
-================================================================ */
 router.get("/stats", ...authenticatePharmacy, async (req, res) => {
   try {
     const pharmacyUserId = req.user?.id;
@@ -94,10 +90,6 @@ router.get("/stats", ...authenticatePharmacy, async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /pharmacy/profile?userId=...
-   - Ensures a profile exists for the user (auto-creates minimal row)
-================================================================ */
 router.get("/profile", ...authenticatePharmacy, async (req, res) => {
   try {
     const userId = inferUserId(req);
@@ -144,15 +136,6 @@ router.get("/profile", ...authenticatePharmacy, async (req, res) => {
   }
 });
 
-/* ================================================================
-   PUT /pharmacy/profile
-   Body: {
-     userId, displayName?, licenseNumber?, phone?, address?, city?,
-     state?, country?, postalCode?, latitude?, longitude?,
-     openingHours?, services?
-   }
-   - Upserts the profile and returns a success message (for toast)
-================================================================ */
 router.put("/profile", verifyToken, async (req, res) => {
   try {
     const userId = inferUserId(req);
@@ -200,7 +183,7 @@ router.put("/profile", verifyToken, async (req, res) => {
       updatedAt: new Date(),
     };
 
-    // ✅ Sync User Phone & Name if provided
+    //  Sync User Phone & Name if provided
     const userData = {};
     if (phone) userData.phone = String(phone).trim();
     if (firstName) userData.firstName = String(firstName).trim();
@@ -222,7 +205,7 @@ router.put("/profile", verifyToken, async (req, res) => {
 
     return res.json({
       success: true,
-      message: "✅ Profile saved",
+      message: " Profile saved",
       data: saved,
     });
   } catch (err) {
@@ -231,10 +214,6 @@ router.put("/profile", verifyToken, async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /pharmacy/prescriptions?userId=...
-   (dashboard counts / list)
-================================================================ */
 router.get("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const userId = inferUserId(req);
@@ -262,11 +241,6 @@ router.get("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUP
   }
 });
 
-/* ================================================================
-   BONUS: pharmacy dispatch status updates
-   PATCH /pharmacy/prescriptions/:id/status { dispatchStatus }
-   dispatchStatus: "ACKNOWLEDGED" | "READY" | "DISPENSED" | "REJECTED"
-================================================================ */
 router.patch("/prescriptions/:id/status", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,7 +269,7 @@ router.patch("/prescriptions/:id/status", verifyToken, requireRole(["PHARMACY", 
       },
     });
 
-    return res.json({ success: true, message: "✅ Status updated", data: updated });
+    return res.json({ success: true, message: " Status updated", data: updated });
   } catch (err) {
     console.error("PATCH /pharmacy/prescriptions/:id/status error:", err);
     return res.status(500).json({ error: "Failed to update dispatch status" });
@@ -303,25 +277,17 @@ router.patch("/prescriptions/:id/status", verifyToken, requireRole(["PHARMACY", 
 
 });
 
-/* ================================================================
-   DELETE /pharmacy/prescriptions/:id
-   - Delete a prescription (e.g. if created in error or rejected)
-================================================================ */
 router.delete("/prescriptions/:id", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.prescription.delete({ where: { id: String(id) } });
-    return res.json({ success: true, message: "✅ Prescription deleted" });
+    return res.json({ success: true, message: " Prescription deleted" });
   } catch (err) {
     console.error("DELETE /pharmacy/prescriptions/:id error:", err);
     return res.status(500).json({ error: "Failed to delete prescription" });
   }
 });
 
-/* ================================================================
-   PUT /pharmacy/prescriptions/:id
-   - Edit prescription details (medication, dosage, etc.)
-================================================================ */
 router.put("/prescriptions/:id", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
@@ -342,17 +308,13 @@ router.put("/prescriptions/:id", verifyToken, requireRole(["PHARMACY", "ADMIN", 
       }
     });
 
-    return res.json({ success: true, message: "✅ Prescription updated", data: updated });
+    return res.json({ success: true, message: " Prescription updated", data: updated });
   } catch (err) {
     console.error("PUT /pharmacy/prescriptions/:id error:", err);
     return res.status(500).json({ error: "Failed to update prescription" });
   }
 });
 
-/* ================================================================
-   GET /pharmacy/list — List all pharmacies
-   Used by patient pharmacy list page
-================================================================ */
 router.get("/list", async (req, res) => {
   try {
     const { lat, lng } = req.query;
@@ -394,7 +356,6 @@ router.get("/list", async (req, res) => {
     return res.status(500).json({ error: "Failed to load pharmacy list" });
   }
 });
-
 
 // GET /api/pharmacy/patient/selected?patientId=...
 router.get("/patient/selected", async (req, res) => {
@@ -512,11 +473,6 @@ router.patch("/patient/select/:mapId/preferred", verifyToken, async (req, res) =
   }
 });
 
-/* ================================================================
-   POST /pharmacy/prescriptions — Create a new prescription
-   Requester (Pharmacy) acts as the creator/filler.
-   Needs doctorId & patientId.
-================================================================ */
 router.post("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SUPERADMIN"]), async (req, res) => {
   try {
     const userId = inferUserId(req);
@@ -557,17 +513,13 @@ router.post("/prescriptions", verifyToken, requireRole(["PHARMACY", "ADMIN", "SU
       }
     });
 
-    return res.json({ success: true, message: "✅ Prescription created", data: created });
+    return res.json({ success: true, message: " Prescription created", data: created });
   } catch (err) {
     console.error("POST /pharmacy/prescriptions error:", err);
     return res.status(500).json({ error: "Failed to create prescription" });
   }
 });
 
-/* ================================================================
-   GET /pharmacy/doctors-list & /pharmacy/patients-list
-   Helpers for the Create Modal
-================================================================ */
 router.get("/doctors-list", async (_req, res) => {
   try {
     const list = await prisma.doctorProfile.findMany({

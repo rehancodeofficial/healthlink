@@ -17,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
  */
 const verifyToken = (req, res, next) => {
   if (!JWT_SECRET) {
-    console.error("❌ JWT_SECRET is missing in environment variables!");
+    console.error(" JWT_SECRET is missing in environment variables!");
     return res
       .status(500)
       .json({

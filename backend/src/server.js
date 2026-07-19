@@ -36,8 +36,8 @@ require("./socket/socketHandler.cjs")(io);
 const PORT = env.PORT || 5001;
 server.listen(PORT, "0.0.0.0", () => {
   console.log("-------------------------------------------");
-  console.log(`🚀 Server running on: http://0.0.0.0:${PORT}`);
-  console.log(`🌍 Environment: ${env.NODE_ENV}`);
-  console.log(`⏱️  Started at: ${new Date().toISOString()}`);
+  console.log(` Server running on: http://0.0.0.0:${PORT}`);
+  console.log(` Environment: ${env.NODE_ENV}`);
+  console.log(`  Started at: ${new Date().toISOString()}`);
   console.log("-------------------------------------------");
 });

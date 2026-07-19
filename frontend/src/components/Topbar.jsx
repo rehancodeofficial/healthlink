@@ -129,8 +129,6 @@ export default function Topbar({ userName: propUserName, isMobileMenuOpen, setIs
           </div>
         </div>
 
-
-
         {/* Notifications */}
         <div
           className="relative cursor-pointer p-2.5 md:p-3 rounded-2xl bg-white/10 border border-white/10 text-white hover:text-emerald-300 transition-all active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"

@@ -30,11 +30,11 @@ router.get("/test-email", async (req, res) => {
   }
 
   try {
-    console.log(`🧪 Diagnostics: Sending test email to ${email}...`);
+    console.log(` Diagnostics: Sending test email to ${email}...`);
     await sendOTPEmail(email, "123456"); // Send a dummy OTP
     res.json({ success: true, message: `Test email sent to ${email}` });
   } catch (error) {
-    console.error("❌ Diagnostics: Email failed:", error);
+    console.error(" Diagnostics: Email failed:", error);
     res.status(500).json({
       success: false,
       error: error.message,

@@ -46,7 +46,7 @@ export default function MyAppointments() {
       const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setAppointments(data);
     } catch (err) {
-      console.error("❌ Error loading appointments:", err);
+      console.error(" Error loading appointments:", err);
       toast.error("Failed to load appointments");
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ export default function MyAppointments() {
     if (patientUserId) fetchAppointments();
   }, [fetchAppointments, patientUserId]);
 
-  // ========== POLLING: Check callStatus every 5 seconds ==========
+  
   useEffect(() => {
     const approvedIds = appointments
       .filter((a) => a.status === "APPROVED" && (a.callStatus || "idle") !== "ended")
@@ -101,7 +101,7 @@ export default function MyAppointments() {
 
               // Detect transition to "requested" — show notification
               if (oldStatus !== "requested" && newStatus === "requested") {
-                toast.info("📞 Doctor is calling you! Click Join to connect.", {
+                toast.info(" Doctor is calling you! Click Join to connect.", {
                   autoClose: false,
                   toastId: `call-${a.id}`,
                 });
@@ -195,7 +195,7 @@ export default function MyAppointments() {
     }
   };
 
-  // ========== NEW: Join Video Call via API ==========
+  
   const handleJoinCall = async (appt) => {
     try {
       setJoiningCallId(appt.id);
@@ -583,7 +583,7 @@ export default function MyAppointments() {
                   {/* Visual feedback for selected slot */}
                   {form.selectedSlotId && (
                     <p className="text-xs text-[var(--brand-green)] mt-2 font-bold px-1">
-                      ✓ Slot selected
+                       Slot selected
                     </p>
                   )}
                 </div>

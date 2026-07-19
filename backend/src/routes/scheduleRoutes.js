@@ -22,9 +22,7 @@ function hasTimeConflict(start1, end1, start2, end2) {
   return s1 < e2 && s2 < e1;
 }
 
-// =============================================================================
 // DOCTOR: Manage Schedule (Recurring)
-// =============================================================================
 
 // GET /api/schedule?doctorId=...
 router.get("/", async (req, res) => {
@@ -137,9 +135,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// =============================================================================
 // PATIENT: View Slots & Book
-// =============================================================================
 
 // GET /api/schedule/slots?doctorId=...&date=YYYY-MM-DD
 const { formatInTimeZone, toDate } = require("date-fns-tz");

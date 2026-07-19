@@ -8,7 +8,7 @@ const callTimeouts = new Map(); // appointmentId -> setTimeout ID
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log(`✅ Socket connected: ${socket.id}`);
+    console.log(` Socket connected: ${socket.id}`);
 
     // User registers with their identity
     socket.on("user_online", ({ userId, role, name }) => {
@@ -18,7 +18,7 @@ module.exports = (io) => {
         name,
         rooms: new Set(),
       });
-      console.log(`👤 User online: ${name} (${role}) - Socket: ${socket.id}`);
+      console.log(` User online: ${name} (${role}) - Socket: ${socket.id}`);
 
       // broadcast to all that user is online
       socket.broadcast.emit("user_status", {
@@ -57,7 +57,7 @@ module.exports = (io) => {
             code: "APPOINTMENT_NOT_FOUND",
             message: "Appointment not found",
           });
-          console.warn(`⚠️ Appointment not found: ${appointmentId} by socket ${socket.id}`);
+          console.warn(` Appointment not found: ${appointmentId} by socket ${socket.id}`);
           return;
         }
 
@@ -70,7 +70,7 @@ module.exports = (io) => {
             code: "UNAUTHORIZED",
             message: "You are not authorized to join this session",
           });
-          console.warn(`🚫 Unauthorized room access attempt:`, {
+          console.warn(` Unauthorized room access attempt:`, {
             socketId: socket.id,
             userId: socket.userId,
             roomId,
@@ -87,7 +87,7 @@ module.exports = (io) => {
           const existingUser = activeUsers.get(socketId);
           if (existingUser && existingUser.userId === socket.userId) {
             // Same user reconnecting - replace old socket
-            console.log(`🔄 User ${socket.userId} reconnecting, removing old socket ${socketId}`);
+            console.log(` User ${socket.userId} reconnecting, removing old socket ${socketId}`);
             io.to(socketId).emit("session_replaced", {
               message: "You've connected from another tab or device",
             });
@@ -109,7 +109,7 @@ module.exports = (io) => {
             code: "ROOM_FULL",
             message: "This session already has 2 participants (doctor and patient)",
           });
-          console.warn(`⚠️ Room full: ${roomId}, rejected socket ${socket.id}`);
+          console.warn(` Room full: ${roomId}, rejected socket ${socket.id}`);
           return;
         }
 
@@ -127,7 +127,7 @@ module.exports = (io) => {
         }
         roomUsers.get(roomId).add(socket.id);
 
-        console.log(`📥 Socket ${socket.id} joined room: ${roomId}`);
+        console.log(` Socket ${socket.id} joined room: ${roomId}`);
 
         // Get other users in the room
         const otherUsers = Array.from(roomUsers.get(roomId) || [])
@@ -149,7 +149,7 @@ module.exports = (io) => {
           user: user ? { role: user.role, name: user.name } : null,
         });
       } catch (error) {
-        console.error(`❌ Error in join_room:`, error);
+        console.error(` Error in join_room:`, error);
         socket.emit("error", {
           code: "SERVER_ERROR",
           message: "Failed to Video Call",
@@ -157,14 +157,12 @@ module.exports = (io) => {
       }
     });
 
-    /* ==========================================================
-       VIDEO CALL SIGNALING (Doctor Initiated with 60s Timeout)
-       ========================================================== */
+    
 
     socket.on(
       "initiate-video-call",
       async ({ consultationId, patientId, doctorName, roomName }) => {
-        console.log(`🔔 Call initiated for consultation ${consultationId} by ${doctorName}`);
+        console.log(` Call initiated for consultation ${consultationId} by ${doctorName}`);
 
         try {
           // 1. Update DB Status to RINGING
@@ -188,7 +186,7 @@ module.exports = (io) => {
           }
 
           if (!patientNotified) {
-            console.warn(`⚠️ Patient ${patientId} is not online for call ${consultationId}`);
+            console.warn(` Patient ${patientId} is not online for call ${consultationId}`);
             socket.emit("call-failed", {
               consultationId,
               reason: "Patient is currently offline.",
@@ -222,7 +220,7 @@ module.exports = (io) => {
                   }
                 }
 
-                console.log(`⏰ Call ${consultationId} timed out after 60s`);
+                console.log(` Call ${consultationId} timed out after 60s`);
               }
             } catch (err) {
               console.error("Error handling call timeout:", err);
@@ -233,14 +231,14 @@ module.exports = (io) => {
 
           callTimeouts.set(consultationId, timeoutId);
         } catch (err) {
-          console.error("❌ Error initiating call:", err);
+          console.error(" Error initiating call:", err);
           socket.emit("error", { message: "Failed to initiate call" });
         }
       }
     );
 
     socket.on("accept-video-call", async ({ consultationId, doctorUserId }) => {
-      console.log(`✅ Call ${consultationId} accepted by patient`);
+      console.log(` Call ${consultationId} accepted by patient`);
 
       try {
         // 1. Clear Timeout
@@ -262,12 +260,12 @@ module.exports = (io) => {
           }
         }
       } catch (err) {
-        console.error("❌ Error accepting call:", err);
+        console.error(" Error accepting call:", err);
       }
     });
 
     socket.on("reject-video-call", async ({ consultationId, doctorUserId }) => {
-      console.log(`❌ Call ${consultationId} rejected by patient`);
+      console.log(` Call ${consultationId} rejected by patient`);
 
       try {
         // 1. Clear Timeout
@@ -291,16 +289,16 @@ module.exports = (io) => {
           }
         } else {
           // Fallback: Notify everyone in the "room" (if any) or find by consultation metadata
-          console.warn(`⚠️ No doctorUserId provided for reject-video-call ${consultationId}`);
+          console.warn(` No doctorUserId provided for reject-video-call ${consultationId}`);
         }
       } catch (err) {
-        console.error("❌ Error rejecting call:", err);
+        console.error(" Error rejecting call:", err);
       }
     });
 
     // Doctor starts session (legacy / generic)
     socket.on("start_session", ({ roomId, doctorName, patientId, appointmentId }) => {
-      console.log(`📢 Session started in room ${roomId} by ${doctorName}`);
+      console.log(` Session started in room ${roomId} by ${doctorName}`);
       socket.to(roomId).emit("session_started", { doctorName, roomId, appointmentId, patientId });
       if (patientId) {
         for (const [socketId, user] of activeUsers.entries()) {
@@ -333,7 +331,7 @@ module.exports = (io) => {
 
     // Session end (clean termination)
     socket.on("end_session", ({ roomId }) => {
-      console.log(`🛑 Session ended in room ${roomId}`);
+      console.log(` Session ended in room ${roomId}`);
       io.to(roomId).emit("session_ended", { roomId });
       io.in(roomId).socketsLeave(roomId);
     });
@@ -342,7 +340,7 @@ module.exports = (io) => {
     socket.on("disconnect", () => {
       const user = activeUsers.get(socket.id);
       if (user) {
-        console.log(`❌ User disconnected: ${user.name} (${user.role})`);
+        console.log(` User disconnected: ${user.name} (${user.role})`);
         for (const roomId of user.rooms) {
           socket
             .to(roomId)

@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
     const token = localStorage.getItem("token"); // JWT token for authentication
 
     if (!userId || !role || !token) {
-      console.warn("⚠️ No user credentials or token found. Socket will not connect.");
+      console.warn(" No user credentials or token found. Socket will not connect.");
       setSocket(null);
       setIsConnected(false);
       setConnectionState("disconnected");
@@ -39,7 +39,7 @@ export const SocketProvider = ({ children }) => {
     // Initialize socket connection with JWT auth
     const newSocket = io(backendUrl, {
       withCredentials: true,
-      transports: ["websocket"], // 👈 FORCE WEBSOCKET
+      transports: ["websocket"], //  FORCE WEBSOCKET
       auth: {
         token: token, // JWT authentication
       },
@@ -51,7 +51,7 @@ export const SocketProvider = ({ children }) => {
 
     // Connection successful
     newSocket.on("connect", () => {
-      console.log("✅ Socket connected:", newSocket.id);
+      console.log(" Socket connected:", newSocket.id);
       setIsConnected(true);
       setConnectionState("connected");
       reconnectAttempts.current = 0;
@@ -66,14 +66,14 @@ export const SocketProvider = ({ children }) => {
 
     // Connection error
     newSocket.on("connect_error", (error) => {
-      console.error("❌ Socket connection error:", error.message);
+      console.error(" Socket connection error:", error.message);
 
       if (
         error.message === "Invalid token" ||
         error.message === "Token expired" ||
         error.message === "Authentication required"
       ) {
-        console.warn("⚠️ Socket auth failed. Clearing credentials...");
+        console.warn(" Socket auth failed. Clearing credentials...");
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
         localStorage.removeItem("role");
@@ -92,14 +92,14 @@ export const SocketProvider = ({ children }) => {
 
     // Reconnect attempt
     newSocket.on("reconnect_attempt", (attemptNumber) => {
-      console.log(`🔄 Reconnection attempt ${attemptNumber}/${maxReconnectAttempts}`);
+      console.log(` Reconnection attempt ${attemptNumber}/${maxReconnectAttempts}`);
       setConnectionState("reconnecting");
       reconnectAttempts.current = attemptNumber;
     });
 
     // Reconnect successful
     newSocket.on("reconnect", (attemptNumber) => {
-      console.log(`✅ Reconnected after ${attemptNumber} attempts`);
+      console.log(` Reconnected after ${attemptNumber} attempts`);
       setIsConnected(true);
       setConnectionState("connected");
       reconnectAttempts.current = 0;
@@ -114,14 +114,14 @@ export const SocketProvider = ({ children }) => {
 
     // Reconnect failed
     newSocket.on("reconnect_failed", () => {
-      console.error("❌ Reconnection failed after maximum attempts");
+      console.error(" Reconnection failed after maximum attempts");
       setIsConnected(false);
       setConnectionState("disconnected");
     });
 
     // Disconnected
     newSocket.on("disconnect", (reason) => {
-      console.log("🔌 Socket disconnected:", reason);
+      console.log(" Socket disconnected:", reason);
       setIsConnected(false);
       if (reason === "io server disconnect") {
         // Server disconnected us, need to manually reconnect

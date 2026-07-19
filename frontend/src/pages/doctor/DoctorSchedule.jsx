@@ -147,7 +147,7 @@ const DoctorSchedule = () => {
                 {profile?.timezone &&
                   profile.timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone && (
                     <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-md border border-yellow-500/30">
-                      ⚠️ Different from browser ({Intl.DateTimeFormat().resolvedOptions().timeZone})
+                       Different from browser ({Intl.DateTimeFormat().resolvedOptions().timeZone})
                     </span>
                   )}
               </div>
@@ -267,11 +267,11 @@ const DoctorSchedule = () => {
                           className="bg-transparent border-0 text-lg text-[var(--text-main)] cursor-pointer focus:outline-none hover:text-blue-500"
                         >
                           <option value="">⋮</option>
-                          <option value="edit">✏️ Edit</option>
+                          <option value="edit"> Edit</option>
                           <option value="toggle">
-                            {schedule.isActive ? "⏸️ Deactivate" : "▶️ Activate"}
+                            {schedule.isActive ? " Deactivate" : " Activate"}
                           </option>
-                          <option value="delete">🗑️ Delete</option>
+                          <option value="delete"> Delete</option>
                         </select>
                       </td>
                       <td className="p-3">

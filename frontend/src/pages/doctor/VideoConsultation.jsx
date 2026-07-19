@@ -6,7 +6,6 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import VideoCallModal from "./VideoCallModal";
 import { FaPlusCircle, FaVideo, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 
-/* ------------------- Tiny toast (success/error) ------------------- */
 function Toast({ text, onClose }) {
   if (!text) return null;
   return (
@@ -34,7 +33,6 @@ if (typeof document !== "undefined" && !document.getElementById("cv-fade-styles"
   document.head.appendChild(style);
 }
 
-/* ------------------- Status pill component ------------------------ */
 const StatusPill = ({ status }) => {
   const s = (status || "").toUpperCase();
   const styles =
@@ -77,7 +75,7 @@ export default function VideoConsultation() {
     durationMins: 30,
   });
 
-  /* ---------------------- Load my patients (requires doctorUserId) ------- */
+  
   const loadMyPatients = useCallback(async () => {
     try {
       const res = await api.get("/doctor/patients", { params: { doctorUserId } });
@@ -88,7 +86,7 @@ export default function VideoConsultation() {
     }
   }, [doctorUserId]);
 
-  /* ---------------------- Load my consultations -------------------------- */
+  
   const fetchConsultations = useCallback(async () => {
     try {
       setLoading(true);
@@ -99,7 +97,7 @@ export default function VideoConsultation() {
       setConsultations(Array.isArray(data) ? data : []);
       setError("");
     } catch (err) {
-      console.error("❌ Error fetching consultations:", err);
+      console.error(" Error fetching consultations:", err);
       setError("Failed to load consultations. Please try again.");
     } finally {
       setLoading(false);
@@ -111,11 +109,11 @@ export default function VideoConsultation() {
     loadMyPatients();
   }, [fetchConsultations, loadMyPatients]);
 
-  /* ---------------------- Schedule new consultation ---------------------- */
+  
   const handleSchedule = async (e) => {
     e.preventDefault();
     if (!form.patientId || !form.scheduledAt) {
-      setToastText("❗ Please fill all required fields.");
+      setToastText(" Please fill all required fields.");
       return;
     }
 
@@ -127,17 +125,17 @@ export default function VideoConsultation() {
         durationMins: form.durationMins,
       });
 
-      setToastText("✅ Consultation scheduled successfully!");
+      setToastText(" Consultation scheduled successfully!");
       setModalOpen(false);
       setForm({ patientId: "", scheduledAt: "", durationMins: 30 });
       fetchConsultations();
     } catch (err) {
       console.error("Error scheduling consultation:", err);
-      setToastText(err?.response?.data?.error || "❌ Failed to schedule consultation.");
+      setToastText(err?.response?.data?.error || " Failed to schedule consultation.");
     }
   };
 
-  /* ---------------------- Cancel consultation (confirm) ------------------ */
+  
   const requestCancel = (id) => {
     setPendingCancelId(id);
     setConfirmOpen(true);
@@ -150,13 +148,13 @@ export default function VideoConsultation() {
       await api.put(`/videocall/status/${pendingCancelId}`, {
         status: "CANCELLED",
       });
-      setToastText("🛑 Consultation cancelled");
+      setToastText(" Consultation cancelled");
       setConfirmOpen(false);
       setPendingCancelId(null);
       fetchConsultations();
     } catch (err) {
       console.error("Error cancelling consultation:", err);
-      setToastText("❌ Failed to cancel consultation.");
+      setToastText(" Failed to cancel consultation.");
     } finally {
       setConfirmLoading(false);
     }
@@ -168,7 +166,7 @@ export default function VideoConsultation() {
     setPendingCancelId(null);
   };
 
-  /* ---------------------- Join consultation ------------------------------ */
+  
   const handleJoin = (consultation) => {
     const roomId = `consult_${consultation.id}`;
 
@@ -300,10 +298,10 @@ export default function VideoConsultation() {
         )}
       </div>
 
-      {/* ✅ Toast */}
+      {/*  Toast */}
       <Toast text={toastText} onClose={() => setToastText("")} />
 
-      {/* ✅ Cancel Confirm Dialog */}
+      {/*  Cancel Confirm Dialog */}
       {confirmOpen && (
         <div className="fixed inset-0 bg-[var(--bg-main)]/95 flex items-center justify-center z-[60]">
           <div className="bg-[var(--bg-card)] text-[var(--text-main)] w-full max-w-md rounded-[2rem] shadow-2xl p-8 relative border border-[var(--border)]">
@@ -334,7 +332,7 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* ✅ Schedule Modal */}
+      {/*  Schedule Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-[var(--bg-main)]/95 flex items-center justify-center z-50">
           <div className="bg-[var(--bg-card)] p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg relative border border-[var(--border)]">
@@ -342,7 +340,7 @@ export default function VideoConsultation() {
               onClick={() => setModalOpen(false)}
               className="absolute top-6 right-8 text-[var(--text-soft)] hover:text-[var(--text-main)] text-xl transition"
             >
-              ✖
+              
             </button>
 
             <h2 className="text-2xl font-black uppercase tracking-tighter mb-8 text-[var(--text-main)]">
@@ -417,7 +415,7 @@ export default function VideoConsultation() {
         </div>
       )}
 
-      {/* 🎥 Jitsi Video Call Modal */}
+      {/*  Jitsi Video Call Modal */}
       {callModalOpen && selectedConsultation && (
         <VideoCallModal
           consultation={selectedConsultation}

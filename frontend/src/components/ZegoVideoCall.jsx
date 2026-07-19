@@ -81,7 +81,7 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
 
         setLoading(false);
       } catch (err) {
-        console.error("❌ Failed to initialize ZEGO:", err);
+        console.error(" Failed to initialize ZEGO:", err);
         if (active) {
           setError(err.response?.data?.error || err.message || "Failed to load video call");
           setLoading(false);
@@ -106,7 +106,7 @@ export default function ZegoVideoCall({ roomName, userId, userName = "User", onC
     return (
       <div className="flex flex-col items-center justify-center h-full w-full bg-gray-900 text-white p-6 rounded-2xl">
         <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-3xl mb-4">
-          ⚠️
+          
         </div>
         <h2 className="text-xl font-bold mb-2">Connection Error</h2>
         <p className="text-gray-400 text-center max-w-md mb-6">{error}</p>

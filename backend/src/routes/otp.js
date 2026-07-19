@@ -159,14 +159,14 @@ router.post('/verify', async (req, res) => {
           );
           
           if (updateError) {
-            console.error(`❌ Failed to confirm user in Supabase: ${updateError.message}`);
+            console.error(` Failed to confirm user in Supabase: ${updateError.message}`);
           } else {
-            console.log(`✅ User ${email} confirmed in Supabase.`);
+            console.log(` User ${email} confirmed in Supabase.`);
           }
         }
       }
     } catch (supaErr) {
-      console.error('⚠️ Supabase confirmation error (non-blocking):', supaErr.message);
+      console.error(' Supabase confirmation error (non-blocking):', supaErr.message);
     }
 
     console.log(`OTP verified for ${email}`);

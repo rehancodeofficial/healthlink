@@ -2,7 +2,7 @@ const express = require("express");
 const prisma = require('../prisma/prismaClient');
 const router = express.Router();
 
-// ✅ Fetch logs (with optional role filter, pagination)
+//  Fetch logs (with optional role filter, pagination)
 router.get("/", async (req, res) => {
   try {
     const { role, limit = 20 } = req.query;
@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Add log entry
+//  Add log entry
 router.post("/", async (req, res) => {
   try {
     const { actorId, actorRole, action, entity } = req.body;

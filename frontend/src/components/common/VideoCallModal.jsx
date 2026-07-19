@@ -15,7 +15,7 @@ export default function VideoCallModal({ onClose }) {
         className="absolute top-4 right-6 text-red-500 text-xl hover:scale-110 transition z-20"
         title="End Call"
       >
-        ✖
+        
       </button>
 
       {/* Jitsi Video */}

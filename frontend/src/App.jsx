@@ -7,15 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "./context/UserContext";
 import { SocketProvider } from "./context/SocketContext";
 
-/* ================================
-   SUPERADMIN
-================================ */
 import api from "./Lib/api";
 import "./App.css";
 
-/* ================================
-   SUPERADMIN
-================================ */
 const SuperadminDashboard = lazy(() => import("./pages/superadmin/SuperadminDashboard"));
 const ManageAdmins = lazy(() => import("./pages/superadmin/ManageAdmins"));
 const SystemReports = lazy(() => import("./pages/superadmin/SystemReports"));
@@ -28,9 +22,6 @@ const SuperadminInbox = lazy(() => import("./pages/superadmin/SuperadminInbox"))
 const SuperadminSendMessage = lazy(() => import("./pages/superadmin/SuperadminSendMessage"));
 const SuperadminActivityLogs = lazy(() => import("./pages/superadmin/ActivityLogs"));
 
-/* ================================
-   ADMIN
-================================ */
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const ManageUsers = lazy(() => import("./pages/admin/ManageUsers"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
@@ -44,9 +35,6 @@ const AdminSubscribedDoctors = lazy(() => import("./pages/admin/subscribers/Doct
 const AdminSubscribedPatients = lazy(() => import("./pages/admin/subscribers/Patients"));
 const AdminSubscribedPharmacy = lazy(() => import("./pages/admin/subscribers/Pharmacy"));
 
-/* ================================
-   DOCTOR
-================================ */
 const DoctorDashboard = lazy(() => import("./pages/doctor/DoctorDashboard"));
 const DoctorAppointments = lazy(() => import("./pages/doctor/DoctorAppointments"));
 const DoctorPrescriptions = lazy(() => import("./pages/doctor/Prescriptions"));
@@ -60,9 +48,6 @@ const MyPatientList = lazy(() => import("./pages/doctor/MyPatientList"));
 const DoctorVideoConsultation = lazy(() => import("./pages/doctor/VideoConsultation"));
 const DoctorSchedule = lazy(() => import("./pages/doctor/DoctorSchedule"));
 
-/* ================================
-   PATIENT
-================================ */
 const PatientDashboard = lazy(() => import("./pages/patient/PatientDashboard"));
 const BookAppointment = lazy(() => import("./pages/patient/BookAppointment"));
 const MyAppointments = lazy(() => import("./pages/patient/MyAppointments"));
@@ -78,9 +63,6 @@ const PatientSubscription = lazy(() => import("./pages/patient/PatientSubscripti
 const DoctorsList = lazy(() => import("./pages/patient/DoctorsList"));
 const MyDoctors = lazy(() => import("./pages/patient/MyDoctors"));
 
-/**=====================================
- * PHARMACY
- *======================================*/
 const PharmacyDashboard = lazy(() => import("./pages/pharmacy/Dashboard"));
 const PharmacyProfile = lazy(() => import("./pages/pharmacy/Profile"));
 const PharmacyPrescriptions = lazy(() => import("./pages/pharmacy/Prescriptions"));
@@ -93,9 +75,6 @@ const PharmacyViewProfile = lazy(() => import("./pages/pharmacy/ViewProfile"));
 const PharmacyInbox = lazy(() => import("./pages/pharmacy/messages/Inbox"));
 const PharmacySendMessage = lazy(() => import("./pages/pharmacy/messages/SendMessage"));
 
-/* ================================
-   SUPPORT
-================================ */
 const SupportDashboard = lazy(() => import("./pages/support/SupportDashboard"));
 const SupportTickets = lazy(() => import("./pages/support/SupportTickets"));
 const SupportLiveChat = lazy(() => import("./pages/support/SupportLiveChat"));
@@ -104,9 +83,6 @@ const SupportSubscribedPatients = lazy(() => import("./pages/support/subscribers
 const SupportSubscribedPharmacy = lazy(() => import("./pages/support/subscribers/Pharmacy"));
 const UserProfile = lazy(() => import("./pages/shared/UserProfile"));
 
-/* ================================
-   AUTH / HOME
-================================ */
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -120,16 +96,10 @@ const Resources = lazy(() => import("./pages/public/Resources"));
 const Contact = lazy(() => import("./pages/public/Contact"));
 import Chatbot from "./components/Chatbot";
 
-/* ================================
-   VIDEO (shared)
-================================ */
 const VideoLobby = lazy(() => import("./pages/video/VideoLobby"));
 const VideoRoom = lazy(() => import("./pages/video/VideoRoom"));
 const CallPage = lazy(() => import("./pages/CallPage"));
 
-/* ================================
-   Tiny role guard (localStorage)
-================================ */
 const RequireRole = ({ role, children }) => {
   const currentRole = localStorage.getItem("role") || localStorage.getItem("userRole") || "";
   if (!role || currentRole === role) return children;
@@ -137,7 +107,7 @@ const RequireRole = ({ role, children }) => {
 };
 
 export default function App() {
-  // 🚀 Warmup Backend on Load
+  //  Warmup Backend on Load
   useEffect(() => {
     const wakeupBackend = async () => {
       try {
@@ -175,7 +145,7 @@ export default function App() {
             <Route path="/video/room/:roomName" element={<VideoRoom />} />
             <Route path="/call/:appointmentId" element={<CallPage />} />
 
-            {/* ================= SUPERADMIN ================= */}
+            {}
             <Route
               path="/superadmin/dashboard"
               element={
@@ -276,7 +246,7 @@ export default function App() {
                 </RequireRole>
               }
             />
-            {/* ================= ADMIN ================= */}
+            {}
             <Route
               path="/admin/dashboard"
               element={
@@ -384,7 +354,7 @@ export default function App() {
                 </RequireRole>
               }
             />
-            {/* ================= DOCTOR ================= */}
+            {}
             <Route
               path="/doctor/dashboard"
               element={
@@ -482,7 +452,7 @@ export default function App() {
               }
             />
 
-            {/* ================= PATIENT ================= */}
+            {}
             <Route
               path="/patient/dashboard"
               element={
@@ -596,7 +566,7 @@ export default function App() {
               }
             />
 
-            {/*================== PHARMACY ==================*/}
+            {}
             <Route
               path="/pharmacy/dashboard"
               element={
@@ -684,7 +654,7 @@ export default function App() {
               }
             />
 
-            {/* ================= SUPPORT ================= */}
+            {}
             <Route
               path="/support/dashboard"
               element={

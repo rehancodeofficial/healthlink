@@ -42,11 +42,11 @@ export default function PatientSelectPharmacy() {
   const choose = async (pharmacyId) => {
     try {
       await api.post("/pharmacy/patient/select", { patientId: userId, pharmacyId });
-      setMsg("✅ Selected!");
+      setMsg(" Selected!");
       setTimeout(() => setMsg(""), 2000);
     } catch (err) {
       console.error(err);
-      setMsg(err?.response?.data?.error || "❌ Failed to select pharmacy");
+      setMsg(err?.response?.data?.error || " Failed to select pharmacy");
       setTimeout(() => setMsg(""), 2500);
     }
   };

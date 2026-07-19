@@ -99,7 +99,7 @@ export default function PharmacySubscription() {
       });
       setHistory(Array.isArray(hist.data) ? hist.data : hist.data?.data || []);
     } catch (e) {
-      console.error("❌ Subscription load failed:", e);
+      console.error(" Subscription load failed:", e);
       setToast("Failed to load subscription info");
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ export default function PharmacySubscription() {
       const data = res.data || {};
 
       if (data.mockSuccess) {
-        setToast("✅ Subscription updated successfully!");
+        setToast(" Subscription updated successfully!");
         fetchAll(); // Refresh data in place
         return;
       }
@@ -149,9 +149,9 @@ export default function PharmacySubscription() {
       }
       setToast("Unable to start checkout. Try again.");
     } catch (e) {
-      console.error("❌ Checkout start failed:", e);
+      console.error(" Checkout start failed:", e);
       const msg = e?.response?.data?.error || "Failed to start checkout";
-      setToast(`❌ ${msg}`);
+      setToast(` ${msg}`);
     }
   };
 

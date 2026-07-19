@@ -16,7 +16,7 @@ export default function PatientPrescriptions() {
 
   const role = localStorage.getItem("role");
   const userName = localStorage.getItem("userName");
-  const patientUserId = localStorage.getItem("userId"); // ✅ This is User.id
+  const patientUserId = localStorage.getItem("userId"); //  This is User.id
 
   // For PDF capture
   const pdfRef = useRef(null);
@@ -34,9 +34,9 @@ export default function PatientPrescriptions() {
       </svg>`
     );
 
-  // --------------------------------------------------------
+  
   // Fetch prescriptions for the logged-in patient
-  // --------------------------------------------------------
+  
   const fetchPrescriptions = useCallback(async () => {
     try {
       setLoading(true);
@@ -59,9 +59,9 @@ export default function PatientPrescriptions() {
     setModalOpen(true);
   };
 
-  // --------------------------------------------------------
+  
   // Download PDF (html2canvas + jsPDF)
-  // --------------------------------------------------------
+  
   const handleDownloadPdf = async () => {
     if (!pdfRef.current || !selectedPrescription) return;
     try {
@@ -118,9 +118,9 @@ export default function PatientPrescriptions() {
     }
   };
 
-  // --------------------------------------------------------
+  
   // UI Rendering
-  // --------------------------------------------------------
+  
   return (
     <div className="flex bg-[var(--bg-main)]/90 text-[var(--text-main)] min-h-screen">
       <Sidebar role={role || "PATIENT"} />
@@ -202,7 +202,7 @@ export default function PatientPrescriptions() {
         )}
       </div>
 
-      {/* ===== MODAL (View + Download) ===== */}
+      {}
       {modalOpen && (
         <div className="fixed inset-0 bg-[var(--bg-main)]/95 flex items-center justify-center z-50">
           <div className="bg-[var(--bg-card)] p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
@@ -210,7 +210,7 @@ export default function PatientPrescriptions() {
               onClick={() => setModalOpen(false)}
               className="absolute top-3 right-4 text-[var(--text-soft)] text-xl"
             >
-              ✖
+              
             </button>
             <img
               src="/logo.png"

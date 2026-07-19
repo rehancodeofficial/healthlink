@@ -50,7 +50,7 @@ exports.handleChat = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Chatbot Controller Error:");
+    console.error(" Chatbot Controller Error:");
     console.error("- Message:", error.message);
     if (error.code) console.error("- Prisma Code:", error.code);
     if (error.stack) console.error("- Stack Trace:", error.stack);

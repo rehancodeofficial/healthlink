@@ -4,9 +4,6 @@ const router = express.Router();
 const prisma = require("../prisma/prismaClient");
 const { verifyToken } = require("../middleware/rbac");
 
-/* ============================================================
-   Helper: Fetch appointment with doctor/patient user info
-   ============================================================ */
 async function getAppointmentWithUsers(id) {
   return prisma.appointment.findUnique({
     where: { id },
@@ -25,11 +22,6 @@ async function getAppointmentWithUsers(id) {
   });
 }
 
-/* ============================================================
-   GET /api/appointments/:id
-   Fetches appointment details including roomName & callStatus.
-   Access control: Only the assigned doctor or patient.
-   ============================================================ */
 router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -64,15 +56,11 @@ router.get("/:id", verifyToken, async (req, res) => {
       patientName: `${appointment.patient.user.firstName} ${appointment.patient.user.lastName}`,
     });
   } catch (err) {
-    console.error("❌ GET /api/appointments/:id error:", err);
+    console.error(" GET /api/appointments/:id error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
 
-/* ============================================================
-   POST /api/appointments/:id/start-call
-   Doctor initiates a call → callStatus = "requested"
-   ============================================================ */
 router.post("/:id/start-call", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -123,15 +111,11 @@ router.post("/:id/start-call", verifyToken, async (req, res) => {
       message: "Call request sent to patient",
     });
   } catch (err) {
-    console.error("❌ POST /api/appointments/:id/start-call error:", err);
+    console.error(" POST /api/appointments/:id/start-call error:", err);
     return res.status(500).json({ error: "Failed to start call" });
   }
 });
 
-/* ============================================================
-   GET /api/appointments/:id/status
-   Poll current callStatus (for patient notification system)
-   ============================================================ */
 router.get("/:id/status", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -158,15 +142,11 @@ router.get("/:id/status", verifyToken, async (req, res) => {
       roomName: appointment.roomName,
     });
   } catch (err) {
-    console.error("❌ GET /api/appointments/:id/status error:", err);
+    console.error(" GET /api/appointments/:id/status error:", err);
     return res.status(500).json({ error: "Failed to get call status" });
   }
 });
 
-/* ============================================================
-   POST /api/appointments/:id/join-call
-   Patient accepts the call → callStatus = "active"
-   ============================================================ */
 router.post("/:id/join-call", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -208,15 +188,11 @@ router.post("/:id/join-call", verifyToken, async (req, res) => {
       roomName: updated.roomName,
     });
   } catch (err) {
-    console.error("❌ POST /api/appointments/:id/join-call error:", err);
+    console.error(" POST /api/appointments/:id/join-call error:", err);
     return res.status(500).json({ error: "Failed to join call" });
   }
 });
 
-/* ============================================================
-   POST /api/appointments/:id/end-call
-   Either party ends the call → callStatus = "ended"
-   ============================================================ */
 router.post("/:id/end-call", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -250,7 +226,7 @@ router.post("/:id/end-call", verifyToken, async (req, res) => {
       message: "Call ended successfully",
     });
   } catch (err) {
-    console.error("❌ POST /api/appointments/:id/end-call error:", err);
+    console.error(" POST /api/appointments/:id/end-call error:", err);
     return res.status(500).json({ error: "Failed to end call" });
   }
 });
