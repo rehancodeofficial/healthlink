@@ -1,8 +1,0 @@
-[dotenv@17.2.3] injecting env (30) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
-📧 Gmail Transporter initialized with 30s timeout. Host: smtp.gmail.com
-[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
--------------------------------------------
-🚀 Server running on: http://0.0.0.0:5001
-🌍 Environment: development
-⏱️  Started at: 2026-03-25T05:34:12.244Z
--------------------------------------------
