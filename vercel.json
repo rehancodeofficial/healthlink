@@ -1,14 +1,5 @@
 {
   "version": 2,
-  "services": {
-    "frontend": {
-      "root": "frontend",
-      "framework": "vite"
-    },
-    "backend": {
-      "root": "backend"
-    }
-  },
   "builds": [
     {
       "src": "backend/src/server.js",
