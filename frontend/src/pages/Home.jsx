@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar/Navbar";
 import Hero from "../components/hero/Hero";
 import DarkStatsBanner from "../components/hero/DarkStatsBanner";
+import VideoSlot from "../components/ui/VideoSlot";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -108,6 +109,24 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Video — below How It Works */}
+        <div className="mt-14">
+          <VideoSlot
+            src="home-how-it-works.mp4"
+            label="Doctor consultation — telemedicine video call"
+            searchTerms="telemedicine video call, doctor consultation laptop"
+            overlay={45}
+            height="h-[380px]"
+            rounded="rounded-3xl"
+            mode="background"
+            className="w-full"
+          >
+            <p className="text-white text-xl sm:text-2xl font-black tracking-tight text-center drop-shadow-lg max-w-lg">
+              See how a real consultation works in under 60 seconds
+            </p>
+          </VideoSlot>
+        </div>
       </section>
 
       {/* Specialties Preview */}
@@ -179,10 +198,15 @@ export default function Home() {
           </div>
 
           <div className="lg:w-1/2 w-full">
-            <img
-              src="/images/about.png"
-              className="rounded-[2.5rem] shadow-2xl border border-[var(--border)] w-full object-cover h-[520px] hover:scale-[1.01] transition-transform duration-700"
-              alt="Modern Hospital Telemedicine Suite"
+            <VideoSlot
+              src="home-why-us.mp4"
+              label="Doctor talking on video call — patient home consultation"
+              searchTerms="doctor talking video call, patient home consultation"
+              overlay={20}
+              height="h-[520px]"
+              rounded="rounded-[2.5rem]"
+              mode="panel"
+              className="shadow-2xl border border-[var(--border)]"
             />
           </div>
         </div>
@@ -236,25 +260,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA Band */}
-      <section className="py-24 bg-[var(--bg-glass)] backdrop-blur-md border-t border-[var(--border)] text-center relative overflow-hidden">
-        <div className="max-w-3xl mx-auto px-6 space-y-8 relative z-10">
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tighter leading-tight">
-            Your next doctor's visit doesn't need a waiting room
-          </h2>
-          <p className="text-base sm:text-lg text-[var(--text-soft)] font-medium max-w-xl mx-auto">
-            Book a consultation in under 2 minutes. No app download required — book from any browser.
-          </p>
-          <motion.button
-            onClick={() => navigate("/appointments")}
-            className="btn-clay-primary px-10 py-4 text-sm font-semibold uppercase tracking-wider inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)]"
-            whileHover={{ y: -2, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span>Book Your First Consultation</span>
-            <FaArrowRight size={14} />
-          </motion.button>
-        </div>
+      {/* Final CTA Band — with video background */}
+      <section className="relative border-t border-[var(--border)] overflow-hidden">
+        <VideoSlot
+          src="home-cta.mp4"
+          label="Healthcare technology abstract — CTA background"
+          searchTerms="healthcare technology abstract, medical app interface"
+          overlay={60}
+          height="h-auto"
+          rounded="rounded-none"
+          mode="background"
+          className="py-28"
+        >
+          <div className="max-w-3xl mx-auto px-6 space-y-8 text-center">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tighter leading-tight text-white">
+              Your next doctor's visit doesn't need a waiting room
+            </h2>
+            <p className="text-base sm:text-lg text-white/80 font-medium max-w-xl mx-auto">
+              Book a consultation in under 2 minutes. No app download required — book from any browser.
+            </p>
+            <motion.button
+              onClick={() => navigate("/appointments")}
+              className="btn-clay-primary px-10 py-4 text-sm font-semibold uppercase tracking-wider inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[var(--hb-red)]"
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span>Book Your First Consultation</span>
+              <FaArrowRight size={14} />
+            </motion.button>
+          </div>
+        </VideoSlot>
       </section>
 
       {/* Footer */}

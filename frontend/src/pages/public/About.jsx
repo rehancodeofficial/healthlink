@@ -2,6 +2,7 @@ import Navbar from "../../components/navbar/Navbar";
 import { motion } from "framer-motion";
 import { FaShieldAlt, FaHeart, FaUserLock, FaSmile, FaArrowRight, FaUserMd } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function About() {
   const navigate = useNavigate();
@@ -57,10 +58,15 @@ export default function About() {
             </p>
           </div>
           <div className="md:col-span-5">
-            <img
-              src="/images/about.png"
-              alt="HealthLink Telemedicine Suite"
-              className="rounded-3xl border border-[var(--border)] shadow-xl w-full h-[280px] object-cover"
+            <VideoSlot
+              src="about-team.mp4"
+              label="Medical team meeting — doctors collaborating"
+              searchTerms="medical team meeting, doctors collaborating, healthcare startup office"
+              overlay={15}
+              height="h-[280px]"
+              rounded="rounded-3xl"
+              mode="panel"
+              className="border border-[var(--border)] shadow-xl"
             />
           </div>
         </section>
@@ -132,6 +138,26 @@ export default function About() {
             ))}
           </div>
         </section>
+
+        {/* Team Video Banner */}
+        <VideoSlot
+          src="about-collaborating.mp4"
+          label="Healthcare team — doctors collaborating"
+          searchTerms="doctors collaborating, healthcare startup office, medical team meeting"
+          overlay={55}
+          height="h-[280px]"
+          rounded="rounded-[2.5rem]"
+          mode="background"
+        >
+          <div className="text-center space-y-2 max-w-lg">
+            <p className="text-white font-black text-2xl tracking-tight drop-shadow-lg">
+              Built by people who care about care
+            </p>
+            <p className="text-white/80 text-sm font-medium">
+              Engineers, clinicians, and healthcare operators working toward one goal.
+            </p>
+          </div>
+        </VideoSlot>
 
         {/* Team / Leadership */}
         <section className="glass-clay p-10 sm:p-12 rounded-[2.5rem] border border-[var(--border)] text-center space-y-6">
