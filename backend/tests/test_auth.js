@@ -9,7 +9,7 @@ const axios = require("axios");
 const fs = require("fs");
 
 // Configuration
-const BASE_URL = process.env.BACKEND_URL || "https://HealthBridge-2.vercel.app";
+const BASE_URL = process.env.BACKEND_URL || "https://HealthLink-2.vercel.app";
 const API_BASE = `${BASE_URL}/api`;
 
 // Test results storage
@@ -82,7 +82,13 @@ const testUsers = {
 };
 
 // Helper function to make requests with authentication
-async function makeRequest(method, url, data = null, token = null, expectAuth = true) {
+async function makeRequest(
+  method,
+  url,
+  data = null,
+  token = null,
+  expectAuth = true,
+) {
   try {
     const config = {
       method,
@@ -101,7 +107,10 @@ async function makeRequest(method, url, data = null, token = null, expectAuth = 
     const response = await axios(config);
     return response;
   } catch (error) {
-    console.error(`Request failed for ${method.toUpperCase()} ${url}:`, error.message);
+    console.error(
+      `Request failed for ${method.toUpperCase()} ${url}:`,
+      error.message,
+    );
     return { status: 500, data: { error: error.message } };
   }
 }
@@ -118,14 +127,19 @@ async function testAuthentication() {
   logTest(
     "GET /messages/contacts/all (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
-  response = await makeRequest("get", "/messages/contacts/all", null, "invalid-token");
+  response = await makeRequest(
+    "get",
+    "/messages/contacts/all",
+    null,
+    "invalid-token",
+  );
   logTest(
     "GET /messages/contacts/all (invalid token)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test unread count
@@ -133,24 +147,37 @@ async function testAuthentication() {
   logTest(
     "GET /messages/unread-count (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test mark read
-  response = await makeRequest("post", "/messages/mark-read", { userId: "test" });
+  response = await makeRequest("post", "/messages/mark-read", {
+    userId: "test",
+  });
   logTest(
     "POST /messages/mark-read (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test list messages
   response = await makeRequest("get", "/messages/inbox");
-  logTest("GET /messages/inbox (no auth)", response.status === 401, `Status: ${response.status}`);
+  logTest(
+    "GET /messages/inbox (no auth)",
+    response.status === 401,
+    `Status: ${response.status}`,
+  );
 
   // Test send message
-  response = await makeRequest("post", "/messages/send", { content: "test", senderId: "test" });
-  logTest("POST /messages/send (no auth)", response.status === 401, `Status: ${response.status}`);
+  response = await makeRequest("post", "/messages/send", {
+    content: "test",
+    senderId: "test",
+  });
+  logTest(
+    "POST /messages/send (no auth)",
+    response.status === 401,
+    `Status: ${response.status}`,
+  );
 
   // Test subscription routes
   log("\n💳 Testing Subscription Routes", "yellow");
@@ -159,21 +186,24 @@ async function testAuthentication() {
   logTest(
     "GET /subscription/subscription/prices (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
-  response = await makeRequest("get", "/subscription/subscription/status?userId=test");
+  response = await makeRequest(
+    "get",
+    "/subscription/subscription/status?userId=test",
+  );
   logTest(
     "GET /subscription/subscription/status (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   response = await makeRequest("get", "/subscription/subscription?userId=test");
   logTest(
     "GET /subscription/subscription (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test videocall routes
@@ -185,17 +215,37 @@ async function testAuthentication() {
   logTest(
     "POST /videocall/create (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
-  response = await makeRequest("get", "/videocall/list?userId=test&role=PATIENT");
-  logTest("GET /videocall/list (no auth)", response.status === 401, `Status: ${response.status}`);
+  response = await makeRequest(
+    "get",
+    "/videocall/list?userId=test&role=PATIENT",
+  );
+  logTest(
+    "GET /videocall/list (no auth)",
+    response.status === 401,
+    `Status: ${response.status}`,
+  );
 
-  response = await makeRequest("post", "/videocall/token", { identity: "test", roomName: "test" });
-  logTest("POST /videocall/token (no auth)", response.status === 401, `Status: ${response.status}`);
+  response = await makeRequest("post", "/videocall/token", {
+    identity: "test",
+    roomName: "test",
+  });
+  logTest(
+    "POST /videocall/token (no auth)",
+    response.status === 401,
+    `Status: ${response.status}`,
+  );
 
-  response = await makeRequest("put", "/videocall/status/123", { status: "SCHEDULED" });
-  logTest("PUT /videocall/status (no auth)", response.status === 401, `Status: ${response.status}`);
+  response = await makeRequest("put", "/videocall/status/123", {
+    status: "SCHEDULED",
+  });
+  logTest(
+    "PUT /videocall/status (no auth)",
+    response.status === 401,
+    `Status: ${response.status}`,
+  );
 
   response = await makeRequest("patch", "/videocall/reschedule/123", {
     scheduledAt: new Date().toISOString(),
@@ -203,7 +253,7 @@ async function testAuthentication() {
   logTest(
     "PATCH /videocall/reschedule (no auth)",
     response.status === 401,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 }
 
@@ -224,12 +274,12 @@ async function testRoleBasedAccess() {
       patientMonthlyUsd: 15,
       patientYearlyUsd: 150,
     },
-    testUsers.patient.token
+    testUsers.patient.token,
   );
   logTest(
     "PUT /subscription/prices (PATIENT role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   response = await makeRequest(
@@ -241,12 +291,12 @@ async function testRoleBasedAccess() {
       patientMonthlyUsd: 15,
       patientYearlyUsd: 150,
     },
-    testUsers.doctor.token
+    testUsers.doctor.token,
   );
   logTest(
     "PUT /subscription/prices (DOCTOR role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   response = await makeRequest(
@@ -258,34 +308,49 @@ async function testRoleBasedAccess() {
       patientMonthlyUsd: 15,
       patientYearlyUsd: 150,
     },
-    testUsers.admin.token
+    testUsers.admin.token,
   );
   logTest(
     "PUT /subscription/prices (ADMIN role)",
     response.status === 200 || response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test stats endpoint (should only allow ADMIN/SUPERADMIN)
-  response = await makeRequest("get", "/subscription/stats", null, testUsers.patient.token);
+  response = await makeRequest(
+    "get",
+    "/subscription/stats",
+    null,
+    testUsers.patient.token,
+  );
   logTest(
     "GET /subscription/stats (PATIENT role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
-  response = await makeRequest("get", "/subscription/stats", null, testUsers.doctor.token);
+  response = await makeRequest(
+    "get",
+    "/subscription/stats",
+    null,
+    testUsers.doctor.token,
+  );
   logTest(
     "GET /subscription/stats (DOCTOR role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
-  response = await makeRequest("get", "/subscription/stats", null, testUsers.admin.token);
+  response = await makeRequest(
+    "get",
+    "/subscription/stats",
+    null,
+    testUsers.admin.token,
+  );
   logTest(
     "GET /subscription/stats (ADMIN role)",
     response.status === 200 || response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test subscription status update
@@ -293,24 +358,24 @@ async function testRoleBasedAccess() {
     "patch",
     "/subscription/subscription/123/status",
     { status: "ACTIVE" },
-    testUsers.patient.token
+    testUsers.patient.token,
   );
   logTest(
     "PATCH /subscription/status (PATIENT role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   response = await makeRequest(
     "patch",
     "/subscription/subscription/123/status",
     { status: "ACTIVE" },
-    testUsers.admin.token
+    testUsers.admin.token,
   );
   logTest(
     "PATCH /subscription/status (ADMIN role)",
     response.status === 200 || response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 }
 
@@ -327,12 +392,12 @@ async function testMessageBroadcast() {
       senderId: testUsers.patient.id,
       broadcast: true,
     },
-    testUsers.patient.token
+    testUsers.patient.token,
   );
   logTest(
     "POST /messages/send broadcast (PATIENT role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test broadcast with ADMIN role (should succeed)
@@ -344,12 +409,12 @@ async function testMessageBroadcast() {
       senderId: testUsers.admin.id,
       broadcast: true,
     },
-    testUsers.admin.token
+    testUsers.admin.token,
   );
   logTest(
     "POST /messages/send broadcast (ADMIN role)",
     response.status === 200 || response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 
   // Test "ALL" recipient with regular user (should fail)
@@ -361,12 +426,12 @@ async function testMessageBroadcast() {
       senderId: testUsers.patient.id,
       recipient: "ALL",
     },
-    testUsers.patient.token
+    testUsers.patient.token,
   );
   logTest(
     "POST /messages/send ALL recipient (PATIENT role)",
     response.status === 403,
-    `Status: ${response.status}`
+    `Status: ${response.status}`,
   );
 }
 
@@ -374,7 +439,10 @@ async function testMessageBroadcast() {
 function generateReport() {
   log("\n📊 Test Results Summary", "blue");
   log(`Passed: ${testResults.passed}`, "green");
-  log(`Failed: ${testResults.failed}`, testResults.failed > 0 ? "red" : "green");
+  log(
+    `Failed: ${testResults.failed}`,
+    testResults.failed > 0 ? "red" : "green",
+  );
   log(`Total: ${testResults.passed + testResults.failed}`, "blue");
 
   if (testResults.failed > 0) {
@@ -389,7 +457,10 @@ function generateReport() {
       failed: testResults.failed,
       total: testResults.passed + testResults.failed,
       successRate:
-        ((testResults.passed / (testResults.passed + testResults.failed)) * 100).toFixed(2) + "%",
+        (
+          (testResults.passed / (testResults.passed + testResults.failed)) *
+          100
+        ).toFixed(2) + "%",
     },
     details: testResults.details,
     timestamp: new Date().toISOString(),

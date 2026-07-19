@@ -12,21 +12,21 @@ const supabase = createClient(
 
 const accounts = [
   {
-    email: "superadmin@HealthBridge.com",
-    password: "HealthBridge@123",
+    email: "superadmin@HealthLink.com",
+    password: "HealthLink@123",
     role: "SUPERADMIN",
     firstName: "Super",
     lastName: "Admin",
   },
   {
-    email: "admin@HealthBridge.com",
+    email: "admin@HealthLink.com",
     password: "123456",
     role: "ADMIN",
     firstName: "Admin",
     lastName: "User",
   },
   {
-    email: "support@HealthBridge.com",
+    email: "support@HealthLink.com",
     password: "123456",
     role: "SUPPORT",
     firstName: "Support",

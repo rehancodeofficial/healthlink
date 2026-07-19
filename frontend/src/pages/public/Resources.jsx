@@ -5,7 +5,7 @@ export default function Resources() {
   const guides = [
     { title: "Managing Clinic Workflow", category: "Guides", read: "5 min read" },
     { title: "HIPAA Security Best Practices", category: "Security", read: "8 min read" },
-    { title: "Telehealth Compliance Checklist", category: "Compliance", read: "12 min read" }
+    { title: "Telehealth Compliance Checklist", category: "Compliance", read: "12 min read" },
   ];
 
   return (
@@ -27,14 +27,22 @@ export default function Resources() {
             Helpful Guides & Resources
           </h1>
           <p className="text-lg text-[var(--hb-ink-soft)] max-w-2xl mx-auto leading-relaxed">
-            Read medical insights, compliance reports, and system optimization tutorials written by clinical specialists.
+            Read medical insights, compliance reports, and system optimization tutorials written by
+            clinical specialists.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
             {guides.map((item, idx) => (
-              <div key={idx} className="glass-clay p-6 text-left space-y-4 hover:-translate-y-1 transition-transform cursor-pointer">
-                <span className="text-[9px] font-black uppercase text-[var(--hb-red)] tracking-widest">{item.category}</span>
-                <h3 className="text-base font-bold text-[var(--hb-ink)] leading-snug">{item.title}</h3>
+              <div
+                key={idx}
+                className="glass-clay p-6 text-left space-y-4 hover:-translate-y-1 transition-transform cursor-pointer"
+              >
+                <span className="text-[9px] font-black uppercase text-[var(--hb-red)] tracking-widest">
+                  {item.category}
+                </span>
+                <h3 className="text-base font-bold text-[var(--hb-ink)] leading-snug">
+                  {item.title}
+                </h3>
                 <span className="text-[10px] text-[var(--hb-ink-soft)] block">{item.read}</span>
               </div>
             ))}
@@ -43,7 +51,7 @@ export default function Resources() {
       </main>
 
       <footer className="py-12 border-t border-[var(--border)] text-center text-xs text-[var(--hb-ink-soft)]">
-        &copy; 2025 Health Bridge. All Rights Reserved.
+        &copy; 2025 Health Link. All Rights Reserved.
       </footer>
     </div>
   );

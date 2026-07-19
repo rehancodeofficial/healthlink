@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `HealthBridge`
+-- Database: `HealthLink`
 --
 
 -- --------------------------------------------------------
@@ -68,9 +68,9 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `name`, `email`, `password`, `role`, `token`, `isSuspended`, `createdAt`, `updatedAt`) VALUES
-(1, 'Super Admin', 'superadmin@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'SUPERADMIN', NULL, 0, '2025-11-04 19:19:34.992', '2025-11-04 19:19:34.992'),
-(2, 'James Admin', 'Admin@HealthBridge.com', '123456', 'ADMIN', NULL, 0, '2025-11-04 19:32:17.077', '2025-11-04 19:32:17.077'),
-(3, 'Patient Luka', 'support@HealthBridge.com', '123456', 'SUPPORT', NULL, 0, '2025-11-04 19:32:47.823', '2025-11-04 19:32:47.823');
+(1, 'Super Admin', 'superadmin@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'SUPERADMIN', NULL, 0, '2025-11-04 19:19:34.992', '2025-11-04 19:19:34.992'),
+(2, 'James Admin', 'Admin@HealthLink.com', '123456', 'ADMIN', NULL, 0, '2025-11-04 19:32:17.077', '2025-11-04 19:32:17.077'),
+(3, 'Patient Luka', 'support@HealthLink.com', '123456', 'SUPPORT', NULL, 0, '2025-11-04 19:32:47.823', '2025-11-04 19:32:47.823');
 
 -- --------------------------------------------------------
 
@@ -146,9 +146,9 @@ CREATE TABLE `doctorprofile` (
 --
 
 INSERT INTO `doctorprofile` (`id`, `userId`, `specialization`, `qualifications`, `licenseNumber`, `hospitalAffiliation`, `yearsOfExperience`, `consultationFee`, `availability`, `bio`, `languages`, `createdAt`, `updatedAt`) VALUES
-('1e8e456f-7a87-45c7-a407-1d2d6e9523ea', '653ee412-6963-4aba-acd0-bc5910a367ae', 'General Practice', 'MBBS, FWACP', 'DOC-0001', 'HealthBridge Clinic', 15, 30, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.107', '2025-11-04 19:40:17.679'),
-('683d8041-2cd5-4db1-b793-fe45b7f5337d', 'b46369c4-a34f-492f-bd2d-ef34a4969da3', 'General Practice', 'MBBS, FWACP', 'DOC-0003', 'HealthBridge Clinic', 7, 40, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.130', '2025-11-04 19:19:35.130'),
-('b1ae5048-d181-466e-ac56-10ba3cb090f2', '3842d71f-52d7-4969-ba48-e11e85171976', 'General Practice', 'MBBS, FWACP', 'DOC-0002', 'HealthBridge Clinic', 6, 35, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.122', '2025-11-04 19:19:35.122');
+('1e8e456f-7a87-45c7-a407-1d2d6e9523ea', '653ee412-6963-4aba-acd0-bc5910a367ae', 'General Practice', 'MBBS, FWACP', 'DOC-0001', 'HealthLink Clinic', 15, 30, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.107', '2025-11-04 19:40:17.679'),
+('683d8041-2cd5-4db1-b793-fe45b7f5337d', 'b46369c4-a34f-492f-bd2d-ef34a4969da3', 'General Practice', 'MBBS, FWACP', 'DOC-0003', 'HealthLink Clinic', 7, 40, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.130', '2025-11-04 19:19:35.130'),
+('b1ae5048-d181-466e-ac56-10ba3cb090f2', '3842d71f-52d7-4969-ba48-e11e85171976', 'General Practice', 'MBBS, FWACP', 'DOC-0002', 'HealthLink Clinic', 6, 35, 'Weekdays 09:00–17:00', 'Primary care physician with interest in preventive medicine.', 'English, Yoruba', '2025-11-04 19:19:35.122', '2025-11-04 19:19:35.122');
 
 -- --------------------------------------------------------
 
@@ -239,7 +239,7 @@ CREATE TABLE `pharmacyprofile` (
 --
 
 INSERT INTO `pharmacyprofile` (`id`, `userId`, `displayName`, `licenseNumber`, `phone`, `address`, `city`, `state`, `country`, `postalCode`, `latitude`, `longitude`, `openingHours`, `services`, `createdAt`, `updatedAt`) VALUES
-('c06fddce-4322-414f-a2e3-bc134e40f91a', 'c5c4d149-1f6d-4768-bc29-596324f5e060', 'HealthBridge Main Pharmacy', 'PHARM-0001', '+2348000000000', '1 Health Avenue, Ikeja', 'Lagos', 'Lagos', 'Nigeria', '100001', 6.6018, 3.3515, 'Mon–Sat 8:00–18:00', 'Dispensing; Home Delivery; Counseling', '2025-11-04 19:19:35.048', '2025-11-04 19:19:35.048');
+('c06fddce-4322-414f-a2e3-bc134e40f91a', 'c5c4d149-1f6d-4768-bc29-596324f5e060', 'HealthLink Main Pharmacy', 'PHARM-0001', '+2348000000000', '1 Health Avenue, Ikeja', 'Lagos', 'Lagos', 'Nigeria', '100001', 6.6018, 3.3515, 'Mon–Sat 8:00–18:00', 'Dispensing; Home Delivery; Counseling', '2025-11-04 19:19:35.048', '2025-11-04 19:19:35.048');
 
 -- --------------------------------------------------------
 
@@ -407,13 +407,13 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `role`, `subscriptionState`, `createdAt`, `updatedAt`) VALUES
-('267ac3a4-642e-43c2-aa20-bb5a03de7f3b', 'Patience Patient 3', 'patient3@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.100', '2025-11-04 19:19:35.100'),
-('3842d71f-52d7-4969-ba48-e11e85171976', 'Dr. John Doctor 2', 'doctor2@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'UNSUBSCRIBED', '2025-11-04 19:19:35.071', '2025-11-04 19:19:35.071'),
-('4de3ba63-3a54-4da3-9fa7-732ee2fdcc02', 'Patience Patient 2', 'patient2@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.094', '2025-11-04 19:19:35.094'),
-('653ee412-6963-4aba-acd0-bc5910a367ae', 'Dr. John Doctor 1', 'doctor1@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'ACTIVE', '2025-11-04 19:19:35.063', '2025-11-04 19:19:35.210'),
-('b46369c4-a34f-492f-bd2d-ef34a4969da3', 'Dr. John Doctor 3', 'doctor3@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'UNSUBSCRIBED', '2025-11-04 19:19:35.080', '2025-11-04 19:19:35.080'),
-('bd852968-2706-46db-bd7e-680888e17211', 'Patience Patient 1', 'patient1@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.087', '2025-11-04 19:19:35.087'),
-('c5c4d149-1f6d-4768-bc29-596324f5e060', 'HealthBridge Pharmacy', 'pharmacy@HealthBridge.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PHARMACY', 'UNSUBSCRIBED', '2025-11-04 19:19:35.009', '2025-11-04 19:19:35.009');
+('267ac3a4-642e-43c2-aa20-bb5a03de7f3b', 'Patience Patient 3', 'patient3@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.100', '2025-11-04 19:19:35.100'),
+('3842d71f-52d7-4969-ba48-e11e85171976', 'Dr. John Doctor 2', 'doctor2@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'UNSUBSCRIBED', '2025-11-04 19:19:35.071', '2025-11-04 19:19:35.071'),
+('4de3ba63-3a54-4da3-9fa7-732ee2fdcc02', 'Patience Patient 2', 'patient2@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.094', '2025-11-04 19:19:35.094'),
+('653ee412-6963-4aba-acd0-bc5910a367ae', 'Dr. John Doctor 1', 'doctor1@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'ACTIVE', '2025-11-04 19:19:35.063', '2025-11-04 19:19:35.210'),
+('b46369c4-a34f-492f-bd2d-ef34a4969da3', 'Dr. John Doctor 3', 'doctor3@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'DOCTOR', 'UNSUBSCRIBED', '2025-11-04 19:19:35.080', '2025-11-04 19:19:35.080'),
+('bd852968-2706-46db-bd7e-680888e17211', 'Patience Patient 1', 'patient1@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PATIENT', 'UNSUBSCRIBED', '2025-11-04 19:19:35.087', '2025-11-04 19:19:35.087'),
+('c5c4d149-1f6d-4768-bc29-596324f5e060', 'HealthLink Pharmacy', 'pharmacy@HealthLink.com', '$2b$10$EGY5d8Jmjc9zDlWJSCo89uxsNtodl8qxUw/LE2mgQIdXyy/x5AAlu', 'PHARMACY', 'UNSUBSCRIBED', '2025-11-04 19:19:35.009', '2025-11-04 19:19:35.009');
 
 -- --------------------------------------------------------
 
@@ -444,7 +444,7 @@ INSERT INTO `videoconsultation` (`id`, `doctorId`, `patientId`, `title`, `notes`
 ('006eb07c-799f-4c45-92b5-1c0d808029c8', '683d8041-2cd5-4db1-b793-fe45b7f5337d', 'b74bbe9a-2278-43dc-807f-113b373b4349', NULL, NULL, '2025-11-05 19:44:00.000', 30, 'SCHEDULED', NULL, NULL, '2025-11-04 19:44:50.065', '2025-11-04 19:44:50.065'),
 ('68b5ed0f-22b4-4cf5-8a98-f53e724888fd', '1e8e456f-7a87-45c7-a407-1d2d6e9523ea', '7cc6036a-e5ab-4a15-b3a9-902daa1683a5', NULL, NULL, '2025-11-07 19:39:00.000', 30, 'SCHEDULED', NULL, NULL, '2025-11-04 19:39:58.063', '2025-11-04 19:39:58.063'),
 ('f91934fb-e6f9-4b78-bece-fb4ae68a9302', '683d8041-2cd5-4db1-b793-fe45b7f5337d', 'b74bbe9a-2278-43dc-807f-113b373b4349', NULL, NULL, '2025-11-05 19:43:00.000', 30, 'COMPLETED', NULL, NULL, '2025-11-04 19:44:02.556', '2025-11-04 19:44:26.251'),
-('seed-vc-1', '1e8e456f-7a87-45c7-a407-1d2d6e9523ea', '7cc6036a-e5ab-4a15-b3a9-902daa1683a5', 'Initial Teleconsult', 'Review symptoms and vitals.', '2025-11-05 19:19:35.210', 30, 'SCHEDULED', 'HealthBridge-room-1', 'https://meet.HealthBridge.com/room-1', '2025-11-04 19:19:35.237', '2025-11-04 19:19:35.237');
+('seed-vc-1', '1e8e456f-7a87-45c7-a407-1d2d6e9523ea', '7cc6036a-e5ab-4a15-b3a9-902daa1683a5', 'Initial Teleconsult', 'Review symptoms and vitals.', '2025-11-05 19:19:35.210', 30, 'SCHEDULED', 'HealthLink-room-1', 'https://meet.HealthLink.com/room-1', '2025-11-04 19:19:35.237', '2025-11-04 19:19:35.237');
 
 -- --------------------------------------------------------
 

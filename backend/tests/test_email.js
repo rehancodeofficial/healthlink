@@ -34,7 +34,7 @@ async function runTest() {
 
     console.log("Attempting to send test email to sender...");
     const info = await transporter.sendMail({
-      from: `"HealthBridge Test" <${process.env.EMAIL_USER}>`,
+      from: `"HealthLink Test" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: "SMTP Diagnostic Test",
       text: "If you are reading this, your Gmail SMTP is working perfectly with the new robust settings.",

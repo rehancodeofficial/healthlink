@@ -61,7 +61,7 @@ router.get("/doctors", async (req, res) => {
 router.post("/seed", async (req, res) => {
   try {
     const secret = req.headers["x-seed-secret"];
-    const expectedSecret = process.env.SEED_SECRET || "HealthBridge_secret_123";
+    const expectedSecret = process.env.SEED_SECRET || "HealthLink_secret_123";
 
     if (secret !== expectedSecret) {
       return res
@@ -98,7 +98,7 @@ router.get("/debug-schema", async (req, res) => {
 router.post("/fix-schema", async (req, res) => {
   try {
     const secret = req.headers["x-seed-secret"];
-    const expectedSecret = process.env.SEED_SECRET || "HealthBridge_secret_123";
+    const expectedSecret = process.env.SEED_SECRET || "HealthLink_secret_123";
     if (secret !== expectedSecret)
       return res.status(403).json({ error: "Unauthorized" });
 

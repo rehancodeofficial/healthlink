@@ -220,7 +220,7 @@ export default function DoctorDashboard() {
                 <div>
                   <h4 className="font-black text-lg tracking-tight">Quick Connect</h4>
                   <p className="text-xs font-bold text-white/70 leading-relaxed italic">
-                    "Secure, HIPAA-compliant telehealth bridge active."
+                    "Secure, HIPAA-compliant teleHealth Link active."
                   </p>
                 </div>
               </div>

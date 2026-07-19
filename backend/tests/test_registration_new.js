@@ -14,10 +14,16 @@ async function testRegistration() {
     };
 
     console.log("Registering user:", user);
-    const response = await axios.post("https://HealthBridge-2.vercel.app/api/auth/register", user);
+    const response = await axios.post(
+      "https://HealthLink-2.vercel.app/api/auth/register",
+      user,
+    );
     console.log("Registration Response:", response.status, response.data);
 
-    if (response.data.user.firstName === "Test" && response.data.user.lastName === "User") {
+    if (
+      response.data.user.firstName === "Test" &&
+      response.data.user.lastName === "User"
+    ) {
       console.log("✅ Name split verification passed");
     } else {
       console.error("❌ Name split verification failed");
@@ -38,16 +44,23 @@ async function testRegistration() {
 
     console.log("Registering doctor:", doctor);
     const docResponse = await axios.post(
-      "https://HealthBridge-2.vercel.app/api/auth/register",
-      doctor
+      "https://HealthLink-2.vercel.app/api/auth/register",
+      doctor,
     );
-    console.log("Doctor Registration Response:", docResponse.status, docResponse.data);
+    console.log(
+      "Doctor Registration Response:",
+      docResponse.status,
+      docResponse.data,
+    );
 
     // We need to verify if profile was created. The register response might not return the profile deep details immediately
     // unless we query for it, but let's assume if it doesn't crash and returns 201 it's good for now.
     // Ideally we would query the doctor profile.
   } catch (error) {
-    console.error("Registration failed:", error.response ? error.response.data : error.message);
+    console.error(
+      "Registration failed:",
+      error.response ? error.response.data : error.message,
+    );
   }
 }
 

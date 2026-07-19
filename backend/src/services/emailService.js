@@ -46,8 +46,7 @@ const emailService = {
     try {
       const info = await this.transporter.sendMail({
         from:
-          process.env.EMAIL_FROM ||
-          '"HealthBridge" <no-reply@HealthBridge.com>',
+          process.env.EMAIL_FROM || '"HealthLink" <no-reply@HealthLink.com>',
         to,
         subject,
         text,
@@ -62,7 +61,7 @@ const emailService = {
   },
 
   async sendProfileUpdateConfirmation(user, role) {
-    const subject = `HealthBridge - ${role} Profile Updated`;
+    const subject = `HealthLink - ${role} Profile Updated`;
     const html = `
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2>Profile Updated Successfully</h2>
@@ -71,14 +70,14 @@ const emailService = {
         <p>If you did not make this change, please contact support immediately.</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     return this.sendEmail({ to: user.email, subject, html });
   },
 
   async sendAppointmentBookingConfirmation(appointment, patient, doctor) {
-    const subject = "HealthBridge - Appointment Confirmed";
+    const subject = "HealthLink - Appointment Confirmed";
     const date = new Date(appointment.appointmentDate).toLocaleString();
 
     // Email to Patient
@@ -91,7 +90,7 @@ const emailService = {
         <p><strong>Reason:</strong> ${appointment.reason || "General Consultation"}</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({ to: patient.email, subject, html: patientHtml });
@@ -106,18 +105,18 @@ const emailService = {
         <p><strong>Reason:</strong> ${appointment.reason || "General Consultation"}</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({
       to: doctor.email,
-      subject: "HealthBridge - New Appointment",
+      subject: "HealthLink - New Appointment",
       html: doctorHtml,
     });
   },
 
   async sendAppointmentStatusChange(appointment, patient, doctor, status) {
-    const subject = `HealthBridge - Appointment ${status}`;
+    const subject = `HealthLink - Appointment ${status}`;
     const date = new Date(appointment.appointmentDate).toLocaleString();
 
     // Email to Patient
@@ -128,14 +127,14 @@ const emailService = {
         <p>Your appointment with Dr. ${doctor.lastName} scheduled for ${date} has been <strong>${status}</strong>.</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({ to: patient.email, subject, html: patientHtml });
   },
 
   async sendVideoConsultationConfirmation(consultation, patient, doctor) {
-    const subject = "HealthBridge - Video Consultation Scheduled";
+    const subject = "HealthLink - Video Consultation Scheduled";
     const date = new Date(consultation.scheduledAt).toLocaleString();
 
     const patientHtml = `
@@ -149,7 +148,7 @@ const emailService = {
         <p>Please log in to the portal at the scheduled time to join the call.</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({ to: patient.email, subject, html: patientHtml });
@@ -163,7 +162,7 @@ const emailService = {
         <p><strong>Title:</strong> ${consultation.title || "General Consultation"}</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({ to: doctor.email, subject, html: doctorHtml });
@@ -175,7 +174,7 @@ const emailService = {
     doctor,
     pharmacy,
   ) {
-    const subject = "HealthBridge - New Prescription Assigned";
+    const subject = "HealthLink - New Prescription Assigned";
     const date = new Date(prescription.createdAt).toLocaleString();
 
     const pharmacyHtml = `
@@ -191,7 +190,7 @@ const emailService = {
         <p>Please log in to your dashboard to acknowledge and process this prescription.</p>
         <br>
         <p>Best regards,</p>
-        <p><strong>The HealthBridge Team</strong></p>
+        <p><strong>The HealthLink Team</strong></p>
       </div>
     `;
     await this.sendEmail({

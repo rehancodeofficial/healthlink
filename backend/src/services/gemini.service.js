@@ -19,7 +19,7 @@ exports.generateAIResponse = async (userMessage) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-      You are a smart medical assistant for "HealthBridge".
+      You are a smart medical assistant for "HealthLink".
       User Message: "${userMessage}"
 
       Task:

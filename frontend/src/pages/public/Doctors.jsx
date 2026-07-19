@@ -3,9 +3,21 @@ import { motion } from "framer-motion";
 
 export default function Doctors() {
   const doctorsList = [
-    { name: "Dr. Amara Khan", specialty: "Cardiology", desc: "Expert in clinical cardiovascular medicine and preventive care." },
-    { name: "Dr. Bilal Ahmed", specialty: "Pediatrics", desc: "Dedicated to comprehensive primary healthcare services for children." },
-    { name: "Dr. Farhan Yousaf", specialty: "General Physician", desc: "Focused on health diagnostics and personalized medicine strategies." }
+    {
+      name: "Dr. Amara Khan",
+      specialty: "Cardiology",
+      desc: "Expert in clinical cardiovascular medicine and preventive care.",
+    },
+    {
+      name: "Dr. Bilal Ahmed",
+      specialty: "Pediatrics",
+      desc: "Dedicated to comprehensive primary healthcare services for children.",
+    },
+    {
+      name: "Dr. Farhan Yousaf",
+      specialty: "General Physician",
+      desc: "Focused on health diagnostics and personalized medicine strategies.",
+    },
   ];
 
   return (
@@ -27,7 +39,8 @@ export default function Doctors() {
             Meet Our Specialist Doctors
           </h1>
           <p className="text-lg text-[var(--hb-ink-soft)] max-w-2xl mx-auto leading-relaxed">
-            Consult with certified practitioners committed to empirical, compassionate healthcare delivery.
+            Consult with certified practitioners committed to empirical, compassionate healthcare
+            delivery.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
@@ -35,15 +48,17 @@ export default function Doctors() {
               <div key={idx} className="glass-clay p-8 text-left space-y-4">
                 <div className="h-40 w-full bg-slate-100 rounded-xl overflow-hidden relative flex items-center justify-center text-slate-400 font-bold border border-[var(--border)]">
                   {/* Generic avatar placeholders */}
-                  <span className="text-sm font-black uppercase text-[var(--hb-ink-soft)]">{doc.name.split(" ").slice(1).join(" ")}</span>
+                  <span className="text-sm font-black uppercase text-[var(--hb-ink-soft)]">
+                    {doc.name.split(" ").slice(1).join(" ")}
+                  </span>
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[var(--hb-ink)]">{doc.name}</h3>
-                  <span className="text-[10px] font-black text-[var(--hb-red)] uppercase tracking-wider block mt-0.5">{doc.specialty}</span>
+                  <span className="text-[10px] font-black text-[var(--hb-red)] uppercase tracking-wider block mt-0.5">
+                    {doc.specialty}
+                  </span>
                 </div>
-                <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed">
-                  {doc.desc}
-                </p>
+                <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed">{doc.desc}</p>
               </div>
             ))}
           </div>
@@ -51,7 +66,7 @@ export default function Doctors() {
       </main>
 
       <footer className="py-12 border-t border-[var(--border)] text-center text-xs text-[var(--hb-ink-soft)]">
-        &copy; 2025 Health Bridge. All Rights Reserved.
+        &copy; 2025 Health Link. All Rights Reserved.
       </footer>
     </div>
   );

@@ -170,7 +170,7 @@ export default function PharmacySubscription() {
       <div className="flex items-center justify-between mb-6">
         <img
           src="/logo.png"
-          alt="HealthBridge"
+          alt="HealthLink"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             if (typeof PLACEHOLDER_LOGO !== "undefined") e.currentTarget.src = PLACEHOLDER_LOGO;

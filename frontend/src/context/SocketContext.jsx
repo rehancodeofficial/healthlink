@@ -15,8 +15,7 @@ export const SocketProvider = ({ children }) => {
 
   // Derive socket URL from API base URL (strip /api suffix)
   const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://HealthBridge-2-production-ee33.up.railway.app/api";
+    import.meta.env.VITE_API_BASE_URL || "https://HealthLink-2-production-ee33.up.railway.app/api";
   const backendUrl = apiBaseUrl.replace(/\/api\/?$/, "");
 
   useEffect(() => {

@@ -183,7 +183,7 @@ export default function VideoConsultation() {
           <div className="flex items-center gap-4">
             <img
               src="/logo.png"
-              alt="HealthBridge"
+              alt="HealthLink"
               style={{ width: 60, height: "auto" }}
               onError={(e) => {
                 try {

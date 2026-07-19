@@ -21,10 +21,14 @@ export default function Contact() {
             We'd Love to Hear From You
           </h1>
           <p className="text-lg text-[var(--hb-ink-soft)] max-w-2xl mx-auto leading-relaxed">
-            Have questions about integrations or subscription packages? Message our clinic solutions support team.
+            Have questions about integrations or subscription packages? Message our clinic solutions
+            support team.
           </p>
 
-          <form className="glass-clay p-8 max-w-lg mx-auto space-y-6 pt-8 text-left" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="glass-clay p-8 max-w-lg mx-auto space-y-6 pt-8 text-left"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <div className="space-y-2">
               <label className="text-xs font-bold text-[var(--hb-ink)]">Full Name</label>
               <input
@@ -66,7 +70,7 @@ export default function Contact() {
       </main>
 
       <footer className="py-12 border-t border-[var(--border)] text-center text-xs text-[var(--hb-ink-soft)]">
-        &copy; 2025 Health Bridge. All Rights Reserved.
+        &copy; 2025 Health Link. All Rights Reserved.
       </footer>
     </div>
   );

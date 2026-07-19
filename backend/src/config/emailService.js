@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 
 // Initialize SendGrid if API key is available
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@HealthBridge.com";
+const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@HealthLink.com";
 const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || "gmail"; // 'sendgrid' or 'gmail'
 
 // Configure SendGrid
@@ -80,12 +80,12 @@ async function sendOTPViaSendGrid(email, otp) {
   const msg = {
     to: email,
     from: FROM_EMAIL,
-    subject: "Email Verification - HealthBridge",
+    subject: "Email Verification - HealthLink",
     text: `Your verification code is: ${otp}\n\nThis code will expire in 5 minutes.\n\nIf you didn't request this code, please ignore this email.`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #4F46E5;">Email Verification</h2>
-        <p>Thank you for registering with HealthBridge!</p>
+        <p>Thank you for registering with HealthLink!</p>
         <p>Your verification code is:</p>
         <div style="background-color: #F3F4F6; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
           <h1 style="color: #4F46E5; letter-spacing: 5px; margin: 0;">${otp}</h1>
@@ -93,7 +93,7 @@ async function sendOTPViaSendGrid(email, otp) {
         <p style="color: #6B7280; font-size: 14px;">This code will expire in 5 minutes.</p>
         <p style="color: #6B7280; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
-        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthBridge - Your Health, Our Priority</p>
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthLink - Your Health, Our Priority</p>
       </div>
     `,
   };
@@ -121,14 +121,14 @@ async function sendOTPViaGmail(email, otp) {
   }
 
   const mailOptions = {
-    from: `"HealthBridge" <${FROM_EMAIL}>`,
+    from: `"HealthLink" <${FROM_EMAIL}>`,
     to: email,
-    subject: "Email Verification - HealthBridge",
+    subject: "Email Verification - HealthLink",
     text: `Your verification code is: ${otp}\n\nThis code will expire in 5 minutes.\n\nIf you didn't request this code, please ignore this email.`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #4F46E5;">Email Verification</h2>
-        <p>Thank you for registering with HealthBridge!</p>
+        <p>Thank you for registering with HealthLink!</p>
         <p>Your verification code is:</p>
         <div style="background-color: #F3F4F6; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
           <h1 style="color: #4F46E5; letter-spacing: 5px; margin: 0;">${otp}</h1>
@@ -136,7 +136,7 @@ async function sendOTPViaGmail(email, otp) {
         <p style="color: #6B7280; font-size: 14px;">This code will expire in 5 minutes.</p>
         <p style="color: #6B7280; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
-        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthBridge - Your Health, Our Priority</p>
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthLink - Your Health, Our Priority</p>
       </div>
     `,
   };
@@ -227,22 +227,22 @@ async function sendWithRetry(mailOptions, maxRetries = 3) {
  */
 async function sendRegistrationEmail(email, firstName) {
   const mailOptions = {
-    from: `"HealthBridge" <${FROM_EMAIL}>`,
+    from: `"HealthLink" <${FROM_EMAIL}>`,
     to: email,
-    subject: "Welcome to HealthBridge!",
-    text: `Hi ${firstName || "there"},\n\nWelcome to HealthBridge! Your account has been successfully created. You can now log in to access our healthcare services.\n\nBest Regards,\nThe HealthBridge Team`,
+    subject: "Welcome to HealthLink!",
+    text: `Hi ${firstName || "there"},\n\nWelcome to HealthLink! Your account has been successfully created. You can now log in to access our healthcare services.\n\nBest Regards,\nThe HealthLink Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #4F46E5;">Welcome to HealthBridge!</h2>
+        <h2 style="color: #4F46E5;">Welcome to HealthLink!</h2>
         <p>Hi ${firstName || "there"},</p>
-        <p>Thank you for joining HealthBridge! Your healthcare journey starts here.</p>
+        <p>Thank you for joining HealthLink! Your healthcare journey starts here.</p>
         <p>Your account has been successfully created and confirmed. You can now log in to your dashboard.</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.APP_BASE_URL || process.env.FRONTEND_URL || "https://HealthBridge-2.vercel.app"}/login" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log In Now</a>
+          <a href="${process.env.APP_BASE_URL || process.env.FRONTEND_URL || "https://HealthLink-2.vercel.app"}/login" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log In Now</a>
         </div>
 
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
-        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthBridge - Your Health, Our Priority</p>
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthLink - Your Health, Our Priority</p>
       </div>
     `,
   };
@@ -260,9 +260,9 @@ async function sendOTPEmail(email, otp) {
   console.log(`📧 Dispatching OTP email to ${email}...`);
 
   const mailOptions = {
-    from: `"HealthBridge" <${RESOLVED_EMAIL_USER || FROM_EMAIL}>`,
+    from: `"HealthLink" <${RESOLVED_EMAIL_USER || FROM_EMAIL}>`,
     to: email,
-    subject: "Email Verification - HealthBridge",
+    subject: "Email Verification - HealthLink",
     text: `Your verification code is: ${otp}\n\nThis code will expire in 5 minutes.`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -273,7 +273,7 @@ async function sendOTPEmail(email, otp) {
         </div>
         <p style="color: #6B7280; font-size: 14px;">This code will expire in 5 minutes.</p>
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
-        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthBridge - Your Health, Our Priority</p>
+        <p style="color: #9CA3AF; font-size: 12px; text-align: center;">HealthLink - Your Health, Our Priority</p>
       </div>
     `,
   };

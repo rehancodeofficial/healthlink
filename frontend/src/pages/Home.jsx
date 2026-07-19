@@ -1,8 +1,4 @@
-import {
-  FaClock,
-  FaMobileAlt,
-  FaVideo
-} from "react-icons/fa";
+import { FaClock, FaMobileAlt, FaVideo } from "react-icons/fa";
 import Navbar from "../components/navbar/Navbar";
 import Hero from "../components/hero/Hero";
 import DarkStatsBanner from "../components/hero/DarkStatsBanner";
@@ -77,7 +73,7 @@ export default function Home() {
               Patient-first technology.
             </h3>
             <p className="text-lg text-[var(--text-soft)] leading-relaxed font-medium opacity-80">
-              We've re-engineered the telemedicine workflow from the ground up. Health Bridge isn't
+              We've re-engineered the telemedicine workflow from the ground up. Health Link isn't
               just a video tool; it's a complete medical ecosystem.
             </p>
             <div className="grid grid-cols-2 gap-6">

@@ -18,7 +18,7 @@ function DoctorViewModal({ open, onClose, doctor }) {
       <div className="bg-[var(--bg-card)] p-8 rounded-2xl shadow-xl w-full max-w-3xl relative text-[var(--text-main)]">
         <img
           src="/logo.png"
-          alt="HealthBridge"
+          alt="HealthLink"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -165,7 +165,7 @@ export default function MyDoctors() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <img
               src="/logo.png"
-              alt="HealthBridge"
+              alt="HealthLink"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;

@@ -30,7 +30,7 @@ export default function PatientPrescriptions() {
         <rect width='200' height='50' fill='#027906'/>
         <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
               font-size='16' font-family='Arial, Helvetica, sans-serif'
-              fill='white'>HealthBridge</text>
+              fill='white'>HealthLink</text>
       </svg>`
     );
 
@@ -95,7 +95,7 @@ export default function PatientPrescriptions() {
       pdf.rect(0, 0, pageWidth, 22, "F");
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(16);
-      pdf.text("HealthBridge — Prescription", 10, 14);
+      pdf.text("HealthLink — Prescription", 10, 14);
 
       // Footer
       const footerY = pageHeight - 10;
@@ -130,7 +130,7 @@ export default function PatientPrescriptions() {
         <div className="flex justify-between items-center mb-6">
           <img
             src="/logo.png"
-            alt="HealthBridge"
+            alt="HealthLink"
             style={{ width: 120, height: "auto" }}
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -214,7 +214,7 @@ export default function PatientPrescriptions() {
             </button>
             <img
               src="/logo.png"
-              alt="HealthBridge"
+              alt="HealthLink"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -231,7 +231,7 @@ export default function PatientPrescriptions() {
                 <div className="flex items-center gap-3">
                   <img
                     src="/logo.png"
-                    alt="HealthBridge"
+                    alt="HealthLink"
                     style={{ width: 120, height: "auto" }}
                     onError={(e) => {
                       e.currentTarget.src = PLACEHOLDER_LOGO;

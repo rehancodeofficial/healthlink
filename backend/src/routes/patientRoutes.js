@@ -826,7 +826,7 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
     const origin =
       req.headers.origin ||
       req.headers.referer ||
-      "https://HealthBridge-2.vercel.app";
+      "https://HealthLink-2.vercel.app";
     const reference = `cv_sub_${user.id}_${Date.now()}`;
     const callback_url =
       process.env.PAYSTACK_CALLBACK_URL || `${origin}/subscription`;
@@ -854,7 +854,7 @@ router.post("/subscription/checkout/paystack", async (req, res) => {
         metadata: {
           userId: user.id,
           plan: plan || "SUBSCRIPTION",
-          origin: "HealthBridge",
+          origin: "HealthLink",
         },
       },
       {
@@ -969,10 +969,10 @@ router.post("/subscription/checkout/stripe", async (req, res) => {
       customer_email: user.email,
       success_url:
         process.env.STRIPE_SUCCESS_URL ||
-        `${process.env.APP_BASE_URL || "https://HealthBridge-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        `${process.env.APP_BASE_URL || "https://HealthLink-2.vercel.app"}/subscription?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         process.env.STRIPE_CANCEL_URL ||
-        `${process.env.APP_BASE_URL || "https://HealthBridge-2.vercel.app"}/subscription?status=cancel`,
+        `${process.env.APP_BASE_URL || "https://HealthLink-2.vercel.app"}/subscription?status=cancel`,
       metadata: { userId: user.id },
     });
 

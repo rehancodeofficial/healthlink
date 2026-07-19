@@ -3,7 +3,7 @@
  * Tests all features and verifies theme colors
  *
  * Usage: Run this in browser console after logging in as pharmacy user
- * Credentials: pharmacy@HealthBridge.com / 123456
+ * Credentials: pharmacy@HealthLink.com / 123456
  */
 
 class PharmacyModuleTester {
@@ -70,16 +70,22 @@ class PharmacyModuleTester {
 
       tests.forEach((test) => {
         if (test.element) {
-          this.results.features.push({ feature: `Login - ${test.name}`, status: "✅ Working" });
+          this.results.features.push({
+            feature: `Login - ${test.name}`,
+            status: "✅ Working",
+          });
         } else {
-          this.results.features.push({ feature: `Login - ${test.name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Login - ${test.name}`,
+            status: "❌ Not Found",
+          });
           this.results.errors.push(`Login ${test.name} not found`);
         }
       });
 
       // Test login functionality
       if (emailInput && passwordInput && loginButton) {
-        emailInput.value = "pharmacy@HealthBridge.com";
+        emailInput.value = "pharmacy@HealthLink.com";
         passwordInput.value = "123456";
         console.log("✅ Login form fields populated");
       }
@@ -96,14 +102,23 @@ class PharmacyModuleTester {
       const dashboardElements = [
         { selector: '[class*="dashboard"]', name: "Dashboard Container" },
         { selector: 'h1, h2, [class*="title"]', name: "Dashboard Title" },
-        { selector: '[class*="card"], [class*="stat"]', name: "Statistics Cards" },
-        { selector: 'button, a[href*="prescription"]', name: "Navigation Elements" },
+        {
+          selector: '[class*="card"], [class*="stat"]',
+          name: "Statistics Cards",
+        },
+        {
+          selector: 'button, a[href*="prescription"]',
+          name: "Navigation Elements",
+        },
       ];
 
       dashboardElements.forEach(({ selector, name }) => {
         const element = document.querySelector(selector);
         if (element) {
-          this.results.features.push({ feature: `Dashboard - ${name}`, status: "✅ Found" });
+          this.results.features.push({
+            feature: `Dashboard - ${name}`,
+            status: "✅ Found",
+          });
 
           // Check colors
           const color = this.getComputedColor(element);
@@ -114,13 +129,18 @@ class PharmacyModuleTester {
             backgroundColor: bgColor,
           });
         } else {
-          this.results.features.push({ feature: `Dashboard - ${name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Dashboard - ${name}`,
+            status: "❌ Not Found",
+          });
           this.results.errors.push(`Dashboard ${name} not found`);
         }
       });
 
       // Check for specific dashboard stats
-      const statCards = document.querySelectorAll('[class*="card"], [class*="stat"]');
+      const statCards = document.querySelectorAll(
+        '[class*="card"], [class*="stat"]',
+      );
       console.log(`📊 Found ${statCards.length} stat cards`);
 
       if (statCards.length === 0) {
@@ -139,15 +159,27 @@ class PharmacyModuleTester {
         { selector: 'table, [class*="table"]', name: "Prescriptions Table" },
         { selector: 'thead, [class*="header"]', name: "Table Header" },
         { selector: 'tbody, [class*="body"]', name: "Table Body" },
-        { selector: 'button[class*="add"], button[class*="create"]', name: "Add/Create Button" },
-        { selector: '[class*="search"], input[type="search"]', name: "Search Input" },
-        { selector: 'select, [class*="filter"]', name: "Filter/Status Dropdown" },
+        {
+          selector: 'button[class*="add"], button[class*="create"]',
+          name: "Add/Create Button",
+        },
+        {
+          selector: '[class*="search"], input[type="search"]',
+          name: "Search Input",
+        },
+        {
+          selector: 'select, [class*="filter"]',
+          name: "Filter/Status Dropdown",
+        },
       ];
 
       prescriptionElements.forEach(({ selector, name }) => {
         const element = document.querySelector(selector);
         if (element) {
-          this.results.features.push({ feature: `Prescriptions - ${name}`, status: "✅ Found" });
+          this.results.features.push({
+            feature: `Prescriptions - ${name}`,
+            status: "✅ Found",
+          });
 
           // Check colors
           const color = this.getComputedColor(element);
@@ -168,12 +200,14 @@ class PharmacyModuleTester {
 
       // Check for action buttons (View, Edit, Delete)
       const actionButtons = document.querySelectorAll(
-        'button[class*="view"], button[class*="edit"], button[class*="delete"], svg'
+        'button[class*="view"], button[class*="edit"], button[class*="delete"], svg',
       );
       console.log(`🔘 Found ${actionButtons.length} action buttons/icons`);
 
       if (actionButtons.length === 0) {
-        this.results.warnings.push("No action buttons found in prescriptions table");
+        this.results.warnings.push(
+          "No action buttons found in prescriptions table",
+        );
       }
 
       // Check for prescription rows
@@ -194,17 +228,29 @@ class PharmacyModuleTester {
     try {
       const profileElements = [
         { selector: "form", name: "Profile Form" },
-        { selector: 'input[name*="name"], input[placeholder*="name"]', name: "Name Input" },
+        {
+          selector: 'input[name*="name"], input[placeholder*="name"]',
+          name: "Name Input",
+        },
         { selector: 'input[type="email"]', name: "Email Input" },
-        { selector: 'input[type="tel"], input[name*="phone"]', name: "Phone Input" },
+        {
+          selector: 'input[type="tel"], input[name*="phone"]',
+          name: "Phone Input",
+        },
         { selector: 'textarea, input[name*="address"]', name: "Address Field" },
-        { selector: 'button[type="submit"], button[class*="save"]', name: "Save Button" },
+        {
+          selector: 'button[type="submit"], button[class*="save"]',
+          name: "Save Button",
+        },
       ];
 
       profileElements.forEach(({ selector, name }) => {
         const element = document.querySelector(selector);
         if (element) {
-          this.results.features.push({ feature: `Profile - ${name}`, status: "✅ Found" });
+          this.results.features.push({
+            feature: `Profile - ${name}`,
+            status: "✅ Found",
+          });
 
           // Check colors
           const color = this.getComputedColor(element);
@@ -215,13 +261,18 @@ class PharmacyModuleTester {
             backgroundColor: bgColor,
           });
         } else {
-          this.results.features.push({ feature: `Profile - ${name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Profile - ${name}`,
+            status: "❌ Not Found",
+          });
           this.results.errors.push(`Profile ${name} not found`);
         }
       });
 
       // Check if form fields are editable
-      const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea, select');
+      const inputs = document.querySelectorAll(
+        'input:not([type="hidden"]), textarea, select',
+      );
       let editableCount = 0;
       inputs.forEach((input) => {
         if (!input.disabled && !input.readOnly) {
@@ -244,13 +295,19 @@ class PharmacyModuleTester {
     console.log("\n🧪 TEST 5: Subscription Page");
     try {
       const subscriptionElements = [
-        { selector: '[class*="subscription"], [class*="plan"]', name: "Subscription Container" },
+        {
+          selector: '[class*="subscription"], [class*="plan"]',
+          name: "Subscription Container",
+        },
         { selector: '[class*="card"]', name: "Plan Cards" },
         {
           selector: 'button[class*="subscribe"], button[class*="upgrade"]',
           name: "Subscribe Buttons",
         },
-        { selector: '[class*="price"], [class*="cost"]', name: "Pricing Information" },
+        {
+          selector: '[class*="price"], [class*="cost"]',
+          name: "Pricing Information",
+        },
         { selector: '[class*="feature"], ul, ol', name: "Feature Lists" },
       ];
 
@@ -271,13 +328,18 @@ class PharmacyModuleTester {
             backgroundColor: bgColor,
           });
         } else {
-          this.results.features.push({ feature: `Subscription - ${name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Subscription - ${name}`,
+            status: "❌ Not Found",
+          });
           this.results.errors.push(`Subscription ${name} not found`);
         }
       });
 
       // Check for active subscription indicator
-      const activeIndicator = document.querySelector('[class*="active"], [class*="current"]');
+      const activeIndicator = document.querySelector(
+        '[class*="active"], [class*="current"]',
+      );
       if (activeIndicator) {
         console.log("✅ Active subscription indicator found");
       } else {
@@ -293,17 +355,35 @@ class PharmacyModuleTester {
     console.log("\n🧪 TEST 6: Messages/Inbox");
     try {
       const messageElements = [
-        { selector: '[class*="message"], [class*="inbox"]', name: "Messages Container" },
-        { selector: '[class*="conversation"], [class*="thread"]', name: "Conversation List" },
-        { selector: 'button[class*="compose"], button[class*="new"]', name: "Compose Button" },
-        { selector: 'input[type="search"], [class*="search"]', name: "Search Messages" },
-        { selector: '[class*="message-item"], [class*="thread-item"]', name: "Message Items" },
+        {
+          selector: '[class*="message"], [class*="inbox"]',
+          name: "Messages Container",
+        },
+        {
+          selector: '[class*="conversation"], [class*="thread"]',
+          name: "Conversation List",
+        },
+        {
+          selector: 'button[class*="compose"], button[class*="new"]',
+          name: "Compose Button",
+        },
+        {
+          selector: 'input[type="search"], [class*="search"]',
+          name: "Search Messages",
+        },
+        {
+          selector: '[class*="message-item"], [class*="thread-item"]',
+          name: "Message Items",
+        },
       ];
 
       messageElements.forEach(({ selector, name }) => {
         const element = document.querySelector(selector);
         if (element) {
-          this.results.features.push({ feature: `Messages - ${name}`, status: "✅ Found" });
+          this.results.features.push({
+            feature: `Messages - ${name}`,
+            status: "✅ Found",
+          });
 
           // Check colors
           const color = this.getComputedColor(element);
@@ -314,13 +394,18 @@ class PharmacyModuleTester {
             backgroundColor: bgColor,
           });
         } else {
-          this.results.features.push({ feature: `Messages - ${name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Messages - ${name}`,
+            status: "❌ Not Found",
+          });
           this.results.errors.push(`Messages ${name} not found`);
         }
       });
 
       // Check for message count
-      const messages = document.querySelectorAll('[class*="message-item"], [class*="thread"]');
+      const messages = document.querySelectorAll(
+        '[class*="message-item"], [class*="thread"]',
+      );
       console.log(`💬 Found ${messages.length} messages`);
 
       if (messages.length === 0) {
@@ -340,24 +425,39 @@ class PharmacyModuleTester {
           selector: 'nav, [class*="sidebar"], [class*="navigation"]',
           name: "Navigation Container",
         },
-        { selector: 'a[href*="dashboard"], button[class*="dashboard"]', name: "Dashboard Link" },
+        {
+          selector: 'a[href*="dashboard"], button[class*="dashboard"]',
+          name: "Dashboard Link",
+        },
         {
           selector: 'a[href*="prescription"], button[class*="prescription"]',
           name: "Prescriptions Link",
         },
-        { selector: 'a[href*="profile"], button[class*="profile"]', name: "Profile Link" },
+        {
+          selector: 'a[href*="profile"], button[class*="profile"]',
+          name: "Profile Link",
+        },
         {
           selector: 'a[href*="subscription"], button[class*="subscription"]',
           name: "Subscription Link",
         },
-        { selector: 'a[href*="message"], button[class*="message"]', name: "Messages Link" },
-        { selector: 'button[class*="logout"], a[href*="logout"]', name: "Logout Button" },
+        {
+          selector: 'a[href*="message"], button[class*="message"]',
+          name: "Messages Link",
+        },
+        {
+          selector: 'button[class*="logout"], a[href*="logout"]',
+          name: "Logout Button",
+        },
       ];
 
       navElements.forEach(({ selector, name }) => {
         const element = document.querySelector(selector);
         if (element) {
-          this.results.features.push({ feature: `Navigation - ${name}`, status: "✅ Found" });
+          this.results.features.push({
+            feature: `Navigation - ${name}`,
+            status: "✅ Found",
+          });
 
           // Check colors
           const color = this.getComputedColor(element);
@@ -368,7 +468,10 @@ class PharmacyModuleTester {
             backgroundColor: bgColor,
           });
         } else {
-          this.results.features.push({ feature: `Navigation - ${name}`, status: "❌ Not Found" });
+          this.results.features.push({
+            feature: `Navigation - ${name}`,
+            status: "❌ Not Found",
+          });
           this.results.warnings.push(`Navigation ${name} not found`);
         }
       });
@@ -383,7 +486,7 @@ class PharmacyModuleTester {
     try {
       // Get all text elements
       const textElements = document.querySelectorAll(
-        "h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th"
+        "h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th",
       );
 
       const colorMap = new Map();
@@ -398,7 +501,9 @@ class PharmacyModuleTester {
       });
 
       console.log("\n📊 Text Color Distribution:");
-      const sortedColors = Array.from(colorMap.entries()).sort((a, b) => b[1] - a[1]);
+      const sortedColors = Array.from(colorMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
       sortedColors.slice(0, 10).forEach(([color, count]) => {
         console.log(`  ${color}: ${count} elements`);
         this.results.themeColors.push({
@@ -409,7 +514,9 @@ class PharmacyModuleTester {
       });
 
       console.log("\n📊 Background Color Distribution:");
-      const sortedBgColors = Array.from(bgColorMap.entries()).sort((a, b) => b[1] - a[1]);
+      const sortedBgColors = Array.from(bgColorMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
       sortedBgColors.slice(0, 10).forEach(([color, count]) => {
         console.log(`  ${color}: ${count} elements`);
         this.results.themeColors.push({
@@ -423,7 +530,9 @@ class PharmacyModuleTester {
       const bodyBg = this.getComputedBackground(document.body);
       const isDarkMode = this.isColorDark(bodyBg);
 
-      console.log(`\n🎨 Current Theme: ${isDarkMode ? "Dark Mode" : "Light Mode"}`);
+      console.log(
+        `\n🎨 Current Theme: ${isDarkMode ? "Dark Mode" : "Light Mode"}`,
+      );
       console.log(`   Body Background: ${bodyBg}`);
 
       // Check for contrast issues
@@ -433,7 +542,7 @@ class PharmacyModuleTester {
 
         if (!this.hasGoodContrast(textColor, bgColor)) {
           this.results.warnings.push(
-            `Low contrast: ${element.tagName} with text ${textColor} on background ${bgColor}`
+            `Low contrast: ${element.tagName} with text ${textColor} on background ${bgColor}`,
           );
         }
       });
@@ -449,7 +558,10 @@ class PharmacyModuleTester {
     if (!rgb || rgb.length < 3) return false;
 
     const brightness =
-      (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+      (parseInt(rgb[0]) * 299 +
+        parseInt(rgb[1]) * 587 +
+        parseInt(rgb[2]) * 114) /
+      1000;
     return brightness < 128;
   }
 
@@ -459,12 +571,19 @@ class PharmacyModuleTester {
     const textRgb = textColor.match(/\d+/g);
     const bgRgb = bgColor.match(/\d+/g);
 
-    if (!textRgb || !bgRgb || textRgb.length < 3 || bgRgb.length < 3) return true;
+    if (!textRgb || !bgRgb || textRgb.length < 3 || bgRgb.length < 3)
+      return true;
 
     const textBrightness =
-      (parseInt(textRgb[0]) * 299 + parseInt(textRgb[1]) * 587 + parseInt(textRgb[2]) * 114) / 1000;
+      (parseInt(textRgb[0]) * 299 +
+        parseInt(textRgb[1]) * 587 +
+        parseInt(textRgb[2]) * 114) /
+      1000;
     const bgBrightness =
-      (parseInt(bgRgb[0]) * 299 + parseInt(bgRgb[1]) * 587 + parseInt(bgRgb[2]) * 114) / 1000;
+      (parseInt(bgRgb[0]) * 299 +
+        parseInt(bgRgb[1]) * 587 +
+        parseInt(bgRgb[2]) * 114) /
+      1000;
 
     return Math.abs(textBrightness - bgBrightness) > 125;
   }
@@ -475,7 +594,9 @@ class PharmacyModuleTester {
     try {
       const buttons = document.querySelectorAll("button:not([disabled])");
       const links = document.querySelectorAll("a[href]");
-      const inputs = document.querySelectorAll('input:not([type="hidden"]):not([disabled])');
+      const inputs = document.querySelectorAll(
+        'input:not([type="hidden"]):not([disabled])',
+      );
       const selects = document.querySelectorAll("select:not([disabled])");
 
       console.log(`🔘 Interactive Elements Found:`);
@@ -499,13 +620,19 @@ class PharmacyModuleTester {
         }
       });
 
-      console.log(`   Buttons with handlers: ${buttonsWithHandlers}/${buttons.length}`);
+      console.log(
+        `   Buttons with handlers: ${buttonsWithHandlers}/${buttons.length}`,
+      );
 
       if (buttonsWithHandlers === 0 && buttons.length > 0) {
-        this.results.warnings.push("Buttons found but no click handlers detected");
+        this.results.warnings.push(
+          "Buttons found but no click handlers detected",
+        );
       }
     } catch (error) {
-      this.results.errors.push(`Interactive Elements Test Error: ${error.message}`);
+      this.results.errors.push(
+        `Interactive Elements Test Error: ${error.message}`,
+      );
     }
   }
 
@@ -542,7 +669,9 @@ class PharmacyModuleTester {
       });
 
       if (apiCalls.length === 0) {
-        this.results.warnings.push("No API calls detected - data may not be loading");
+        this.results.warnings.push(
+          "No API calls detected - data may not be loading",
+        );
       }
     } catch (error) {
       this.results.errors.push(`API Connections Test Error: ${error.message}`);
@@ -592,10 +721,10 @@ class PharmacyModuleTester {
 
     console.log("\n" + "=".repeat(80));
     console.log(
-      `✅ Tests Passed: ${this.results.features.filter((f) => f.status.includes("✅")).length}`
+      `✅ Tests Passed: ${this.results.features.filter((f) => f.status.includes("✅")).length}`,
     );
     console.log(
-      `❌ Tests Failed: ${this.results.features.filter((f) => f.status.includes("❌")).length}`
+      `❌ Tests Failed: ${this.results.features.filter((f) => f.status.includes("❌")).length}`,
     );
     console.log(`⚠️  Warnings: ${this.results.warnings.length}`);
     console.log(`❌ Errors: ${this.results.errors.length}`);
@@ -622,7 +751,10 @@ class PharmacyModuleTester {
       await this.testProfile();
     } else if (currentPath.includes("subscription")) {
       await this.testSubscription();
-    } else if (currentPath.includes("message") || currentPath.includes("inbox")) {
+    } else if (
+      currentPath.includes("message") ||
+      currentPath.includes("inbox")
+    ) {
       await this.testMessages();
     }
 

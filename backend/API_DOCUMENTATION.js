@@ -1,7 +1,7 @@
 /**
  * ============================================
  * COMPREHENSIVE API DOCUMENTATION
- * HealthBridge Backend API Routes
+ * HealthLink Backend API Routes
  * ============================================
  */
 

@@ -128,7 +128,7 @@ export default function SubscriptionSettings() {
           <div className="flex items-center justify-between">
             <img
               src="/logo.png"
-              alt="HealthBridge"
+              alt="HealthLink"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;

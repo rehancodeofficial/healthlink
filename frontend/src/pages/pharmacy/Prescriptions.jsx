@@ -14,7 +14,7 @@ const PLACEHOLDER_LOGO =
       <rect width='200' height='50' fill='#027906'/>
       <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
             font-size='16' font-family='Arial, Helvetica, sans-serif'
-            fill='white'>HealthBridge</text>
+            fill='white'>HealthLink</text>
     </svg>`
   );
 
@@ -31,7 +31,7 @@ function ViewModal({ open, onClose, item }) {
         </button>
         <img
           src="/logo.png"
-          alt="HealthBridge"
+          alt="HealthLink"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             if (typeof PLACEHOLDER_LOGO !== "undefined") e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -419,7 +419,7 @@ export default function PharmacyPrescriptions() {
             <div className="flex items-center gap-4">
               <img
                 src="/logo.png"
-                alt="HealthBridge"
+                alt="HealthLink"
                 style={{ width: 120 }}
                 onError={(e) => {
                   e.currentTarget.src = PLACEHOLDER_LOGO;

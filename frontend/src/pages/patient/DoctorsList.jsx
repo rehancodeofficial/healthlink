@@ -43,7 +43,7 @@ function DoctorViewModal({ open, onClose, doctor, onAssign, isAssigned }) {
         <div className="flex items-center gap-4 mb-8">
           <img
             src="/logo.png"
-            alt="HealthBridge"
+            alt="HealthLink"
             className="w-24 h-auto"
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_LOGO;
@@ -320,7 +320,7 @@ export default function DoctorsList() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <img
               src="/logo.png"
-              alt="HealthBridge"
+              alt="HealthLink"
               style={{ width: 120, height: "auto" }}
               onError={(e) => {
                 e.currentTarget.src = PLACEHOLDER_LOGO;

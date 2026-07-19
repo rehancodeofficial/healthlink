@@ -22,7 +22,8 @@ export default function Services() {
             Comprehensive Digital Care
           </h1>
           <p className="text-lg text-[var(--hb-ink-soft)] max-w-2xl mx-auto leading-relaxed">
-            We provide clinics with a cohesive suite of modules designed to handle everything from scheduling to clinical AI synthesis.
+            We provide clinics with a cohesive suite of modules designed to handle everything from
+            scheduling to clinical AI synthesis.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
@@ -32,7 +33,8 @@ export default function Services() {
               </div>
               <h3 className="text-lg font-bold text-[var(--hb-ink)]">EHR Integration</h3>
               <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed">
-                Securely host and retrieve patient records with HIPAA-compliant encryption standards.
+                Securely host and retrieve patient records with HIPAA-compliant encryption
+                standards.
               </p>
             </div>
 
@@ -42,7 +44,8 @@ export default function Services() {
               </div>
               <h3 className="text-lg font-bold text-[var(--hb-ink)]">Smart Prescriptions</h3>
               <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed">
-                Write, validate, and electronically dispatch prescriptions directly to patient-preferred pharmacies.
+                Write, validate, and electronically dispatch prescriptions directly to
+                patient-preferred pharmacies.
               </p>
             </div>
 
@@ -52,7 +55,8 @@ export default function Services() {
               </div>
               <h3 className="text-lg font-bold text-[var(--hb-ink)]">Smart Scheduling</h3>
               <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed">
-                Automate appointment queues and decrease doctor idle hours with calendar optimizations.
+                Automate appointment queues and decrease doctor idle hours with calendar
+                optimizations.
               </p>
             </div>
           </div>
@@ -60,7 +64,7 @@ export default function Services() {
       </main>
 
       <footer className="py-12 border-t border-[var(--border)] text-center text-xs text-[var(--hb-ink-soft)]">
-        &copy; 2025 Health Bridge. All Rights Reserved.
+        &copy; 2025 Health Link. All Rights Reserved.
       </footer>
     </div>
   );

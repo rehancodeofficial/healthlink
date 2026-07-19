@@ -2,7 +2,9 @@ const axios = require("axios");
 const fs = require("fs");
 
 // Configuration
-const BASE_URL = process.env.BACKEND_URL || "https://HealthBridge-2-production-ee33.up.railway.app";
+const BASE_URL =
+  process.env.BACKEND_URL ||
+  "https://HealthLink-2-production-ee33.up.railway.app";
 const API_BASE = `${BASE_URL}/api`;
 
 // Console colors
@@ -15,16 +17,29 @@ const colors = {
   cyan: "\x1b[36m",
 };
 
-const log = (msg, color = "reset") => console.log(`${colors[color]}${msg}${colors.reset}`);
+const log = (msg, color = "reset") =>
+  console.log(`${colors[color]}${msg}${colors.reset}`);
 
 // Credentials from ACCESS_DETAILS.txt
 const CREDENTIALS = [
-  { role: "SUPERADMIN", email: "superadmin@HealthBridge.com", password: "password123" }, // Try 'password123' or '123456' - file said 123456
-  { role: "ADMIN", email: "admin@HealthBridge.com", password: "password123" },
-  { role: "SUPPORT", email: "support@HealthBridge.com", password: "password123" },
-  { role: "PATIENT", email: "patient1@HealthBridge.com", password: "password123" },
-  { role: "DOCTOR", email: "doctor1@HealthBridge.com", password: "password123" },
-  { role: "PHARMACY", email: "pharmacy@HealthBridge.com", password: "password123" },
+  {
+    role: "SUPERADMIN",
+    email: "superadmin@HealthLink.com",
+    password: "password123",
+  }, // Try 'password123' or '123456' - file said 123456
+  { role: "ADMIN", email: "admin@HealthLink.com", password: "password123" },
+  { role: "SUPPORT", email: "support@HealthLink.com", password: "password123" },
+  {
+    role: "PATIENT",
+    email: "patient1@HealthLink.com",
+    password: "password123",
+  },
+  { role: "DOCTOR", email: "doctor1@HealthLink.com", password: "password123" },
+  {
+    role: "PHARMACY",
+    email: "pharmacy@HealthLink.com",
+    password: "password123",
+  },
 ];
 
 const DEFAULT_PASSWORD = "123456";
@@ -58,7 +73,10 @@ async function runTests() {
     // 1. Authenticate
     let authData = await login(user.email, DEFAULT_PASSWORD);
     if (!authData) {
-      log(`  ⚠️ Login failed with default password. Trying fallback...`, "yellow");
+      log(
+        `  ⚠️ Login failed with default password. Trying fallback...`,
+        "yellow",
+      );
       authData = await login(user.email, "password123"); // Fallback just in case
     }
 
@@ -77,17 +95,30 @@ async function runTests() {
     const headers = { Authorization: `Bearer ${token}` };
     const checkEndpoint = async (name, url) => {
       try {
-        const res = await axios.get(`${API_BASE}${url}`, { headers, validateStatus: () => true });
+        const res = await axios.get(`${API_BASE}${url}`, {
+          headers,
+          validateStatus: () => true,
+        });
         const success = res.status >= 200 && res.status < 300;
         const statusColor = success ? "green" : "red";
         log(`    [${res.status}] ${name}: ${url}`, statusColor);
         if (!success) {
           log(`      Error: ${JSON.stringify(res.data)}`, "red");
         }
-        results.push({ role: user.role, endpoint: name, success, status: res.status });
+        results.push({
+          role: user.role,
+          endpoint: name,
+          success,
+          status: res.status,
+        });
       } catch (err) {
         log(`    [ERR] ${name}: ${url} - ${err.message}`, "red");
-        results.push({ role: user.role, endpoint: name, success: false, error: err.message });
+        results.push({
+          role: user.role,
+          endpoint: name,
+          success: false,
+          error: err.message,
+        });
       }
     };
 
@@ -117,7 +148,10 @@ async function runTests() {
         await checkEndpoint("Profile", "/pharmacy/profile");
         break;
       case "SUPPORT":
-        await checkEndpoint("My Tickets", `/support/tickets/my?userId=${userId}`);
+        await checkEndpoint(
+          "My Tickets",
+          `/support/tickets/my?userId=${userId}`,
+        );
         await checkEndpoint("All Tickets", "/support/tickets");
         break;
     }
@@ -134,7 +168,10 @@ async function runTests() {
   } else {
     log(`⚠️ Data: ${failures.length} checks failed.`, "red");
     failures.forEach((f) =>
-      log(`  - [${f.role}] ${f.endpoint}: Failed (${f.status || f.error})`, "red")
+      log(
+        `  - [${f.role}] ${f.endpoint}: Failed (${f.status || f.error})`,
+        "red",
+      ),
     );
     process.exit(1);
   }

@@ -7,8 +7,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL:
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://HealthBridge-2-production-ee33.up.railway.app/api",
+    import.meta.env.VITE_API_BASE_URL || "https://HealthLink-2-production-ee33.up.railway.app/api",
   headers: {
     "Content-Type": "application/json",
   },

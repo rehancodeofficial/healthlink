@@ -1,7 +1,7 @@
 -- ============================================
 -- SUPABASE RLS POLICIES - COMPLETE SETUP
 -- Run this in Supabase SQL Editor
--- Project: HealthBridge
+-- Project: HealthLink
 -- Last Updated: 2026-02-09
 -- ============================================
 

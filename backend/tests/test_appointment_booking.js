@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const BASE_URL = "https://HealthBridge-2-production-ee33.up.railway.app/api";
+const BASE_URL = "https://HealthLink-2-production-ee33.up.railway.app/api";
 
 /**
  * Test Script for Appointment Booking Flow
@@ -50,7 +50,9 @@ async function testAppointmentBooking() {
     }
 
     const doctorId = doctors[0].id;
-    console.log(`✅ Found ${doctors.length} doctors. Using doctor ID: ${doctorId}\n`);
+    console.log(
+      `✅ Found ${doctors.length} doctors. Using doctor ID: ${doctorId}\n`,
+    );
 
     // Step 3: Create appointment with specific datetime
     console.log("Step 3: Booking appointment...");
@@ -65,13 +67,16 @@ async function testAppointmentBooking() {
       patientId: userId,
     };
 
-    console.log("Appointment datetime (ISO):", appointmentPayload.appointmentDate);
+    console.log(
+      "Appointment datetime (ISO):",
+      appointmentPayload.appointmentDate,
+    );
     console.log("Expected time: 14:30 (24-hour format)\n");
 
     const bookingResponse = await axios.post(
       `${BASE_URL}/patient/appointments`,
       appointmentPayload,
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
 
     const createdAppointment = bookingResponse.data;
@@ -92,10 +97,13 @@ async function testAppointmentBooking() {
 
     // Step 4: Retrieve appointments and verify
     console.log("Step 4: Retrieving appointments...");
-    const appointmentsResponse = await axios.get(`${BASE_URL}/patient/appointments`, {
-      params: { patientId: userId },
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const appointmentsResponse = await axios.get(
+      `${BASE_URL}/patient/appointments`,
+      {
+        params: { patientId: userId },
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
     const appointments = Array.isArray(appointmentsResponse.data)
       ? appointmentsResponse.data
@@ -104,13 +112,18 @@ async function testAppointmentBooking() {
     console.log(`✅ Retrieved ${appointments.length} appointments\n`);
 
     // Find our test appointment
-    const testAppointment = appointments.find((a) => a.id === createdAppointment.id);
+    const testAppointment = appointments.find(
+      (a) => a.id === createdAppointment.id,
+    );
     if (testAppointment) {
       console.log("✅ Test appointment found in list");
       console.log("Appointment Details:");
       console.log("  - ID:", testAppointment.id);
       console.log("  - Date (ISO):", testAppointment.appointmentDate);
-      console.log("  - Date (Local):", new Date(testAppointment.appointmentDate).toLocaleString());
+      console.log(
+        "  - Date (Local):",
+        new Date(testAppointment.appointmentDate).toLocaleString(),
+      );
       console.log(
         "  - Date (24h format):",
         new Date(testAppointment.appointmentDate).toLocaleString("en-GB", {
@@ -120,7 +133,7 @@ async function testAppointmentBooking() {
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
-        })
+        }),
       );
       console.log("  - Status:", testAppointment.status);
       console.log("  - Reason:", testAppointment.reason);
@@ -133,7 +146,7 @@ async function testAppointmentBooking() {
     await axios.patch(
       `${BASE_URL}/patient/appointments/${createdAppointment.id}/cancel`,
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     console.log("✅ Test appointment cancelled\n");
 
@@ -152,7 +165,10 @@ async function testAppointmentBooking() {
     console.error("Error:", error.message);
     if (error.response) {
       console.error("Response status:", error.response.status);
-      console.error("Response data:", JSON.stringify(error.response.data, null, 2));
+      console.error(
+        "Response data:",
+        JSON.stringify(error.response.data, null, 2),
+      );
     }
     if (error.request && !error.response) {
       console.error("No response received from server");

@@ -194,7 +194,7 @@ async function ensureUser({ email, name, role, passwordHash }) {
 /** ---- Seed ------------------------------------------------------------- */
 
 async function main() {
-  console.log("🌱 Seeding HealthBridge…");
+  console.log("🌱 Seeding HealthLink…");
 
   // bcrypt hash for "123456"
   const passwordHash = await bcrypt.hash("123456", 10);
@@ -202,10 +202,10 @@ async function main() {
   // 1) System / subscription settings (if those models exist)
   await safeUpsert("systemSetting", {
     where: { id: 1 },
-    update: { systemName: "HealthBridge", themeColor: "#027906" },
+    update: { systemName: "HealthLink", themeColor: "#027906" },
     create: {
       id: 1,
-      systemName: "HealthBridge",
+      systemName: "HealthLink",
       themeColor: "#027906",
       defaultFee: 20,
     },
@@ -234,11 +234,11 @@ async function main() {
 
   // 2) Core accounts
   const superAdmin = await safeUpsert("admin", {
-    where: { email: "superadmin@HealthBridge.com" },
+    where: { email: "superadmin@HealthLink.com" },
     update: { role: E.AdminRole.SUPERADMIN, isSuspended: false },
     create: {
       name: "Super Admin",
-      email: "superadmin@HealthBridge.com",
+      email: "superadmin@HealthLink.com",
       password: passwordHash,
       role: E.AdminRole.SUPERADMIN,
       isSuspended: false,
@@ -246,11 +246,11 @@ async function main() {
   });
 
   const standardAdmin = await safeUpsert("admin", {
-    where: { email: "admin@HealthBridge.com" },
+    where: { email: "admin@HealthLink.com" },
     update: { role: E.AdminRole.ADMIN, isSuspended: false },
     create: {
       name: "Standard Admin",
-      email: "admin@HealthBridge.com",
+      email: "admin@HealthLink.com",
       password: passwordHash,
       role: E.AdminRole.ADMIN,
       isSuspended: false,
@@ -258,11 +258,11 @@ async function main() {
   });
 
   const supportAdmin = await safeUpsert("admin", {
-    where: { email: "support@HealthBridge.com" },
+    where: { email: "support@HealthLink.com" },
     update: { role: E.AdminRole.SUPPORT, isSuspended: false },
     create: {
       name: "Support Officer",
-      email: "support@HealthBridge.com",
+      email: "support@HealthLink.com",
       password: passwordHash,
       role: E.AdminRole.SUPPORT,
       isSuspended: false,
@@ -270,14 +270,14 @@ async function main() {
   });
 
   const pharmacyUser = await ensureUser({
-    email: "pharmacy@HealthBridge.com",
-    name: "HealthBridge Pharmacy",
+    email: "pharmacy@HealthLink.com",
+    name: "HealthLink Pharmacy",
     role: E.UserRole.PHARMACY,
     passwordHash,
   });
 
   const supportUser = await ensureUser({
-    email: "agent@HealthBridge.com",
+    email: "agent@HealthLink.com",
     name: "Support Agent",
     role: E.UserRole.PATIENT, // base user; linked as SupportAgent if model exists
     passwordHash,
@@ -297,14 +297,14 @@ async function main() {
     (await safeUpsert("pharmacyProfile", {
       where: { userId: pharmacyUser.id },
       update: {
-        displayName: "HealthBridge Main Pharmacy",
+        displayName: "HealthLink Main Pharmacy",
         city: "Lagos",
         state: "Lagos",
         country: "Nigeria",
       },
       create: {
         userId: pharmacyUser.id,
-        displayName: "HealthBridge Main Pharmacy",
+        displayName: "HealthLink Main Pharmacy",
         licenseNumber: "PHARM-0001",
         phone: "+2348000000000",
         address: "1 Health Avenue, Ikeja",
@@ -323,7 +323,7 @@ async function main() {
   const doctorUsers = [];
   for (let i = 1; i <= 3; i++) {
     const u = await ensureUser({
-      email: `doctor${i}@HealthBridge.com`,
+      email: `doctor${i}@HealthLink.com`,
       name: `Dr. John Doctor ${i}`,
       role: E.UserRole.DOCTOR,
       passwordHash,
@@ -334,7 +334,7 @@ async function main() {
   const patientUsers = [];
   for (let i = 1; i <= 3; i++) {
     const u = await ensureUser({
-      email: `patient${i}@HealthBridge.com`,
+      email: `patient${i}@HealthLink.com`,
       name: `Virtual Patient ${i}`,
       role: E.UserRole.PATIENT,
       passwordHash,
@@ -354,7 +354,7 @@ async function main() {
         specialization: "General Practice",
         qualifications: "MBBS, FWACP",
         licenseNumber: `DOC-000${i + 1}`, // ensure unique if model enforces it
-        hospitalAffiliation: "HealthBridge Clinic",
+        hospitalAffiliation: "HealthLink Clinic",
         yearsOfExperience: 5 + i,
         consultationFee: 30 + i * 5,
         availability: "Weekdays 09:00–17:00",
@@ -476,8 +476,8 @@ async function main() {
         scheduledAt: tomorrow,
         durationMins: 30,
         status: E.ConsultationStatus.SCHEDULED,
-        roomName: "HealthBridge-room-1",
-        meetingUrl: "https://meet.HealthBridge.com/room-1",
+        roomName: "HealthLink-room-1",
+        meetingUrl: "https://meet.HealthLink.com/room-1",
       },
     });
 

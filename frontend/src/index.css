@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ==========================================
-   🌿 HealthBridge Ultra-Premium Design System
+   🌿 HealthLink Ultra-Premium Design System
    ========================================== */
 
 :root {
@@ -14,16 +14,16 @@
   --r-xl: 36px;
 
   /* Brand Colors */
-  --hb-cream: #F7F4EC;
-  --hb-cream-deep: #EFEAE0;
-  --hb-ink: #12162A;
-  --hb-ink-soft: #545A6E;
-  --hb-white: #FFFFFF;
-  --hb-red: #B23B2E;
-  --hb-red-deep: #8E2E23;
+  --hb-cream: #f7f4ec;
+  --hb-cream-deep: #efeae0;
+  --hb-ink: #12162a;
+  --hb-ink-soft: #545a6e;
+  --hb-white: #ffffff;
+  --hb-red: #b23b2e;
+  --hb-red-deep: #8e2e23;
   --hb-red-glow: rgba(178, 59, 46, 0.25);
-  --hb-green: #3F5A34;
-  --hb-green-glow: rgba(63, 90, 52, 0.20);
+  --hb-green: #3f5a34;
+  --hb-green-glow: rgba(63, 90, 52, 0.2);
 
   /* Glass-Clay material variables */
   --clay-light: rgba(255, 255, 255, 0.85);
@@ -40,14 +40,14 @@
   --brand-primary: var(--hb-red);
   --brand-primary-hover: var(--hb-red-deep);
   --brand-secondary: var(--hb-green);
-  --brand-accent: #22C55E;
+  --brand-accent: #22c55e;
 }
 
 [data-theme="dark"] {
-  --hb-cream: #14172A;
-  --hb-cream-deep: #1C2036;
-  --hb-ink: #F4F1E9;
-  --hb-ink-soft: #A7ACC2;
+  --hb-cream: #14172a;
+  --hb-cream-deep: #1c2036;
+  --hb-ink: #f4f1e9;
+  --hb-ink-soft: #a7acc2;
   --clay-light: rgba(255, 255, 255, 0.06);
   --clay-shadow: rgba(0, 0, 0, 0.55);
   --glass-fill: rgba(255, 255, 255, 0.06);
@@ -108,8 +108,10 @@ body {
   box-shadow:
     8px 8px 20px var(--clay-shadow),
     -6px -6px 16px var(--clay-light),
-    inset 0 1px 0 rgba(255,255,255,0.5);
-  transition: transform 320ms cubic-bezier(0.22,1,0.36,1), box-shadow 320ms ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms ease;
 }
 
 .glass-clay:hover {
@@ -117,7 +119,7 @@ body {
   box-shadow:
     12px 14px 28px var(--clay-shadow),
     -8px -8px 20px var(--clay-light),
-    inset 0 1px 0 rgba(255,255,255,0.6);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .clay-pressed {
@@ -136,8 +138,10 @@ body {
   box-shadow:
     6px 6px 14px rgba(142, 46, 35, 0.35),
     -3px -3px 10px rgba(255, 255, 255, 0.25),
-    inset 0 1px 0 rgba(255,255,255,0.3);
-  transition: transform 180ms ease, box-shadow 180ms ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .btn-clay-primary:hover {
@@ -146,7 +150,9 @@ body {
 
 .btn-clay-primary:active {
   transform: translateY(1px) scale(0.98);
-  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.25), inset -2px -2px 6px rgba(255,255,255,0.15);
+  box-shadow:
+    inset 3px 3px 8px rgba(0, 0, 0, 0.25),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.15);
 }
 
 /* --- Utility --- */
@@ -277,20 +283,27 @@ html {
    ========================================== */
 
 /* Inter Font Override */
-html, body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+html,
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif !important;
 }
 
 /* Subtle Grid Background Pattern (5% opacity) */
 .bg-grid {
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(31, 41, 55, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(31, 41, 55, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
 .dark .bg-grid {
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
@@ -321,15 +334,27 @@ html, body {
 }
 
 @keyframes float-blob-red {
-  0% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(80px, 50px) scale(1.1); }
-  100% { transform: translate(-40px, -60px) scale(0.9); }
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(80px, 50px) scale(1.1);
+  }
+  100% {
+    transform: translate(-40px, -60px) scale(0.9);
+  }
 }
 
 @keyframes float-blob-green {
-  0% { transform: translate(0px, 0px) scale(1.1); }
-  50% { transform: translate(-90px, 60px) scale(0.9); }
-  100% { transform: translate(60px, -40px) scale(1.05); }
+  0% {
+    transform: translate(0px, 0px) scale(1.1);
+  }
+  50% {
+    transform: translate(-90px, 60px) scale(0.9);
+  }
+  100% {
+    transform: translate(60px, -40px) scale(1.05);
+  }
 }
 
 /* Floating Animations */
@@ -342,13 +367,21 @@ html, body {
 }
 
 @keyframes float-slow {
-  0% { transform: translateY(0px) rotate(0deg); }
-  100% { transform: translateY(-15px) rotate(2deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-15px) rotate(2deg);
+  }
 }
 
 @keyframes float-medium {
-  0% { transform: translateY(0px) rotate(0deg); }
-  100% { transform: translateY(-12px) rotate(-1.5deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-12px) rotate(-1.5deg);
+  }
 }
 
 /* Hover Shine Reflection Overlay */
@@ -358,7 +391,7 @@ html, body {
 }
 
 .shine-hover::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -150%;
@@ -378,4 +411,3 @@ html, body {
 .shine-hover:hover::before {
   left: 150%;
 }
-

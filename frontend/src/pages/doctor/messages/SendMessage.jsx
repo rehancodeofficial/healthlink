@@ -72,7 +72,7 @@ export default function DoctorSendMessage() {
       <div className="p-6 min-h-screen bg-[var(--bg-main)]/90 text-[var(--text-main)]">
         <img
           src="/logo.png"
-          alt="HealthBridge"
+          alt="HealthLink"
           style={{ width: 120, height: "auto" }}
           onError={(e) => {
             e.currentTarget.src = PLACEHOLDER_LOGO;

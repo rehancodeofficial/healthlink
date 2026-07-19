@@ -22,11 +22,11 @@ const { Server } = require("socket.io");
 
 // ✅ Global Allowed Origins (Moved up for Socket.io)
 const allowedOrigins = [
-  "https://HealthBridge-2.vercel.app", // Keep for local development
+  "https://HealthLink-2.vercel.app", // Keep for local development
   process.env.FRONTEND_URL,
   process.env.APP_BASE_URL,
   process.env.CORS_ORIGIN,
-  "https://HealthBridge-2.vercel.app",
+  "https://HealthLink-2.vercel.app",
 ].filter(Boolean);
 
 const server = http.createServer(app);

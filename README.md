@@ -1,4 +1,4 @@
-# HealthBridge 2.0
+# HealthLink 2.0
 
 A full-stack telemedicine web application with video calling, appointment booking, and real-time notifications.
 
@@ -22,7 +22,7 @@ A full-stack telemedicine web application with video calling, appointment bookin
 
 ## About The Project
 
-HealthBridge is a comprehensive telemedicine platform designed to connect patients with healthcare professionals through a secure and intuitive interface. It streamlines healthcare delivery by providing tools for virtual consultations, digital prescriptions, and efficient patient management.
+HealthLink is a comprehensive telemedicine platform designed to connect patients with healthcare professionals through a secure and intuitive interface. It streamlines healthcare delivery by providing tools for virtual consultations, digital prescriptions, and efficient patient management.
 
 ## Tech Stack
 
@@ -44,7 +44,7 @@ HealthBridge is a comprehensive telemedicine platform designed to connect patien
 
 ## Architecture
 
-HealthBridge follows a modular monorepo architecture:
+HealthLink follows a modular monorepo architecture:
 
 - **Client Tier:** React-based Web App and Expo-based Mobile App.
 - **Logic Tier:** Express.js REST API with Socket.io for real-time events.
@@ -64,7 +64,7 @@ HealthBridge follows a modular monorepo architecture:
 
    ```bash
    git clone <repository-url>
-   cd HealthBridge-2
+   cd HealthLink-2
    ```
 
 2. **Backend Setup:**
@@ -181,7 +181,7 @@ Distributed under the ISC License. See `LICENSE` for more information.
 
 ## Contact
 
-Project Link: [https://github.com/rehancode1514-pixel/HealthBridge-2](https://github.com/rehancode1514-pixel/HealthBridge-2)
+Project Link: [https://github.com/rehancode1514-pixel/HealthLink-2](https://github.com/rehancode1514-pixel/HealthLink-2)
 
 ---
 

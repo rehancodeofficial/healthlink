@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const BASE_URL = "https://HealthBridge-2.vercel.app/api";
+const BASE_URL = "https://HealthLink-2.vercel.app/api";
 const EMAIL = "rehan.dev1514@gmail.com";
 const PASSWORD = "123123";
 
@@ -75,7 +75,10 @@ async function testProfileUpdate() {
     if (error.response) {
       console.error("Status:", error.response.status);
       console.error("Error message:", error.response.data);
-      console.error("Full response:", JSON.stringify(error.response.data, null, 2));
+      console.error(
+        "Full response:",
+        JSON.stringify(error.response.data, null, 2),
+      );
     } else {
       console.error("Error:", error.message);
       console.error("Stack:", error.stack);
