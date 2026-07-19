@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { FaSearch, FaStar, FaUserCheck, FaCalendarAlt, FaLanguage, FaAward, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function Doctors() {
   const navigate = useNavigate();
@@ -102,17 +103,30 @@ export default function Doctors() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 pt-36 pb-24 space-y-20">
-        {/* Hero */}
-        <section className="text-center space-y-6 max-w-4xl mx-auto">
-          <span className="clay-pressed inline-block px-4 py-1.5 border border-[var(--glass-border)] text-[10px] font-black uppercase tracking-widest text-[var(--hb-red)]">
-            Our Medical Panel
-          </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[var(--hb-ink)] leading-[1.1]">
-            Find the right doctor, not just any doctor
-          </h1>
-          <p className="text-lg sm:text-xl text-[var(--hb-ink-soft)] max-w-3xl mx-auto leading-relaxed font-medium">
-            Every doctor on HealthLink is licensed, credential-verified, and rated by real patients.
-          </p>
+        {/* Hero Banner with video background */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)]">
+          <VideoSlot
+            src="doctors-header.mp4"
+            label="Clinic hallway / modern corridor background"
+            searchTerms="clinic hallway, modern hospital corridor, medical professional walking"
+            overlay={70}
+            height="h-auto"
+            rounded="rounded-none"
+            mode="background"
+            className="py-20 px-6"
+          >
+            <div className="text-center space-y-6 max-w-4xl mx-auto">
+              <span className="clay-pressed inline-block px-4 py-1.5 border border-white/20 text-[10px] font-black uppercase tracking-widest text-[var(--hb-red)] bg-white/10 text-white">
+                Our Medical Panel
+              </span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white leading-[1.1]">
+                Find the right doctor, not just any doctor
+              </h1>
+              <p className="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
+                Every doctor on HealthLink is licensed, credential-verified, and rated by real patients.
+              </p>
+            </div>
+          </VideoSlot>
         </section>
 
         {/* Filter Bar */}

@@ -11,6 +11,7 @@ import {
   FaArrowRight 
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function Appointments() {
   const navigate = useNavigate();
