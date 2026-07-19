@@ -25,13 +25,13 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop & Tablet Top Navbar */}
+      {/* Desktop Top Navbar */}
       <motion.nav
         style={{
           height: navHeight,
           marginTop: navMargin,
         }}
-        className="fixed top-0 left-0 right-0 z-50 glass-clay mx-4 md:mx-8 hidden md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-6 transition-all duration-300 select-none"
+        className="fixed top-0 left-0 right-0 z-50 glass-clay mx-4 lg:mx-8 hidden lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between px-6 transition-all duration-300 select-none"
       >
         <div className="flex items-center gap-3 cursor-pointer group justify-self-start" onClick={() => navigate("/")}>
           <div className="clay-pressed p-1.5 rounded-full group-hover:scale-105 transition-transform shadow-md overflow-hidden flex items-center justify-center">
@@ -81,8 +81,8 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Mobile view top brand logo header */}
-      <div className="fixed top-3 left-3 right-3 z-50 glass-clay h-12 rounded-full flex md:hidden items-center justify-between px-4 shadow-sm border border-[var(--glass-border)] select-none">
+      {/* Mobile & iPad view top brand logo header */}
+      <div className="fixed top-3 left-3 right-3 z-50 glass-clay h-12 rounded-full flex lg:hidden items-center justify-between px-4 shadow-sm border border-[var(--glass-border)] select-none">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
           <img src="/logo.png" alt="Logo" className="w-6 h-6 rounded-full mix-blend-multiply" />
           <span className="text-xs font-black tracking-tighter uppercase text-[var(--hb-ink)]">
@@ -97,8 +97,8 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile view bottom floating icon navigation bar */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 glass-clay rounded-full px-5 py-3 flex md:hidden gap-5.5 items-center justify-around shadow-2xl border border-[var(--glass-border)] select-none w-auto min-w-[280px]">
+      {/* Mobile & iPad view bottom floating icon navigation bar */}
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 glass-clay rounded-full px-5 py-3 flex lg:hidden gap-5.5 items-center justify-around shadow-2xl border border-[var(--glass-border)] select-none w-auto min-w-[280px]">
         <Link to="/" className="text-slate-500 hover:text-[var(--hb-red)] active:scale-90 transition-all p-1 flex items-center justify-center" title="Home">
           <FaHome size={18} />
         </Link>

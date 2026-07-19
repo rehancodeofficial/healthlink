@@ -32,7 +32,7 @@ export default function HeroHeadline() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-2 text-center lg:text-left select-none"
+      className="space-y-2 text-center select-none"
     >
       <motion.h1
         variants={itemVariants}
