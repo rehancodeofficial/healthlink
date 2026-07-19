@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
     "@zegocloud/zego-uikit-prebuilt": "^2.17.2",

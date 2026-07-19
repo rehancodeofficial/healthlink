@@ -13,7 +13,7 @@ const app = require("./app");
 const env = require("./config/env");
 
 const allowedOrigins = [
-  "https://HealthBridge-2.vercel.app",
+  "https://HEALTHLINK-2.vercel.app",
   env.FRONTEND_URL,
   env.APP_BASE_URL,
   process.env.CORS_ORIGIN,

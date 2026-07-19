@@ -50,7 +50,7 @@
     "prisma": "^6.3.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

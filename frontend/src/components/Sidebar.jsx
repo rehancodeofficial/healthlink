@@ -196,7 +196,7 @@ export default function Sidebar({ role: propRole, isMobileMenuOpen, setIsMobileM
             {open && (
               <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                 <p className="text-xl font-black tracking-tighter text-white">
-                  Health<span className="text-blue-200">Bridge</span>
+                  Health<span className="text-blue-200">Link</span>
                 </p>
                 <div className="flex items-center gap-1.5">
                   <FaCircle className="text-white text-[6px] animate-pulse" />

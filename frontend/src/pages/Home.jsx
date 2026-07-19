@@ -114,7 +114,7 @@ export default function Home() {
                 <img src="/logo.png" alt="Logo" className="w-8 h-8 mix-blend-multiply" />
               </div>
               <span className="text-lg font-black tracking-tighter uppercase">
-                HEALTH<span className="text-[var(--brand-primary)]">BRIDGE</span>
+                HEALTH<span className="text-[var(--brand-primary)]">LINK</span>
               </span>
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] md:ml-4">

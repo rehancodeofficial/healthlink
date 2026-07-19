@@ -38,7 +38,7 @@ export default function Navbar() {
             <img src="/logo.png" alt="Logo" className="w-7 h-7 mix-blend-multiply" />
           </div>
           <span className="text-base font-black tracking-tighter uppercase text-[var(--hb-ink)]">
-            HEALTH<span className="text-[var(--hb-red)]">BRIDGE</span>
+            HEALTH<span className="text-[var(--hb-red)]">LINK</span>
           </span>
         </div>
 
@@ -86,7 +86,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
           <img src="/logo.png" alt="Logo" className="w-6 h-6 rounded-full mix-blend-multiply" />
           <span className="text-xs font-black tracking-tighter uppercase text-[var(--hb-ink)]">
-            HEALTH<span className="text-[var(--hb-red)]">BRIDGE</span>
+            HEALTH<span className="text-[var(--hb-red)]">LINK</span>
           </span>
         </div>
         <button
