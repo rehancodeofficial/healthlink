@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FiLock, FiX, FiCheck } from "react-icons/fi";
-import api from "../Lib/api";
+import api from "../../services/api";
 import { toast } from "react-toastify";
 
 export default function ChangePasswordModal({ isOpen, onClose }) {

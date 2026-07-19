@@ -50,7 +50,7 @@ const AdminSubscribedPharmacy = lazy(() => import("./pages/admin/subscribers/Pha
 const DoctorDashboard = lazy(() => import("./pages/doctor/DoctorDashboard"));
 const DoctorAppointments = lazy(() => import("./pages/doctor/DoctorAppointments"));
 const DoctorPrescriptions = lazy(() => import("./pages/doctor/Prescriptions"));
-const DoctorInbox = lazy(() => import("./pages/doctor/messages/inbox"));
+const DoctorInbox = lazy(() => import("./pages/admin/messages/Inbox"));
 const DoctorSendMessage = lazy(() => import("./pages/doctor/messages/SendMessage"));
 const DoctorSubscription = lazy(() => import("./pages/doctor/DoctorSubscription"));
 const PatientList = lazy(() => import("./pages/doctor/PatientList"));

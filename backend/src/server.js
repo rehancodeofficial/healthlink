@@ -105,7 +105,7 @@ const superadminRoutes = require("./routes/superadmin");
 const settingsRoutes = require("./routes/settings");
 const reportsRoutes = require("./routes/reports");
 const logsRoutes = require("./routes/logs");
-const activityLogsRoutes = require("./routes/activityLogs");
+const activityLogsRoutes = require("./routes/logs");
 
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/superadmin/settings", settingsRoutes);

@@ -1,7 +1,7 @@
 const express = require("express");
 const prisma = require("../prisma/prismaClient");
 const router = express.Router();
-const { main: runSeed } = require("../prisma/seed");
+const { main: runSeed } = require("../../prisma/seed");
 
 // Internal endpoint for chatbot to fetch doctor data
 router.get("/doctors", async (req, res) => {
