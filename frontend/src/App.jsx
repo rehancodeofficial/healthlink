@@ -123,6 +123,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <UserProvider>
         <SocketProvider>
           <ToastContainer position="top-right" autoClose={3000} />
