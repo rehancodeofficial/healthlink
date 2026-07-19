@@ -70,28 +70,39 @@ export default function Appointments() {
           </p>
         </section>
 
-        {/* Booking Flow */}
-        <section className="glass-clay p-10 sm:p-14 rounded-[2.5rem] border border-[var(--border)] space-y-10">
-          <div className="text-center space-y-2">
-            <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
-              Simple Process
-            </h2>
-            <h3 className="text-3xl font-black tracking-tighter">
-              Booking Flow
-            </h3>
-          </div>
+        {/* Booking Flow with background video */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)]">
+          <VideoSlot
+            src="appointments-flow.mp4"
+            label="Calendar scheduling app / booking interface"
+            searchTerms="calendar scheduling app, booking interface"
+            overlay={80}
+            height="h-auto"
+            rounded="rounded-none"
+            mode="background"
+            className="p-10 sm:p-14 space-y-10"
+          >
+            <div className="text-center space-y-2 text-white relative z-10">
+              <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
+                Simple Process
+              </h2>
+              <h3 className="text-3xl font-black tracking-tighter">
+                Booking Flow
+              </h3>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {flowSteps.map((s, idx) => (
-              <div key={idx} className="p-6 rounded-3xl bg-[var(--bg-main)]/60 border border-[var(--border)] space-y-3">
-                <div className="w-9 h-9 rounded-xl bg-[var(--hb-red)] text-white font-black text-xs flex items-center justify-center">
-                  {s.num}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+              {flowSteps.map((s, idx) => (
+                <div key={idx} className="p-6 rounded-3xl bg-[var(--hb-ink)]/75 border border-white/10 space-y-3 text-white">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--hb-red)] text-white font-black text-xs flex items-center justify-center">
+                    {s.num}
+                  </div>
+                  <h4 className="text-base font-bold tracking-tight">{s.title}</h4>
+                  <p className="text-xs text-white/80 leading-relaxed font-medium">{s.desc}</p>
                 </div>
-                <h4 className="text-base font-bold tracking-tight">{s.title}</h4>
-                <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed font-medium">{s.desc}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </VideoSlot>
         </section>
 
         {/* Appointment Types */}
