@@ -21,24 +21,8 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative flex flex-col pt-16 pb-0 overflow-hidden select-none">
+    <section className="relative flex flex-col pt-32 sm:pt-36 pb-0 overflow-hidden select-none">
       <div className="max-w-4xl mx-auto px-6 w-full flex flex-col items-center text-center gap-7">
-        
-        {/* Eyebrow Badge (Centered) */}
-        <motion.div
-          custom={0.1}
-          variants={fadeInVariants}
-          initial="hidden"
-          animate="visible"
-          className="clay-pressed inline-flex items-center gap-2.5 px-4.5 py-2 border border-[var(--glass-border)] text-[10px] font-black uppercase tracking-wider text-[var(--hb-ink-soft)]"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--hb-green)] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--hb-green)]"></span>
-          </span>
-          <span>AI Powered Clinic Management</span>
-        </motion.div>
-
         {/* Headline (Centered) */}
         <HeroHeadline />
 
@@ -50,7 +34,8 @@ export default function Hero() {
           animate="visible"
           className="text-base sm:text-lg md:text-xl text-[var(--hb-ink-soft)] max-w-[560px] leading-relaxed font-medium mx-auto opacity-90"
         >
-          Manage appointments, patients, prescriptions, billing, staff, and AI-assisted healthcare—one platform.
+          Manage appointments, patients, prescriptions, billing, staff, and AI-assisted
+          healthcare—one platform.
         </motion.p>
 
         {/* CTA Buttons (Centered) */}
@@ -83,7 +68,6 @@ export default function Hero() {
 
         {/* Hero Image Component with float widgets (Centered) */}
         <HeroImage />
-
       </div>
     </section>
   );

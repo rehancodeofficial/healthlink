@@ -5,9 +5,9 @@ export default function HeroImage() {
       {/* Centered Ambient Glow */}
       <div className="absolute inset-0 bg-gradient-to-tr from-[var(--hb-red-glow)] to-[var(--hb-green-glow)] -z-10 blur-[90px] rounded-full pointer-events-none opacity-40" />
 
-      {/* Faded Red Globe Grid SVG Drawing (layered behind the image, no rounded clipping box) */}
-      <div className="absolute inset-0 opacity-15 text-[var(--hb-red)] flex items-center justify-center pointer-events-none z-0">
-        <svg className="w-[300px] h-[300px] xs:w-[360px] xs:h-[360px] sm:w-[480px] sm:h-[480px]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
+      {/* Faded Red Globe Grid SVG Drawing (positioned behind and arched above the doctors' heads) */}
+      <div className="absolute -top-16 sm:-top-28 left-1/2 -translate-x-1/2 opacity-20 text-[var(--hb-red)] flex items-center justify-center pointer-events-none z-0">
+        <svg className="w-[320px] h-[320px] xs:w-[400px] xs:h-[400px] sm:w-[540px] sm:h-[540px]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
           <circle cx="50" cy="50" r="45" />
           <ellipse cx="50" cy="50" rx="45" ry="18" />
           <ellipse cx="50" cy="50" rx="45" ry="32" />
@@ -19,9 +19,9 @@ export default function HeroImage() {
       </div>
 
       {/* White silhouette mask to block globe lines behind doctors' bodies */}
-      <div className="absolute bottom-0 w-[55%] h-[80%] bg-white rounded-t-[180px] z-5 pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[75%] sm:w-[68%] h-[85%] bg-white rounded-t-[140px] z-5 pointer-events-none" />
 
-      {/* Cutout Image of Doctors with Transparent Blend Effect (layered in front, sitting exactly on the bottom border joining stats band) */}
+      {/* Cutout Image of Doctors with Transparent Blend Effect (layered in front, sitting flush on stats band) */}
       <img
         src="/images/clinicians.png"
         alt="Pakistani medical team clinicians"
