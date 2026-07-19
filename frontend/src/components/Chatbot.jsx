@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { FaRobot, FaPaperPlane, FaTimes, FaUserMd, FaCommentMedical } from "react-icons/fa";
+import { FaRobot, FaPaperPlane, FaTimes, FaUserMd, FaCommentMedical, FaMinus } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import api from "../Lib/api";
 
 export default function Chatbot() {
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "Hi! I'm your health assistant. Tell me your symptoms and I'll help you find the right doctor.",
-    },
-  ]);
+  
+  const initialMessage = {
+    sender: "bot",
+    text: "Hi! I'm Healbot, your virtual health assistant. Tell me your symptoms and I'll help you find the right doctor.",
+  };
+
+  const [messages, setMessages] = useState([initialMessage]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -40,7 +41,7 @@ export default function Chatbot() {
         sender: "bot",
         text: data.reply,
         isEmergency: data.isEmergency,
-        doctors: data.doctors || [], // Python backend currently doesn't return doctors, handle gracefully
+        doctors: data.doctors || [],
       };
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
@@ -61,14 +62,23 @@ export default function Chatbot() {
     if (e.key === "Enter") handleSend();
   };
 
+  const handleMinimize = () => {
+    setIsOpen(false);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setMessages([initialMessage]);
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end pointer-events-none">
       {/* Chat Window */}
       <div
         className={`pointer-events-auto w-[calc(100vw-3rem)] sm:w-[380px] h-[calc(100vh-8rem)] sm:h-[500px] max-h-[600px] rounded-2xl overflow-hidden flex flex-col transition-all duration-300 origin-bottom-right mb-4 ${
           theme === "dark"
-            ? "bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]"
-            : "bg-white border border-gray-200 shadow-2xl"
+            ? "bg-gradient-to-br from-[#14172a]/95 via-[#1c2036]/95 to-[#14172a]/95 backdrop-blur-xl border border-gray-700/50 shadow-[0_8px_32px_0_rgba(178,59,46,0.2)]"
+            : "bg-[var(--hb-cream)] border border-[var(--border)] shadow-2xl"
         } ${
           isOpen
             ? "opacity-100 scale-100 translate-y-0"
@@ -76,31 +86,41 @@ export default function Chatbot() {
         }`}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-green)] p-4 flex items-center justify-between text-white shrink-0">
+        <div className="bg-[var(--hb-ink)] p-4 flex items-center justify-between text-white shrink-0 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
+            <div className="bg-[var(--hb-red)]/10 p-2 rounded-xl border border-[var(--hb-red)]/20 text-[var(--hb-red)]">
               <FaRobot className="text-xl" />
             </div>
             <div>
-              <h3 className="font-bold text-sm">Medical Assistant</h3>
+              <h3 className="font-bold text-sm text-[var(--hb-white)]">Healbot</h3>
               <div className="flex items-center gap-1.5 opacity-90">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-[10px] font-medium tracking-wide">ONLINE</span>
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span className="text-[10px] font-semibold tracking-wider text-emerald-400">ONLINE</span>
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <FaTimes />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleMinimize}
+              title="Minimize chat"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+            >
+              <FaMinus className="text-xs" />
+            </button>
+            <button
+              onClick={handleClose}
+              title="Close & Reset Chat"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+            >
+              <FaTimes className="text-sm" />
+            </button>
+          </div>
         </div>
 
         {/* Messages Area */}
         <div
           className={`flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar ${
-            theme === "dark" ? "bg-gray-900/50" : "bg-gray-50"
+            theme === "dark" ? "bg-[#14172a]/30" : "bg-[#efeae0]/30"
           }`}
         >
           {messages.map((msg, index) => (
@@ -111,10 +131,10 @@ export default function Chatbot() {
               <div
                 className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm relative ${
                   msg.sender === "user"
-                    ? "bg-[var(--brand-blue)] text-white rounded-tr-sm"
+                    ? "bg-[var(--hb-red)] text-white rounded-tr-sm"
                     : theme === "dark"
-                      ? "bg-gradient-to-br from-gray-800/80 to-gray-700/80 backdrop-blur-md text-white border border-gray-600/50 rounded-tl-sm"
-                      : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
+                      ? "bg-gradient-to-br from-[#1c2036] to-[#14172a] backdrop-blur-md text-[var(--hb-ink)] border border-[var(--border)] rounded-tl-sm"
+                      : "bg-[var(--hb-white)] text-[var(--hb-ink)] border border-[var(--border)] rounded-tl-sm"
                 }`}
               >
                 <div className="whitespace-pre-wrap">
@@ -131,26 +151,26 @@ export default function Chatbot() {
               {/* Recommended Doctors Cards */}
               {msg.doctors && msg.doctors.length > 0 && (
                 <div className="mt-3 space-y-2 w-full max-w-[90%]">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                  <p className="text-[10px] font-bold text-[var(--hb-ink-soft)] uppercase tracking-wider mb-1.5 ml-1">
                     Recommended Specialists
                   </p>
                   {msg.doctors.map((doc) => (
                     <div
                       key={doc.id}
-                      className={`p-3 rounded-xl shadow-sm flex items-center gap-3 hover:border-[var(--brand-blue)] transition-all cursor-pointer group ${
+                      className={`p-3 rounded-xl shadow-sm flex items-center gap-3 hover:border-[var(--hb-red)] transition-all cursor-pointer group ${
                         theme === "dark"
-                          ? "bg-gray-800/60 backdrop-blur-md border border-gray-600/50"
-                          : "bg-white border border-gray-200"
+                          ? "bg-[#1c2036]/60 backdrop-blur-md border border-[var(--border)]"
+                          : "bg-[var(--hb-white)] border border-[var(--border)]"
                       }`}
                     >
-                      <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[var(--brand-blue)] shrink-0 group-hover:bg-[var(--brand-blue)] group-hover:text-white transition-colors">
+                      <div className="h-10 w-10 rounded-full bg-[var(--hb-red)]/10 flex items-center justify-center text-[var(--hb-red)] shrink-0 group-hover:bg-[var(--hb-red)] group-hover:text-white transition-colors">
                         <FaUserMd />
                       </div>
                       <div className="overflow-hidden">
-                        <p className="font-bold text-sm text-[var(--text-main)] group-hover:text-[var(--brand-blue)] transition-colors">
+                        <p className="font-bold text-sm text-[var(--hb-ink)] group-hover:text-[var(--hb-red)] transition-colors">
                           Dr. {doc.user?.firstName} {doc.user?.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">{doc.specialization}</p>
+                        <p className="text-xs text-[var(--hb-ink-soft)]">{doc.specialization}</p>
                       </div>
                     </div>
                   ))}
@@ -159,13 +179,13 @@ export default function Chatbot() {
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-center gap-2 text-gray-400 text-xs ml-2">
+            <div className="flex items-center gap-2 text-[var(--hb-ink-soft)] text-xs ml-2">
               <div className="flex space-x-1">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                <div className="w-1.5 h-1.5 bg-[var(--hb-ink-soft)] rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-[var(--hb-ink-soft)] rounded-full animate-bounce delay-70"></div>
+                <div className="w-1.5 h-1.5 bg-[var(--hb-ink-soft)] rounded-full animate-bounce delay-150"></div>
               </div>
-              Bot is typing...
+              Healbot is thinking...
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -175,8 +195,8 @@ export default function Chatbot() {
         <div
           className={`p-3 border-t shrink-0 ${
             theme === "dark"
-              ? "bg-gray-900/50 backdrop-blur-md border-gray-700/50"
-              : "bg-white border-gray-200"
+              ? "bg-[#14172a]/50 backdrop-blur-md border-gray-700/50"
+              : "bg-[var(--hb-white)] border-[var(--border)]"
           }`}
         >
           <div className="relative flex items-center gap-2">
@@ -186,16 +206,16 @@ export default function Chatbot() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Describe your symptoms..."
-              className={`w-full pl-4 pr-12 py-3 rounded-xl border-none focus:ring-2 focus:ring-[var(--brand-blue)]/50 text-sm transition-all shadow-inner ${
+              className={`w-full pl-4 pr-12 py-3 rounded-xl border border-[var(--border)] focus:ring-2 focus:ring-[var(--hb-red)]/50 focus:outline-none text-sm transition-all shadow-inner ${
                 theme === "dark"
-                  ? "bg-gray-800/80 backdrop-blur-md text-white placeholder-gray-400"
-                  : "bg-gray-100 text-gray-800 placeholder-gray-500"
+                  ? "bg-[#1c2036]/80 text-white placeholder-gray-400"
+                  : "bg-[var(--hb-cream-deep)] text-[var(--hb-ink)] placeholder-[var(--hb-ink-soft)]"
               }`}
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="absolute right-2 p-2 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-green)] text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:shadow-none transition-all transform hover:scale-105 active:scale-95"
+              className="absolute right-2 p-2 bg-[var(--hb-red)] text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:shadow-none transition-all transform hover:scale-105 active:scale-95"
             >
               <FaPaperPlane className="text-sm" />
             </button>
@@ -206,10 +226,10 @@ export default function Chatbot() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto h-12 w-12 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] flex items-center justify-center text-xl transition-all duration-300 transform hover:scale-110 active:scale-95 ${
+        className={`pointer-events-auto h-12 w-12 rounded-full shadow-[0_4px_20px_rgba(178,59,46,0.35)] flex items-center justify-center text-xl transition-all duration-300 transform hover:scale-110 active:scale-95 ${
           isOpen
-            ? "rotate-90 bg-gray-400 hover:bg-gray-500"
-            : "bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-green)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-bounce-slow"
+            ? "rotate-90 bg-[var(--hb-ink)] text-white hover:bg-[var(--hb-ink)]"
+            : "bg-[var(--hb-red)] text-white hover:bg-[var(--hb-red-deep)] hover:shadow-[0_0_20px_var(--hb-red-glow)] animate-bounce-slow"
         }`}
       >
         {isOpen ? <FaTimes /> : <FaCommentMedical />}
