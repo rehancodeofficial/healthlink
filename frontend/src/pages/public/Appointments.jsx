@@ -11,7 +11,6 @@ import {
   FaArrowRight 
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function Appointments() {
   const navigate = useNavigate();
@@ -70,18 +69,10 @@ export default function Appointments() {
           </p>
         </section>
 
-        {/* Booking Flow with background video */}
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)]">
-          <VideoSlot
-            src="appointments-flow.mp4"
-            label="Calendar scheduling app / booking interface"
-            searchTerms="calendar scheduling app, booking interface"
-            overlay={80}
-            height="h-auto"
-            rounded="rounded-none"
-            mode="background"
-            className="p-10 sm:p-14 space-y-10"
-          >
+        {/* Booking Flow with background image */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/booking-flow.jpg')" }}>
+          <div className="absolute inset-0 bg-[var(--hb-ink)]/85 backdrop-blur-[2px]" />
+          <div className="relative z-10 p-10 sm:p-14 space-y-10">
             <div className="text-center space-y-2 text-white relative z-10">
               <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
                 Simple Process
@@ -93,7 +84,7 @@ export default function Appointments() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
               {flowSteps.map((s, idx) => (
-                <div key={idx} className="p-6 rounded-3xl bg-[var(--hb-ink)]/75 border border-white/10 space-y-3 text-white">
+                <div key={idx} className="p-6 rounded-3xl bg-[var(--hb-ink)]/80 backdrop-blur-md border border-white/10 space-y-3 text-white shadow-xl">
                   <div className="w-9 h-9 rounded-xl bg-[var(--hb-red)] text-white font-black text-xs flex items-center justify-center">
                     {s.num}
                   </div>
@@ -102,7 +93,7 @@ export default function Appointments() {
                 </div>
               ))}
             </div>
-          </VideoSlot>
+          </div>
         </section>
 
         {/* Appointment Types */}
@@ -131,16 +122,27 @@ export default function Appointments() {
 
         {/* What to Expect & Cancellation */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="glass-clay p-8 sm:p-10 rounded-[2rem] border border-[var(--border)] space-y-6">
-            <h3 className="text-2xl font-black tracking-tight text-[var(--hb-ink)]">What to Expect</h3>
-            <ul className="space-y-3">
-              {expectations.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-xs font-medium text-[var(--hb-ink-soft)] leading-relaxed">
-                  <span className="w-2 h-2 rounded-full bg-[var(--hb-red)] mt-1.5 flex-shrink-0"></span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="glass-clay p-8 sm:p-10 rounded-[2rem] border border-[var(--border)] space-y-6 flex flex-col justify-between">
+            <div>
+              <h3 className="text-2xl font-black tracking-tight text-[var(--hb-ink)] mb-4">What to Expect</h3>
+              <ul className="space-y-3">
+                {expectations.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-xs font-medium text-[var(--hb-ink-soft)] leading-relaxed">
+                    <span className="w-2 h-2 rounded-full bg-[var(--hb-red)] mt-1.5 flex-shrink-0"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-4 h-[160px] w-full rounded-2xl overflow-hidden border border-[var(--border)] relative bg-slate-100">
+              <img
+                src="/images/booking-flow.jpg"
+                alt="Webcam setup"
+                className="w-full h-full object-cover object-center"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/20" />
+            </div>
           </div>
 
           <div className="glass-clay p-8 sm:p-10 rounded-[2rem] border border-[var(--border)] space-y-6 flex flex-col justify-between">

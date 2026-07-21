@@ -2,7 +2,6 @@ import Navbar from "../../components/navbar/Navbar";
 import { motion } from "framer-motion";
 import { FaShieldAlt, FaHeart, FaUserLock, FaSmile, FaArrowRight, FaUserMd } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function About() {
   const navigate = useNavigate();
@@ -57,16 +56,12 @@ export default function About() {
               Millions of people delay care because of distance, cost, or time — not because they don't need it. HealthLink was built to remove those barriers, giving patients direct, affordable access to licensed doctors from wherever they are, and giving doctors a platform to practice medicine without the overhead of a physical clinic.
             </p>
           </div>
-          <div className="md:col-span-5">
-            <VideoSlot
-              src="about-team.mp4"
-              label="Medical team meeting — doctors collaborating"
-              searchTerms="medical team meeting, doctors collaborating, healthcare startup office"
-              overlay={15}
-              height="h-[280px]"
-              rounded="rounded-3xl"
-              mode="panel"
-              className="border border-[var(--border)] shadow-xl"
+          <div className="md:col-span-5 h-[280px] rounded-3xl overflow-hidden border border-[var(--border)] shadow-xl relative bg-slate-100">
+            <img
+              src="/images/clinicians.jpg"
+              alt="Medical team meeting"
+              className="w-full h-full object-cover object-center"
+              loading="lazy"
             />
           </div>
         </section>
@@ -139,17 +134,10 @@ export default function About() {
           </div>
         </section>
 
-        {/* Team Video Banner */}
-        <VideoSlot
-          src="about-collaborating.mp4"
-          label="Healthcare team — doctors collaborating"
-          searchTerms="doctors collaborating, healthcare startup office, medical team meeting"
-          overlay={55}
-          height="h-[280px]"
-          rounded="rounded-[2.5rem]"
-          mode="background"
-        >
-          <div className="text-center space-y-2 max-w-lg">
+        {/* Team Image Banner */}
+        <div className="relative h-[280px] rounded-[2.5rem] overflow-hidden border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/doctors-header.jpg')" }}>
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
+          <div className="relative z-10 h-full flex flex-col items-center justify-center px-8 text-center space-y-2 max-w-lg mx-auto">
             <p className="text-white font-black text-2xl tracking-tight drop-shadow-lg">
               Built by people who care about care
             </p>
@@ -157,7 +145,7 @@ export default function About() {
               Engineers, clinicians, and healthcare operators working toward one goal.
             </p>
           </div>
-        </VideoSlot>
+        </div>
 
         {/* Team / Leadership */}
         <section className="glass-clay p-10 sm:p-12 rounded-[2.5rem] border border-[var(--border)] text-center space-y-6">

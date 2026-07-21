@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { FaSearch, FaStar, FaUserCheck, FaCalendarAlt, FaLanguage, FaAward, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function Doctors() {
   const navigate = useNavigate();
@@ -103,18 +102,10 @@ export default function Doctors() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 pt-36 pb-24 space-y-20">
-        {/* Hero Banner with video background */}
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)]">
-          <VideoSlot
-            src="doctors-header.mp4"
-            label="Clinic hallway / modern corridor background"
-            searchTerms="clinic hallway, modern hospital corridor, medical professional walking"
-            overlay={70}
-            height="h-auto"
-            rounded="rounded-none"
-            mode="background"
-            className="py-20 px-6"
-          >
+        {/* Hero Banner with background image */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/doctors-header.jpg')" }}>
+          <div className="absolute inset-0 bg-[var(--hb-ink)]/75 backdrop-blur-[1px]" />
+          <div className="relative z-10 py-20 px-6">
             <div className="text-center space-y-6 max-w-4xl mx-auto">
               <span className="clay-pressed inline-block px-4 py-1.5 border border-white/20 text-[10px] font-black uppercase tracking-widest text-[var(--hb-red)] bg-white/10 text-white">
                 Our Medical Panel
@@ -126,7 +117,7 @@ export default function Doctors() {
                 Every doctor on HealthLink is licensed, credential-verified, and rated by real patients.
               </p>
             </div>
-          </VideoSlot>
+          </div>
         </section>
 
         {/* Filter Bar */}

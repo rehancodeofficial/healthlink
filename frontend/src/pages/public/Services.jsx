@@ -12,7 +12,6 @@ import {
   FaArrowRight 
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import VideoSlot from "../../components/ui/VideoSlot";
 
 export default function Services() {
   const navigate = useNavigate();
@@ -22,6 +21,7 @@ export default function Services() {
       title: "General Consultations",
       desc: "Talk to a licensed general physician for everyday health concerns — fevers, infections, prescriptions, referrals, and general advice.",
       icon: <FaStethoscope className="text-[var(--hb-red)]" />,
+      image: "/images/service-general.jpg",
       video: "services-general.mp4",
       searchTerms: "doctor video call patient home, telemedicine consultation"
     },
@@ -29,6 +29,7 @@ export default function Services() {
       title: "Specialist Consultations",
       desc: "Connect with cardiologists, dermatologists, gynecologists, ENT specialists, and more — no referral wait times.",
       icon: <FaUserMd className="text-emerald-500" />,
+      image: "/images/service-specialist.jpg",
       video: "services-specialist.mp4",
       searchTerms: "doctor talking video call, specialist consultation"
     },
@@ -36,6 +37,7 @@ export default function Services() {
       title: "Mental Health Support",
       desc: "Confidential video sessions with licensed therapists and psychiatrists for anxiety, stress, depression, and ongoing mental wellness care.",
       icon: <FaBrain className="text-purple-500" />,
+      image: "/images/service-mental.jpg",
       video: "services-mental.mp4",
       searchTerms: "therapy session video call, online therapy"
     },
@@ -43,6 +45,7 @@ export default function Services() {
       title: "Pediatric Care",
       desc: "Child-friendly consultations for infants through teens, with pediatricians experienced in remote care.",
       icon: <FaChild className="text-blue-500" />,
+      image: "/images/service-pediatric.jpg",
       video: "services-pediatric.mp4",
       searchTerms: "doctor video call patient home, pediatric video consult"
     },
@@ -50,6 +53,7 @@ export default function Services() {
       title: "Chronic Disease Management",
       desc: "Ongoing monitoring and consultations for diabetes, hypertension, asthma, and other long-term conditions.",
       icon: <FaHeartbeat className="text-rose-500" />,
+      image: "/images/service-chronic.jpg",
       video: "services-chronic.mp4",
       searchTerms: "elderly patient health monitoring, chronic disease support"
     },
@@ -57,6 +61,7 @@ export default function Services() {
       title: "Prescription & Refill Services",
       desc: "Get new prescriptions or refills reviewed and issued digitally, sent straight to your pharmacy.",
       icon: <FaPrescription className="text-teal-500" />,
+      image: "/images/service-prescription.jpg",
       video: "services-prescription.mp4",
       searchTerms: "pharmacy prescription phone app, online refill app"
     },
@@ -64,6 +69,7 @@ export default function Services() {
       title: "Lab Test Recommendations",
       desc: "Doctors can recommend and interpret lab work, with results reviewed in a dedicated follow-up call.",
       icon: <FaVial className="text-amber-500" />,
+      image: "/images/service-lab.jpg",
       video: "services-lab.mp4",
       searchTerms: "blood test sample lab technician, laboratory test sample"
     },
@@ -71,6 +77,7 @@ export default function Services() {
       title: "Second Opinions",
       desc: "Already have a diagnosis? Get a fast, independent second opinion from another licensed specialist.",
       icon: <FaNotesMedical className="text-indigo-500" />,
+      image: "/images/doctors-header.jpg",
       video: "services-second-opinion.mp4",
       searchTerms: "texting messaging app closeup, doctor consulting case"
     }
@@ -114,17 +121,15 @@ export default function Services() {
               className="glass-clay p-5 rounded-3xl space-y-4 border border-[var(--border)] hover:-translate-y-1.5 transition-all flex flex-col justify-between overflow-hidden"
             >
               <div className="space-y-4">
-                {/* Loop Video for each service */}
-                <VideoSlot
-                  src={service.video}
-                  label={service.title}
-                  searchTerms={service.searchTerms}
-                  overlay={15}
-                  height="h-[120px]"
-                  rounded="rounded-2xl"
-                  mode="panel"
-                  className="w-full"
-                />
+                {/* Feature Image for each service */}
+                <div className="h-[120px] w-full rounded-2xl overflow-hidden border border-[var(--border)] relative bg-slate-100">
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[var(--bg-main)] border border-[var(--border)] flex items-center justify-center text-lg shrink-0">
