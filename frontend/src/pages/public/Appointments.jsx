@@ -70,7 +70,7 @@ export default function Appointments() {
         </section>
 
         {/* Booking Flow with background image */}
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/booking-flow.jpg')" }}>
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/booking-flow-bg.png')" }}>
           <div className="absolute inset-0 bg-[var(--hb-ink)]/85 backdrop-blur-[2px]" />
           <div className="relative z-10 p-10 sm:p-14 space-y-10">
             <div className="text-center space-y-2 text-white relative z-10">

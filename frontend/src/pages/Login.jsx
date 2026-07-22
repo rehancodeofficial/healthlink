@@ -133,48 +133,45 @@ export default function Login() {
         ></div>
       </div>
 
-      <div className="w-full max-w-[1000px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700 rounded-[3rem] border border-[var(--border)]">
-        {/* Left Side: Branding */}
-        <div className="hidden md:flex flex-col justify-between w-2/5 p-12 text-[var(--text-main)] relative overflow-hidden bg-gradient-to-br from-[#1e293b] to-[#0f172a]">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--brand-orange),transparent)]"></div>
-            <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,var(--brand-green),transparent)]"></div>
-          </div>
+      <div className="w-full max-w-[1100px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700 rounded-[3rem] border border-[var(--border)]">
+        {/* Left Side: Branding / Background Image */}
+        <div className="hidden md:flex flex-col justify-between w-1/2 p-12 text-white relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/images/login-split-bg.png')" }}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] z-0" />
 
           <div className="z-10">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 mb-8 md:mb-12 text-[var(--brand-green)] hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
+              className="inline-flex items-center gap-2 mb-8 md:mb-12 text-emerald-300 hover:text-white transition-all group font-black text-[10px] uppercase tracking-[0.2em]"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Home
             </Link>
 
             <div className="mb-8">
-              <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-6 border border-[var(--border)] shadow-2xl">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10" />
-                <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
-                  HEALTH<span className="text-[var(--brand-blue)]">LINK</span>
+              <div className="flex items-center gap-3 bg-black/20 backdrop-blur-md p-3 rounded-2xl mb-6 border border-white/10 shadow-2xl inline-flex">
+                <img src="/logo.png" alt="Logo" className="w-10 h-10 brightness-0 invert" />
+                <span className="text-xl font-black tracking-tighter text-white uppercase">
+                  HEALTH<span className="text-sky-300">LINK</span>
                 </span>
               </div>
-              <h2 className="text-4xl font-black tracking-tighter mb-4 leading-none uppercase text-[var(--brand-green)]">
-                Welcome <br /> <span className="text-[var(--brand-green)]">Back</span>
+              <h2 className="text-4xl font-black tracking-tighter mb-4 leading-none uppercase text-white">
+                Welcome <br /> <span>Back</span>
               </h2>
-              <p className="text-[var(--brand-green)] text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic">
+              <p className="text-emerald-300 text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic">
                 Login to your account.
               </p>
             </div>
           </div>
 
           <div className="z-10 flex items-center gap-4">
-            <div className="h-2 w-2 rounded-full bg-[var(--brand-orange)] animate-ping"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--brand-green)]">
-              Secure Login
+            <div className="h-2 w-2 rounded-full bg-amber-500 animate-ping"></div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+              Secure Login Portal
             </p>
           </div>
         </div>
 
         {/* Right Side: Form */}
-        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col justify-center">
           <div className="mb-8 md:mb-10">
             {/* Mobile Branding */}
             <div className="md:hidden flex items-center gap-2 mb-6 opacity-80">
