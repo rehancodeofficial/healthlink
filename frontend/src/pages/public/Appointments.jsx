@@ -136,7 +136,7 @@ export default function Appointments() {
             </div>
             <div className="mt-4 h-[160px] w-full rounded-2xl overflow-hidden border border-[var(--border)] relative bg-slate-100">
               <img
-                src="/images/booking-flow.jpg"
+                src="/images/webcam-setup.png"
                 alt="Webcam setup"
                 className="w-full h-full object-cover object-center"
                 loading="lazy"

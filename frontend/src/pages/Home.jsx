@@ -110,7 +110,7 @@ export default function Home() {
         </div>
 
         {/* Image Banner — below How It Works */}
-        <div className="mt-14 h-[380px] rounded-3xl overflow-hidden border border-[var(--border)] relative bg-cover bg-center" style={{ backgroundImage: "url('/images/service-general.jpg')" }}>
+        <div className="mt-14 h-[380px] rounded-3xl overflow-hidden border border-[var(--border)] relative bg-cover bg-center" style={{ backgroundImage: "url('/images/consultation-video.png')" }}>
           <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
           <div className="relative z-10 h-full flex items-center justify-center p-8">
             <p className="text-white text-xl sm:text-2xl font-black tracking-tight text-center drop-shadow-lg max-w-lg">
@@ -248,7 +248,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Band — with background image */}
-      <section className="relative border-t border-[var(--border)] overflow-hidden bg-cover bg-center py-28" style={{ backgroundImage: "url('/images/booking-flow.jpg')" }}>
+      <section className="relative border-t border-[var(--border)] overflow-hidden bg-cover bg-center py-28" style={{ backgroundImage: "url('/images/clinic-lobby.png')" }}>
         <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
         <div className="relative z-10 max-w-3xl mx-auto px-6 space-y-8 text-center">
           <h2 className="text-4xl sm:text-5xl font-black tracking-tighter leading-tight text-white">
