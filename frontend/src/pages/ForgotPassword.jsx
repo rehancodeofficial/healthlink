@@ -1,9 +1,9 @@
-// FILE: src/pages/ForgotPassword.jsx
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiMail, FiArrowLeft, FiSmartphone, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
-import { supabase } from "../Lib/supabase";
+import api from "../Lib/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,10 +22,9 @@ export default function ForgotPassword() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+      await api.post("/auth/request-password-reset", {
+        email: email.trim(),
       });
-      if (error) throw error;
 
       toast.success("OTP sent to your email.");
       setStep(2);
@@ -42,12 +41,12 @@ export default function ForgotPassword() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const res = await api.post("/auth/verify-password-reset-otp", {
         email: email.trim(),
-        token: otp,
-        type: "recovery",
+        otp: otp,
       });
-      if (error) throw error;
+      // Temporarily store reset token to use in step 3
+      localStorage.setItem("resetToken", res.data.resetToken);
 
       toast.success("OTP verified. Please set a new password.");
       setStep(3);
@@ -69,10 +68,11 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+      await api.post("/auth/reset-password", {
+        resetToken: localStorage.getItem("resetToken"),
+        newPassword: newPassword,
       });
-      if (error) throw error;
+      localStorage.removeItem("resetToken");
 
       toast.success("Password updated successfully!");
       setTimeout(() => {

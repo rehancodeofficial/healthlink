@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../Lib/api";
-import { supabase } from "../Lib/supabase";
+// Removed supabase import
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowLeft, FiSmartphone } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -26,26 +26,10 @@ export default function Login() {
 
     try {
       if (loginMode === "password") {
-        // Password Login via Supabase
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
+        // Password Login via Backend API
+        const res = await api.post("/auth/login", {
           email: email.trim().toLowerCase(),
           password: password,
-        });
-
-        if (authError) throw authError;
-
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
-          throw new Error(
-            "Email not verified. Please check your email and verify your account before logging in."
-          );
-        }
-
-        // Sync with backend
-        const res = await api.post("/auth/login-sync", {
-          email: email.trim().toLowerCase(),
-          supabaseId: data.user.id,
-          supabaseAccessToken: data.session.access_token,
         });
 
         handleAuthSuccess(res.data, email.trim().toLowerCase());

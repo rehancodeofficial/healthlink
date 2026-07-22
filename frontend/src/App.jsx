@@ -87,7 +87,7 @@ const UserProfile = lazy(() => import("./pages/shared/UserProfile"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/public/About"));
 const Services = lazy(() => import("./pages/public/Services"));
@@ -140,7 +140,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+
 
             {/* Video shared */}
             <Route path="/video/lobby" element={<VideoLobby />} />
