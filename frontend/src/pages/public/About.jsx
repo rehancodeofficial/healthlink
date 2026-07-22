@@ -7,23 +7,39 @@ export default function About() {
   const navigate = useNavigate();
 
   const values = [
-    { title: "Accessibility First", desc: "Care should never depend on your zip code or your schedule.", icon: <FaHeart className="text-[var(--hb-red)]" /> },
-    { title: "Clinical Integrity", desc: "Every doctor on our platform is independently verified and held to strict care standards.", icon: <FaUserMd className="text-emerald-500" /> },
-    { title: "Privacy by Design", desc: "Your health data is encrypted, private, and yours alone.", icon: <FaUserLock className="text-blue-500" /> },
-    { title: "Human-Centered Tech", desc: "Technology should make care simpler, not colder.", icon: <FaSmile className="text-purple-500" /> }
+    {
+      title: "Accessibility First",
+      desc: "Care should never depend on your zip code or your schedule.",
+      icon: <FaHeart className="text-[var(--hb-red)]" />,
+    },
+    {
+      title: "Clinical Integrity",
+      desc: "Every doctor on our platform is independently verified and held to strict care standards.",
+      icon: <FaUserMd className="text-emerald-500" />,
+    },
+    {
+      title: "Privacy by Design",
+      desc: "Your health data is encrypted, private, and yours alone.",
+      icon: <FaUserLock className="text-blue-500" />,
+    },
+    {
+      title: "Human-Centered Tech",
+      desc: "Technology should make care simpler, not colder.",
+      icon: <FaSmile className="text-purple-500" />,
+    },
   ];
 
   const stats = [
     { value: "500+", label: "Verified Doctors across 12+ Specialties" },
     { value: "50,000+", label: "Consultations Delivered" },
     { value: "98%", label: "Patient Satisfaction Rate" },
-    { value: "< 5 mins", label: "Average Wait Time" }
+    { value: "< 5 mins", label: "Average Wait Time" },
   ];
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] relative overflow-hidden transition-all duration-300">
       <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none -z-20"></div>
-      
+
       <div className="blur-blob-red top-[-100px] left-[-50px]"></div>
       <div className="blur-blob-green top-[300px] right-[-100px]"></div>
 
@@ -39,7 +55,8 @@ export default function About() {
             Healthcare shouldn't be hard to reach
           </h1>
           <p className="text-lg sm:text-xl text-[var(--hb-ink-soft)] max-w-3xl mx-auto leading-relaxed font-medium">
-            HealthLink connects patients with trusted doctors through a secure, simple, always-on telemedicine platform.
+            HealthLink connects patients with trusted doctors through a secure, simple, always-on
+            telemedicine platform.
           </p>
         </section>
 
@@ -53,12 +70,15 @@ export default function About() {
               Removing barriers to care
             </h3>
             <p className="text-base text-[var(--hb-ink-soft)] leading-relaxed font-medium">
-              Millions of people delay care because of distance, cost, or time — not because they don't need it. HealthLink was built to remove those barriers, giving patients direct, affordable access to licensed doctors from wherever they are, and giving doctors a platform to practice medicine without the overhead of a physical clinic.
+              Millions of people delay care because of distance, cost, or time — not because they
+              don't need it. HealthLink was built to remove those barriers, giving patients direct,
+              affordable access to licensed doctors from wherever they are, and giving doctors a
+              platform to practice medicine without the overhead of a physical clinic.
             </p>
           </div>
           <div className="md:col-span-5 h-[280px] rounded-3xl overflow-hidden border border-[var(--border)] shadow-xl relative bg-slate-100">
             <img
-              src="/images/clinicians.jpg"
+              src="/images/clinicians.png"
               alt="Medical team meeting"
               className="w-full h-full object-cover object-center"
               loading="lazy"
@@ -84,7 +104,8 @@ export default function About() {
             </div>
             <h3 className="text-2xl font-black tracking-tight">Our Vision</h3>
             <p className="text-base text-[var(--hb-ink-soft)] leading-relaxed font-medium">
-              A world where distance and scheduling never stand between a patient and the care they need.
+              A world where distance and scheduling never stand between a patient and the care they
+              need.
             </p>
           </div>
         </section>
@@ -95,19 +116,22 @@ export default function About() {
             <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
               Core Principles
             </h2>
-            <h3 className="text-3xl sm:text-4xl font-black tracking-tighter">
-              Our Values
-            </h3>
+            <h3 className="text-3xl sm:text-4xl font-black tracking-tighter">Our Values</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((v, idx) => (
-              <div key={idx} className="glass-clay p-6 rounded-3xl space-y-3 border border-[var(--border)] hover:-translate-y-1 transition-transform">
+              <div
+                key={idx}
+                className="glass-clay p-6 rounded-3xl space-y-3 border border-[var(--border)] hover:-translate-y-1 transition-transform"
+              >
                 <div className="w-10 h-10 rounded-xl bg-[var(--bg-main)] border border-[var(--border)] flex items-center justify-center text-lg">
                   {v.icon}
                 </div>
                 <h4 className="text-lg font-bold tracking-tight">{v.title}</h4>
-                <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed font-medium">{v.desc}</p>
+                <p className="text-xs text-[var(--hb-ink-soft)] leading-relaxed font-medium">
+                  {v.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -119,23 +143,28 @@ export default function About() {
             <h2 className="text-xs font-black text-[var(--hb-red)] uppercase tracking-[0.3em]">
               Impact & Reach
             </h2>
-            <h3 className="text-3xl font-black tracking-tighter mt-1">
-              By the Numbers
-            </h3>
+            <h3 className="text-3xl font-black tracking-tighter mt-1">By the Numbers</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map((s, idx) => (
               <div key={idx} className="space-y-1">
-                <p className="text-4xl sm:text-5xl font-black tracking-tighter text-white">{s.value}</p>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--hb-ink-soft)]">{s.label}</p>
+                <p className="text-4xl sm:text-5xl font-black tracking-tighter text-white">
+                  {s.value}
+                </p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--hb-ink-soft)]">
+                  {s.label}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Team Image Banner */}
-        <div className="relative h-[280px] rounded-[2.5rem] overflow-hidden border border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: "url('/images/doctors-header.jpg')" }}>
+        <div
+          className="relative h-[280px] rounded-[2.5rem] overflow-hidden border border-[var(--border)] bg-cover bg-center"
+          style={{ backgroundImage: "url('/images/medical-team.png')" }}
+        >
           <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
           <div className="relative z-10 h-full flex flex-col items-center justify-center px-8 text-center space-y-2 max-w-lg mx-auto">
             <p className="text-white font-black text-2xl tracking-tight drop-shadow-lg">
@@ -156,7 +185,9 @@ export default function About() {
             Built by people who care about care
           </h3>
           <p className="text-base text-[var(--hb-ink-soft)] max-w-2xl mx-auto leading-relaxed font-medium">
-            HealthLink is developed by a team of engineers, clinicians, and healthcare operators led by Founder & CEO <strong>Rehan Hussain</strong>, focused on one goal: making the doctor's visit simpler for everyone involved.
+            HealthLink is developed by a team of engineers, clinicians, and healthcare operators led
+            by Founder & CEO <strong>Rehan Hussain</strong>, focused on one goal: making the
+            doctor's visit simpler for everyone involved.
           </p>
         </section>
 

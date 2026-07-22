@@ -129,12 +129,9 @@ export default function Register() {
       </div>
 
       <div className="w-full max-w-[1100px] flex flex-col md:flex-row glass overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 rounded-[3rem] border border-[var(--border)]">
-        {/* Left Side: Onboarding Panel */}
-        <div className="hidden md:flex flex-col justify-between w-2/5 p-12 text-[var(--text-main)] relative overflow-hidden bg-gradient-to-tr from-[#0f172a] to-[#1e293b]">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,var(--brand-blue),transparent)]"></div>
-            <div className="absolute bottom-10 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_right,var(--brand-orange),transparent)]"></div>
-          </div>
+        {/* Left Side: Onboarding Panel / Background Image */}
+        <div className="hidden md:flex flex-col justify-between w-1/2 p-12 text-white relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/images/register-split-bg.png')" }}>
+          <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px] z-0" />
 
           <div className="z-10">
             <Link
@@ -145,15 +142,15 @@ export default function Register() {
               Back to Home
             </Link>
 
-            <div className="flex items-center gap-3 bg-[var(--bg-glass)] p-3 rounded-2xl mb-8 border border-[var(--border)] shadow-2xl">
-              <img src="/logo.png" alt="Logo" className="w-10 h-10" />
-              <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase">
-                HEALTH<span className="text-[var(--brand-blue)]">LINK</span>
+            <div className="flex items-center gap-3 bg-black/20 backdrop-blur-md p-3 rounded-2xl mb-8 border border-white/10 shadow-2xl inline-flex">
+              <img src="/logo.png" alt="Logo" className="w-10 h-10 brightness-0 invert" />
+              <span className="text-xl font-black tracking-tighter text-white uppercase">
+                HEALTH<span className="text-sky-300">LINK</span>
               </span>
             </div>
 
-            <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-[0.9] uppercase text-emerald-300">
-              Create <br /> <span className="text-emerald-300">Account</span>
+            <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-[0.9] uppercase text-white">
+              Create <br /> <span>Account</span>
             </h2>
             <p className="text-emerald-300 text-sm leading-relaxed max-w-xs font-bold uppercase tracking-widest italic text-justify">
               Sign up to access virtual care.
@@ -161,15 +158,15 @@ export default function Register() {
           </div>
 
           <div className="z-10 space-y-4">
-            <div className="flex items-center gap-4 p-4 rounded-3xl bg-[var(--bg-glass)] border border-[var(--border)] backdrop-blur-xl">
-              <div className="h-10 w-10 rounded-2xl bg-[var(--brand-green)]/20 flex items-center justify-center text-[var(--brand-green)]">
+            <div className="flex items-center gap-4 p-4 rounded-3xl bg-black/30 border border-white/10 backdrop-blur-xl">
+              <div className="h-10 w-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-300">
                 <FiShield className="text-xl" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white">
                   Secure Data
                 </p>
-                <p className="text-[9px] font-bold text-[var(--text-main)]/40 uppercase tracking-widest">
+                <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">
                   Medical Grade Security
                 </p>
               </div>
@@ -178,7 +175,7 @@ export default function Register() {
         </div>
 
         {/* Right Side: Registration Form */}
-        <div className="w-full md:w-3/5 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
+        <div className="w-full md:w-1/2 bg-[var(--bg-card)] p-6 md:p-14 flex flex-col overflow-y-auto max-h-[90vh]">
           <div className="mb-6 md:mb-8">
             {/* Mobile Branding */}
             <div className="md:hidden flex items-center gap-2 mb-6 opacity-80">
